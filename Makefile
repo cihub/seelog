@@ -1,7 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog
-
+TARG=github.com/cihub/sealog
 GOFILES = \
 	constraints.go \
 	exception.go \

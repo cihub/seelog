@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog/writers
+TARG=github.com/cihub/sealog/writers
 
 GOFILES = \
 	filesystemwrapper.go \
