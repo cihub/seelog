@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=github.com/cihub/sealog/dispatchers
+TARG=sealog/dispatchers
 
 GOFILES = \
 	dispatcher.go \

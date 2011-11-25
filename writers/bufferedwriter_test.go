@@ -2,64 +2,63 @@ package writers
 
 import (
 	"testing"
+	. "sealog/test"
 )
 
 func TestChunkWriteOnFilling(t *testing.T) {
-	testEnv = t
-
-	writer := new(testWriteCloser).Initialize()
+	writer, _ := NewBytesVerfier(t)
 	bufferedWriter, err := NewBufferedWriter(writer, 1024, 1, 0)
-	
+
 	if err != nil {
 		t.Fatalf("Unexpected buffered writer creation error: %s", err.String())
 	}
-	
+
 	bytes := make([]byte, 1000)
 
 	bufferedWriter.Write(bytes)
-	writer.expectBytes(bytes)
+	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
 
-	// BufferedWriter writes another chunk not at once but in goroutine ( with nondetermined delay )
-	//   so we wait few seconds
-	writer.mustNotExpectWithDelay(1 * 1e9)
+	// BufferedWriter writes another chunk not at once but in goroutine (with nondetermined delay)
+	// so we wait for a few seconds
+	writer.MustNotExpectWithDelay(0.1 * 1e9)
 }
 
 func TestFlushByTimePeriod(t *testing.T) {
-	testEnv = t
+	writer, _ := NewBytesVerfier(t)
+	bufferedWriter, err := NewBufferedWriter(writer, 1024, 1, 100)
 
-	writer := new(testWriteCloser).Initialize()
-	bufferedWriter, err := NewBufferedWriter(writer, 1024, 1, 1)
-	
 	if err != nil {
 		t.Fatalf("Unexpected buffered writer creation error: %s", err.String())
 	}
-	
+
 	bytes := []byte("Hello")
 
-	writer.expectBytes(bytes)
+	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-	writer.mustNotExpectWithDelay(2 * 1e9)
+	writer.MustNotExpectWithDelay(0.2 * 1e9)
 
 	// Added after bug with stopped timer
-	writer.expectBytes(bytes)
+	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-	writer.mustNotExpectWithDelay(2 * 1e9)
+	writer.MustNotExpectWithDelay(0.2 * 1e9)
 }
 
 func TestBigMessageMustPassMemoryBuffer(t *testing.T) {
-	testEnv = t
+	writer, _ := NewBytesVerfier(t)
+	bufferedWriter, err := NewBufferedWriter(writer, 1024, 2, 0)
 
-	writer := new(testWriteCloser).Initialize()
-	bufferedWriter, err := NewBufferedWriter(writer, 1024, 1, 0)
-	
 	if err != nil {
 		t.Fatalf("Unexpected buffered writer creation error: %s", err.String())
 	}
-	
-	bytes := make([]byte, 1025)
 
-	writer.expectBytes(bytes)
+	bytes := make([]byte, 5000)
+
+	for i := 0; i < len(bytes); i++ {
+		bytes[i] = uint8(i % 255)
+	}
+
+	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-	writer.mustNotExpectWithDelay(1 * 1e9)
+	writer.MustNotExpectWithDelay(0.1 * 1e9)
 }

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"fmt"
 )
 
 // FileWriter is used to write to a file.
@@ -14,10 +15,12 @@ type FileWriter struct {
 	fileName    string
 }
 
-// Creates a new file and a corresponding writer. Returns error, if the file couldn't be craeted.
+// Creates a new file and a corresponding writer. Returns error, if the file couldn't be created.
 func NewFileWriter(fileName string) (writer *FileWriter, err os.Error) {
 	newWriter := new(FileWriter)
-	
+
+	newWriter.fileName = fileName
+
 	fileErr := newWriter.createFile()
 	if fileErr != nil {
 		return nil, fileErr
@@ -35,12 +38,14 @@ func (this *FileWriter) createFile() os.Error {
 
 	folder, _ := filepath.Split(this.fileName)
 
-	dirErr := fileSystemWrapper.createFolderPath(folder)
+	dirErr := fileSystemWrapper.MkdirAll(folder)
+
 	if dirErr != nil {
 		return dirErr
 	}
 
-	innerWriter, fileError := fileSystemWrapper.create(this.fileName)
+	innerWriter, fileError := fileSystemWrapper.Create(this.fileName)
+
 	if fileError != nil {
 		return fileError
 	}
@@ -48,4 +53,8 @@ func (this *FileWriter) createFile() os.Error {
 	this.innerWriter = innerWriter
 
 	return nil
+}
+
+func (this *FileWriter) String() string {
+	return fmt.Sprintf("File writer: %s", this.fileName)
 }

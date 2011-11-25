@@ -26,7 +26,7 @@ const (
 	OffStr      = "off"
 )
 
-var levelesToStringRepresentations = map[LogLevel]string{
+var levelToStringRepresentations = map[LogLevel]string{
 	TraceLvl:    TraceStr,
 	DebugLvl:    DebugStr,
 	InfoLvl:     InfoStr,
@@ -36,19 +36,9 @@ var levelesToStringRepresentations = map[LogLevel]string{
 	Off:         OffStr,
 }
 
-var levelesToStringRepresentationsInBrace = map[LogLevel][]byte{
-	TraceLvl:    []byte(" [" + TraceStr + "] "),
-	DebugLvl:    []byte(" [" + DebugStr + "] "),
-	InfoLvl:     []byte(" [" + InfoStr + "] "),
-	WarnLvl:     []byte(" [" + WarnStr + "] "),
-	ErrorLvl:    []byte(" [" + ErrorStr + "] "),
-	CriticalLvl: []byte(" [" + CriticalStr + "] "),
-	Off:         []byte(" [" + OffStr + "] "),
-}
-
 // LogLevelFromString parses a string and returns a corresponding log level, if sucessfull. 
 func LogLevelFromString(levelStr string) (level LogLevel, found bool) {
-	for lvl, lvlStr := range levelesToStringRepresentations {
+	for lvl, lvlStr := range levelToStringRepresentations {
 		if lvlStr == levelStr {
 			return lvl, true
 		}
@@ -58,11 +48,12 @@ func LogLevelFromString(levelStr string) (level LogLevel, found bool) {
 }
 
 // LogLevelToString returns sealog string representation for a specified level. Returns "" for invalid log levels.
-func LogLevelToString(level LogLevel) string {
-	levelStr, ok := levelesToStringRepresentations[level]
+func (level LogLevel) String() string {
+	levelStr, ok := levelToStringRepresentations[level]
 	if ok {
 		return levelStr
 	}
 
 	return ""
 }
+

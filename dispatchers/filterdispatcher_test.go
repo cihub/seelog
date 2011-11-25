@@ -2,48 +2,45 @@ package dispatchers
 
 import (
 	"testing"
-	"sealog/common"
 	"os"
+	. "sealog/common"
+	. "sealog/test"
 )
 
 func TestFilterDispatcher_Passing(t *testing.T) {
-	testEnv = t
-
-	writer := new(testWriteCloser).Initialize()
-	filter, err := NewFilterDispatcher([]interface{}{writer}, common.TraceLvl)
+	writer, _ := NewBytesVerfier(t)
+	filter, err := NewFilterDispatcher([]interface{}{writer}, TraceLvl)
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
-	context, err := common.CurrentContext()
+	context, err := CurrentContext()
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
 	bytes := []byte("Hello")
-	writer.expectBytes(bytes)
-	filter.Dispatch(string(bytes), common.TraceLvl, context, func(err os.Error) {})
-	writer.mustNotExpect()
+	writer.ExpectBytes(bytes)
+	filter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
+	writer.MustNotExpect()
 }
 
 func TestFilterDispatcher_Denying(t *testing.T) {
-	testEnv = t
-
-	writer := new(testWriteCloser).Initialize()
+	writer, _ := NewBytesVerfier(t)
 	filter, err := NewFilterDispatcher([]interface{}{writer})
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
-	context, err := common.CurrentContext()
+	context, err := CurrentContext()
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
 	bytes := []byte("Hello")
-	filter.Dispatch(string(bytes), common.TraceLvl, context, func(err os.Error) {})
+	filter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
 }

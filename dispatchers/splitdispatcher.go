@@ -2,6 +2,7 @@ package dispatchers
 
 import (
 	"os"
+	"fmt"
 )
 
 // A SplitDispatcher just writes the given message to underlying receivers. (Splits the message stream.)
@@ -16,4 +17,8 @@ func NewSplitDispatcher(receivers []interface{}) (*SplitDispatcher, os.Error) {
 	}
 
 	return &SplitDispatcher{disp}, nil
+}
+
+func (splitter *SplitDispatcher) String() string {
+	return fmt.Sprintf("SplitDispatcher ->\n%s", splitter.dispatcher.String())
 }

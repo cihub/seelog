@@ -2,32 +2,31 @@ package dispatchers
 
 import (
 	"testing"
-	"sealog/common"
 	"os"
+	. "sealog/common"
+	. "sealog/test"
 )
 
 func TestSplitDispatcher(t *testing.T) {
-	testEnv = t
-
-	writer1 := new(testWriteCloser).Initialize()
-	writer2 := new(testWriteCloser).Initialize()
+	writer1, _ := NewBytesVerfier(t)
+	writer2, _ := NewBytesVerfier(t)
 	spliter, err := NewSplitDispatcher([]interface{}{writer1, writer2})
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
-	context, err := common.CurrentContext()
+	context, err := CurrentContext()
 	if err != nil {
-		testEnv.Error(err)
+		t.Error(err)
 		return
 	}
 
 	bytes := []byte("Hello")
 
-	writer1.expectBytes(bytes)
-	writer2.expectBytes(bytes)
-	spliter.Dispatch(string(bytes), common.TraceLvl, context, func(err os.Error) {})
-	writer1.mustNotExpect()
-	writer2.mustNotExpect()
+	writer1.ExpectBytes(bytes)
+	writer2.ExpectBytes(bytes)
+	spliter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
+	writer1.MustNotExpect()
+	writer2.MustNotExpect()
 }

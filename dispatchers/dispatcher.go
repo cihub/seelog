@@ -3,15 +3,16 @@
 package dispatchers
 
 import (
-	"sealog/common"
+	. "sealog/common"
 	"os"
 	"io"
+	"fmt"
 )
 
 // A DispatcherInterface is used to dispatch message to all underlying receivers.
 // Dispatch logic depends on given context and log level. Any errors are reported using errorFunc.
 type DispatcherInterface interface {
-	Dispatch(message string, level common.LogLevel, context *common.LogContext, errorFunc func(err os.Error))
+	Dispatch(message string, level LogLevel, context *LogContext, errorFunc func(err os.Error))
 }
 
 type dispatcher struct {
@@ -47,23 +48,51 @@ func createDispatcher(receivers []interface{}) (*dispatcher, os.Error) {
 	return disp, nil
 }
 
-func (this *dispatcher) Dispatch(message string, level common.LogLevel, context *common.LogContext, errorFunc func(err os.Error)) {
-	for _, writer := range this.writers {
+func (disp *dispatcher) Dispatch(message string, level LogLevel, context *LogContext, errorFunc func(err os.Error)) {
+	for _, writer := range disp.writers {
 		_, err := writer.Write([]byte(message))
 		if err != nil {
 			errorFunc(err)
 		}
 	}
 
-	for _, dispInterface := range this.dispatchers {
+	for _, dispInterface := range disp.dispatchers {
 		dispInterface.Dispatch(message, level, context, errorFunc)
 	}
 }
 
-func (this *dispatcher) Writers() []io.Writer {
-	return this.writers
+func (disp *dispatcher) Writers() []io.Writer {
+	return disp.writers
 }
 
-func (this *dispatcher) Dispatchers() []DispatcherInterface {
-	return this.dispatchers
+func (disp *dispatcher) Dispatchers() []DispatcherInterface {
+	return disp.dispatchers
+}
+
+func (disp *dispatcher) String() string {
+	str := "    ->Dispatchers:"
+
+	if len(disp.dispatchers) == 0 {
+		str += "none\n"
+	} else {
+		str += "\n"
+
+		for _, disp := range disp.dispatchers {
+			str += fmt.Sprintf("        ->%s", disp)
+		}
+	}
+
+	str += "    ->Writers:"
+
+	if len(disp.writers) == 0 {
+		str += "none\n"
+	} else {
+		str += "\n"
+
+		for _, writer := range disp.writers {
+			str += fmt.Sprintf("        ->%s", writer)
+		}
+	}
+
+	return str
 }

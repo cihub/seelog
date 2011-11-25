@@ -3,17 +3,18 @@ package sealog
 
 import (
 	"sealog/common"
+	"sealog/config"
 	"fmt"
 	"os"
 )
 
-var currentConfig *LogConfig
+var currentConfig *config.LogConfig
 
 func reportInternalError(err os.Error) {
 	fmt.Println("Sealog error: " + err.String())
 }
 
-func log(config *LogConfig, level common.LogLevel, format string, params []interface{}) {
+func log(config *config.LogConfig, level common.LogLevel, format string, params []interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			reportInternalError(os.NewError(fmt.Sprintf("%v", err)))
@@ -45,7 +46,7 @@ func buildLogString(format string, params []interface{}) string {
 }
 
 // Loads config that will be used until next SetConfig call. 
-func SetConfig(config *LogConfig) {
+func SetConfig(config *config.LogConfig) {
 	currentConfig = config
 }
 

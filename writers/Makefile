@@ -1,11 +1,12 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=github.com/cihub/sealog/writers
+TARG=sealog/writers
 
 GOFILES = \
-	filesystemwrapper.go \
+	fswrapper.go \
 	filewriter.go \
-	buffer.go \
 	bufferedwriter.go \
+	consolewriter.go \
+	rollingfilewriter.go \
 
 include $(GOROOT)/src/Make.pkg

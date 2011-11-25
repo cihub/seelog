@@ -22,16 +22,16 @@ func CurrentContext() (*LogContext, os.Error) {
 	return &LogContext{function, shortPath, fullPath}, nil
 }
 
-func (this *LogContext) Func() string {
-	return this.funcName
+func (context *LogContext) Func() string {
+	return context.funcName
 }
 
-func (this *LogContext) ShortPath() string {
-	return this.shortPath
+func (context *LogContext) ShortPath() string {
+	return context.shortPath
 }
 
-func (this *LogContext) FullPath() string {
-	return this.fullPath
+func (context *LogContext) FullPath() string {
+	return context.fullPath
 }
 
 var workingDir = ""
@@ -50,14 +50,13 @@ func setWorkDir() {
 	workingDir = workDir + "/"
 }
 
-func extractCallerInfo(skip int) (string, string, string, os.Error) {
+func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err os.Error) {
 	pc, fullPath, _, ok := runtime.Caller(skip)
 
 	if !ok {
 		return "", "", "", os.NewError("Error during runtime.Caller")
 	}
 
-	var shortPath string
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
 	} else {
