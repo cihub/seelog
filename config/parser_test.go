@@ -4,11 +4,11 @@ package config
 import (
 	"testing"
 	"reflect"
-	"sealog/dispatchers"
-	"sealog/writers"
-	. "sealog/common"
-	"sealog/test"
-	"sealog/format"
+	"github.com/cihub/sealog/dispatchers"
+	"github.com/cihub/sealog/writers"
+	. "github.com/cihub/sealog/common"
+	"github.com/cihub/sealog/test"
+	"github.com/cihub/sealog/format"
 	"strings"
 )
 

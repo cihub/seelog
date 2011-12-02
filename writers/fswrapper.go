@@ -5,7 +5,7 @@ package writers
 import (
 	"os"
 	"io"
-	"sealog/test"
+	"github.com/cihub/sealog/test"
 )
 
 const (

@@ -3,9 +3,9 @@ package dispatchers
 import (
 	"testing"
 	"os"
-	. "sealog/common"
-	. "sealog/test"
-	"sealog/format"
+	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/sealog/test"
+	"github.com/cihub/sealog/format"
 )
 
 func TestFilterDispatcher_Passing(t *testing.T) {

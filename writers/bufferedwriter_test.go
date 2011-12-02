@@ -2,7 +2,7 @@ package writers
 
 import (
 	"testing"
-	. "sealog/test"
+	. "github.com/cihub/sealog/test"
 )
 
 func TestChunkWriteOnFilling(t *testing.T) {

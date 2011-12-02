@@ -3,8 +3,8 @@
 package dispatchers
 
 import (
-	. "sealog/common"
-	"sealog/format"
+	. "github.com/cihub/sealog/common"
+	"github.com/cihub/sealog/format"
 	"os"
 	"io"
 	"fmt"

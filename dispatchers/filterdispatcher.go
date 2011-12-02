@@ -1,10 +1,10 @@
 package dispatchers
 
 import (
-	. "sealog/common"
+	. "github.com/cihub/sealog/common"
 	"os"
 	"fmt"
-	"sealog/format"
+	"github.com/cihub/sealog/format"
 )
 
 // A FilterDispatcher writes the given message to underlying receivers only if message log level 

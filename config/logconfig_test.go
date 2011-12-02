@@ -3,7 +3,7 @@ package config
 
 import (
 	"testing"
-	. "sealog/common"
+	. "github.com/cihub/sealog/common"
 	"strings"
 	"os"
 )

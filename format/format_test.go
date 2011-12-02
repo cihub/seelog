@@ -4,7 +4,7 @@ import (
 	"time"
 	"testing"
 	"strings"
-	. "sealog/common"
+	. "github.com/cihub/sealog/common"
 )
 
 const (

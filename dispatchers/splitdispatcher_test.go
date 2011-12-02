@@ -4,9 +4,9 @@ import (
 	"testing"
 	"os"
 	"fmt"
-	. "sealog/common"
-	. "sealog/test"
-	"sealog/format"
+	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/sealog/test"
+	"github.com/cihub/sealog/format"
 )
 
 var onlyMessageFormatForTest *format.Formatter

@@ -4,10 +4,10 @@ package config
 import (
 	"os"
 	"io"
-	. "sealog/common"
-	"sealog/dispatchers"
-	"sealog/writers"
-	"sealog/format"
+	. "github.com/cihub/sealog/common"
+	"github.com/cihub/sealog/dispatchers"
+	"github.com/cihub/sealog/writers"
+	"github.com/cihub/sealog/format"
 	"strings"
 	"fmt"
 )

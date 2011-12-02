@@ -2,9 +2,9 @@ package dispatchers
 
 import (
 	"testing"
-	. "sealog/common"
-	. "sealog/test"
-	"sealog/format"
+	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/sealog/test"
+	"github.com/cihub/sealog/format"
 )
 
 func TestFormattedWriter(t *testing.T) {

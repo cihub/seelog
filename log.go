@@ -2,8 +2,8 @@
 package sealog
 
 import (
-	"sealog/common"
-	"sealog/config"
+	"github.com/cihub/sealog/common"
+	"github.com/cihub/sealog/config"
 	"fmt"
 	"os"
 )

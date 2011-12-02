@@ -2,8 +2,8 @@ package config
 
 import (
 	"os"
-	"sealog/dispatchers"
-	. "sealog/common"
+	"github.com/cihub/sealog/dispatchers"
+	. "github.com/cihub/sealog/common"
 )
 
 // LogConfig stores logging configuration. Contains messages dispatcher, allowed log levels rules 

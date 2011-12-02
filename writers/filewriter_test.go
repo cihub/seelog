@@ -3,7 +3,7 @@ package writers
 import (
 	"testing"
 	"io"
-	"sealog/test"
+	"github.com/cihub/sealog/test"
 	"os"
 )
 

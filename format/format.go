@@ -9,7 +9,7 @@ import (
 	"unicode"
 	"utf8"
 	"time"
-	. "sealog/common"
+	. "github.com/cihub/sealog/common"
 )
 
 const (
