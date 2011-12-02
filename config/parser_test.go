@@ -8,6 +8,7 @@ import (
 	"sealog/writers"
 	. "sealog/common"
 	"sealog/test"
+	"sealog/format"
 	"strings"
 )
 
@@ -36,7 +37,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testFileWriter, _ := writers.NewFileWriter("log.log")
-		testHeadSplitter, _ := dispatchers.NewSplitDispatcher([]interface{}{testFileWriter})
+		testHeadSplitter, _ := dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -48,7 +49,75 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ := writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Inner splitter output"
+		testConfig = `
+<sealog>
+	<outputs>
+		<file path="log.log"/>
+		<splitter>
+			<file path="log1.log"/>
+			<file path="log2.log"/>
+		</splitter>
+	</outputs>
+</sealog>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testFileWriter1, _ := writers.NewFileWriter("log1.log")
+		testFileWriter2, _ := writers.NewFileWriter("log2.log")
+		testInnerSplitter, _ := dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter1, testFileWriter2})
+		testFileWriter, _ = writers.NewFileWriter("log.log")
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter, testInnerSplitter})
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Format"
+		testConfig = `
+<sealog>
+	<outputs formatid="dateFormat">
+		<file path="log.log"/>
+	</outputs>
+	<formats>
+		<format id="dateFormat" format="%Level %Msg %File" />
+	</formats>
+</sealog>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testFileWriter, _ = writers.NewFileWriter("log.log")
+		testFormat, _ := format.NewFormatter("%Level %Msg %File")
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(testFormat, []interface{}{testFileWriter})
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Format2"
+		testConfig = `
+<sealog>
+	<outputs formatid="format1">
+		<file path="log.log"/>
+		<file formatid="format2" path="log1.log"/>
+	</outputs>
+	<formats>
+		<format id="format1" format="%Level %Msg %File" />
+		<format id="format2" format="%l %Msg" />
+	</formats>
+</sealog>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testFileWriter, _ = writers.NewFileWriter("log.log")
+		testFileWriter1, _ = writers.NewFileWriter("log1.log")
+		testFormat1, _ := format.NewFormatter("%Level %Msg %File")
+		testFormat2, _ := format.NewFormatter("%l %Msg")
+		formattedWriter, _ := dispatchers.NewFormattedWriter(testFileWriter1, testFormat2)
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(testFormat1, []interface{}{testFileWriter, formattedWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -58,7 +127,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewMinMaxConstraints(WarnLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -68,7 +137,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, TraceLvl)
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -78,7 +147,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewMinMaxConstraints(InfoLvl, ErrorLvl)
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -88,7 +157,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = NewOffConstraints()
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -103,7 +172,7 @@ func getParserTests() []parserTest {
 			DebugLvl, InfoLvl, CriticalLvl})
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -162,7 +231,7 @@ func getParserTests() []parserTest {
 		exception, _ := NewLogLevelException("Test*", "someFile.go", listConstraint)
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -181,7 +250,7 @@ func getParserTests() []parserTest {
 		exception, _ = NewLogLevelException("*", "testfile.go", minMaxConstraint)
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -200,7 +269,7 @@ func getParserTests() []parserTest {
 		exception, _ = NewLogLevelException("*", "testfile.go", minMaxConstraint)
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
-		testHeadSplitter, _ = dispatchers.NewSplitDispatcher([]interface{}{testConsoleWriter})
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 

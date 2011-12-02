@@ -5,11 +5,12 @@ import (
 	"os"
 	. "sealog/common"
 	. "sealog/test"
+	"sealog/format"
 )
 
 func TestFilterDispatcher_Passing(t *testing.T) {
 	writer, _ := NewBytesVerfier(t)
-	filter, err := NewFilterDispatcher([]interface{}{writer}, TraceLvl)
+	filter, err := NewFilterDispatcher(onlyMessageFormatForTest, []interface{}{writer}, TraceLvl)
 	if err != nil {
 		t.Error(err)
 		return
@@ -29,7 +30,7 @@ func TestFilterDispatcher_Passing(t *testing.T) {
 
 func TestFilterDispatcher_Denying(t *testing.T) {
 	writer, _ := NewBytesVerfier(t)
-	filter, err := NewFilterDispatcher([]interface{}{writer})
+	filter, err := NewFilterDispatcher(format.DefaultFormatter, []interface{}{writer})
 	if err != nil {
 		t.Error(err)
 		return

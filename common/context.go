@@ -4,6 +4,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"path/filepath"
 )
 
 // Represents runtime caller context
@@ -11,6 +12,7 @@ type LogContext struct {
 	funcName  string
 	shortPath string
 	fullPath  string
+	fileName string
 }
 
 func CurrentContext() (*LogContext, os.Error) {
@@ -18,8 +20,9 @@ func CurrentContext() (*LogContext, os.Error) {
 	if err != nil {
 		return nil, err
 	}
+	_, fileName := filepath.Split(fullPath)
 
-	return &LogContext{function, shortPath, fullPath}, nil
+	return &LogContext{function, shortPath, fullPath, fileName}, nil
 }
 
 func (context *LogContext) Func() string {
@@ -32,6 +35,10 @@ func (context *LogContext) ShortPath() string {
 
 func (context *LogContext) FullPath() string {
 	return context.fullPath
+}
+
+func (context *LogContext) FileName() string {
+	return context.fileName
 }
 
 var workingDir = ""
@@ -57,6 +64,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 		return "", "", "", os.NewError("Error during runtime.Caller")
 	}
 
+	
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
 	} else {

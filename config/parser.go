@@ -1,4 +1,4 @@
-// Package config contains configuration functionality of sealog
+// Package config contains configuration functionality of sealog.
 package config
 
 import (
@@ -7,27 +7,44 @@ import (
 	. "sealog/common"
 	"sealog/dispatchers"
 	"sealog/writers"
+	"sealog/format"
 	"strings"
 	"fmt"
 )
 
+const (
+	SealogConfigId = "sealog"
+	OutputsId = "outputs"
+	FormatsId = "formats"
+	MinLevelId = "minlevel"
+	MaxLevelId = "maxlevel"
+	LevelsId = "levels"
+	ExceptionsId = "exceptions"
+	ExceptionId = "exception"
+	FuncPatternId = "funcpattern"
+	FilePatternId = "filepattern"
+	FormatId = "format"
+	FormatAttrId = "format"
+	FormatKeyAttrId = "id"
+	OutputFormatId = "formatid"
+	FilePathId = "path"
+	FileWriterId = "file"
+	SpliterDispatcherId = "splitter"
+)
+
 type elementMapEntry struct {
-	constructor func(node *xmlNode, formatFromParent *formatDummy, formats map[string]*formatDummy) (interface{}, os.Error)
+	constructor func(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, os.Error)
 }
 
 var elementMap map[string]elementMapEntry
 
 func init() {
 	elementMap = map[string]elementMapEntry{
-		"outputs": {createSplitter},
-		"file":    {createFileWriter},
+		OutputsId: {createSplitter},
+		FileWriterId:    {createFileWriter},
+		SpliterDispatcherId: {createSplitter},
 		//"smtp": { createSmtpWriter },
 	}
-}
-
-type formatDummy struct {
-	id     string
-	format string
 }
 
 // Creates a new config from given reader. Returns error if format is incorrect or anything happened.
@@ -37,11 +54,11 @@ func ConfigFromReader(reader io.Reader) (*LogConfig, os.Error) {
 		return nil, err
 	}
 
-	if config.name != "sealog" {
-		return nil, os.NewError("Root xml tag must be 'sealog'")
+	if config.name != SealogConfigId {
+		return nil, os.NewError("Root xml tag must be '" + SealogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, "minlevel", "maxlevel", "levels")
+	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId)
 	if err != nil {
 		return nil, err
 	}
@@ -70,17 +87,17 @@ func ConfigFromReader(reader io.Reader) (*LogConfig, os.Error) {
 		return nil, err
 	}
 
-	newConfig := &LogConfig{Constraints: constraints, Exceptions: exceptions, RootDispatcher: dispatcher}
-	return newConfig, nil
+	return NewConfig(constraints, exceptions, dispatcher)
 }
 
 func getConstraints(node *xmlNode) (LogLevelConstraints, os.Error) {
-	minLevelStr, isMinLevel := node.attributes["minlevel"]
-	maxLevelStr, isMaxLevel := node.attributes["maxlevel"]
-	levelsStr, isLevels := node.attributes["levels"]
+	minLevelStr, isMinLevel := node.attributes[MinLevelId]
+	maxLevelStr, isMaxLevel := node.attributes[MaxLevelId]
+	levelsStr, isLevels := node.attributes[LevelsId]
 
 	if isLevels && (isMinLevel && isMaxLevel) {
-		return nil, os.NewError("For level declaration use 'levels' OR 'minlevel', 'maxlevel'")
+		return nil, os.NewError("For level declaration use '" + LevelsId + "'' OR '" + MinLevelId + 
+			"', '" + MaxLevelId + "'")
 	}
 
 	offString := LogLevel(Off).String()
@@ -110,7 +127,7 @@ func getConstraints(node *xmlNode) (LogLevelConstraints, os.Error) {
 		found := true
 		minLevel, found = LogLevelFromString(minLevelStr)
 		if !found {
-			return nil, os.NewError("Declared minlevel not found: " + minLevelStr)
+			return nil, os.NewError("Declared " + MinLevelId + " not found: " + minLevelStr)
 		}
 	}
 
@@ -119,7 +136,7 @@ func getConstraints(node *xmlNode) (LogLevelConstraints, os.Error) {
 		found := true
 		maxLevel, found = LogLevelFromString(maxLevelStr)
 		if !found {
-			return nil, os.NewError("Declared maxlevel not found: " + maxLevelStr)
+			return nil, os.NewError("Declared " + MaxLevelId + " not found: " + maxLevelStr)
 		}
 	}
 
@@ -131,7 +148,7 @@ func getExceptions(config *xmlNode) ([]*LogLevelException, os.Error) {
 
 	var exceptionsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == "exceptions" {
+		if child.name == ExceptionsId {
 			exceptionsNode = child
 			break
 		}
@@ -147,22 +164,22 @@ func getExceptions(config *xmlNode) ([]*LogLevelException, os.Error) {
 	}
 
 	for _, exceptionNode := range exceptionsNode.children {
-		if exceptionNode.name != "exception" {
+		if exceptionNode.name != ExceptionId {
 			return nil, os.NewError("Incorrect nested element in exceptions section: " + exceptionNode.name)
 		}
 
-		err := checkUnexpectedAttribute(exceptionNode, "minlevel", "maxlevel", "levels", "funcpattern", "filepattern")
+		err := checkUnexpectedAttribute(exceptionNode, MinLevelId, MaxLevelId, LevelsId, FuncPatternId, FilePatternId)
 		if err != nil {
 			return nil, err
 		}
 
 		constraints, err := getConstraints(exceptionNode)
 		if err != nil {
-			return nil, os.NewError("Incorrect exception node: " + err.String())
+			return nil, os.NewError("Incorrect " + ExceptionsId + " node: " + err.String())
 		}
 
-		funcPattern, isFuncPattern := exceptionNode.attributes["funcpattern"]
-		filePattern, isFilePattern := exceptionNode.attributes["filepattern"]
+		funcPattern, isFuncPattern := exceptionNode.attributes[FuncPatternId]
+		filePattern, isFilePattern := exceptionNode.attributes[FilePatternId]
 		if !isFuncPattern {
 			funcPattern = "*"
 		}
@@ -200,12 +217,12 @@ func checkDistinctExceptions(exceptions []*LogLevelException) os.Error {
 	return nil
 }
 
-func getFormats(config *xmlNode) (map[string]*formatDummy, os.Error) {
-	formats := make(map[string]*formatDummy, 0)
+func getFormats(config *xmlNode) (map[string]*format.Formatter, os.Error) {
+	formats := make(map[string]*format.Formatter, 0)
 
 	var formatsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == "formats" {
+		if child.name == FormatsId {
 			formatsNode = child
 			break
 		}
@@ -221,51 +238,56 @@ func getFormats(config *xmlNode) (map[string]*formatDummy, os.Error) {
 	}
 
 	for _, formatNode := range formatsNode.children {
-		if formatNode.name != "format" {
-			return nil, os.NewError("Incorrect nested element in formats section: " + formatNode.name)
+		if formatNode.name != FormatId {
+			return nil, os.NewError("Incorrect nested element in " + FormatsId + " section: " + formatNode.name)
 		}
 
-		err := checkUnexpectedAttribute(formatNode, "id", "format")
+		err := checkUnexpectedAttribute(formatNode, FormatKeyAttrId, FormatId)
 		if err != nil {
 			return nil, err
 		}
 
-		id, isId := formatNode.attributes["id"]
-		formatStr, isFormat := formatNode.attributes["format"]
+		id, isId := formatNode.attributes[FormatKeyAttrId]
+		formatStr, isFormat := formatNode.attributes[FormatAttrId]
 		if !isId {
-			return nil, os.NewError("Format has no 'id' attribute")
+			return nil, os.NewError("Format has no '" + FormatKeyAttrId + "' attribute")
 		}
 		if !isFormat {
-			return nil, os.NewError("Format[" + id + "] has no 'format' attribute")
+			return nil, os.NewError("Format[" + id + "] has no '" + FormatAttrId + "' attribute")
 		}
 
-		formats[id] = &formatDummy{id, formatStr}
+		formatter, err := format.NewFormatter(formatStr)
+		if err != nil {
+			return nil, err
+		}
+		
+		formats[id] = formatter
 	}
 
 	return formats, nil
 }
 
-func getOutputsTree(config *xmlNode, formats map[string]*formatDummy) (dispatchers.DispatcherInterface, os.Error) {
+func getOutputsTree(config *xmlNode, formats map[string]*format.Formatter) (dispatchers.DispatcherInterface, os.Error) {
 	var outputsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == "outputs" {
+		if child.name == OutputsId {
 			outputsNode = child
 			break
 		}
 	}
 
 	if outputsNode != nil {
-		err := checkUnexpectedAttribute(outputsNode, "formatid")
+		err := checkUnexpectedAttribute(outputsNode, OutputFormatId)
 		if err != nil {
 			return nil, err
 		}
 
-		format, err := getCurrentFormat(outputsNode, nil, formats)
+		formatter, err := getCurrentFormat(outputsNode, format.DefaultFormatter, formats)
 		if err != nil {
 			return nil, err
 		}
 
-		output, err := elementMap["outputs"].constructor(outputsNode, format, formats)
+		output, err := elementMap[OutputsId].constructor(outputsNode, formatter, formats)
 		if err != nil {
 			return nil, err
 		}
@@ -280,11 +302,11 @@ func getOutputsTree(config *xmlNode, formats map[string]*formatDummy) (dispatche
 	if err != nil {
 		return nil, err
 	}
-	return dispatchers.NewSplitDispatcher([]interface{}{console})
+	return dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{console})
 }
 
-func getCurrentFormat(node *xmlNode, formatFromParent *formatDummy, formats map[string]*formatDummy) (*formatDummy, os.Error) {
-	formatId, isFormatId := node.attributes["formatid"]
+func getCurrentFormat(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (*format.Formatter, os.Error) {
+	formatId, isFormatId := node.attributes[OutputFormatId]
 	if isFormatId {
 		format, ok := formats[formatId]
 		if !ok {
@@ -297,7 +319,7 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatDummy, formats map[
 	return formatFromParent, nil
 }
 
-func createOutputs(node *xmlNode, format *formatDummy, formats map[string]*formatDummy) ([]interface{}, os.Error) {
+func createOutputs(node *xmlNode, format *format.Formatter, formats map[string]*format.Formatter) ([]interface{}, os.Error) {
 	outputs := make([]interface{}, 0)
 	for _, childNode := range node.children {
 		entry, ok := elementMap[childNode.name]
@@ -316,8 +338,8 @@ func createOutputs(node *xmlNode, format *formatDummy, formats map[string]*forma
 	return outputs, nil
 }
 
-func createSplitter(node *xmlNode, formatFromParent *formatDummy, formats map[string]*formatDummy) (interface{}, os.Error) {
-	err := checkUnexpectedAttribute(node, "formatid")
+func createSplitter(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, os.Error) {
+	err := checkUnexpectedAttribute(node, OutputFormatId)
 	if err != nil {
 		return nil, err
 	}
@@ -332,11 +354,11 @@ func createSplitter(node *xmlNode, formatFromParent *formatDummy, formats map[st
 		return nil, err
 	}
 
-	return dispatchers.NewSplitDispatcher(outputs)
+	return dispatchers.NewSplitDispatcher(currentFormat, outputs)
 }
 
-func createFileWriter(node *xmlNode, formatFromParent *formatDummy, formats map[string]*formatDummy) (interface{}, os.Error) {
-	err := checkUnexpectedAttribute(node, "formatid", "path")
+func createFileWriter(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, os.Error) {
+	err := checkUnexpectedAttribute(node, OutputFormatId, FilePathId)
 	if err != nil {
 		return nil, err
 	}
@@ -345,18 +367,22 @@ func createFileWriter(node *xmlNode, formatFromParent *formatDummy, formats map[
 	if err != nil {
 		return nil, err
 	}
-	_ = currentFormat
 
 	if len(node.children) > 0 {
 		return nil, os.NewError("Output '" + node.name + "' must not have children")
 	}
 
-	path, isPath := node.attributes["path"]
+	path, isPath := node.attributes[FilePathId]
 	if !isPath {
-		return nil, os.NewError("Output '" + node.name + "' has no 'path' attribute")
+		return nil, os.NewError("Output '" + node.name + "' has no '" + FilePathId + "' attribute")
 	}
 
-	return writers.NewFileWriter(path)
+	fileWriter, err := writers.NewFileWriter(path)
+	if err != nil {
+		return nil, err
+	}
+	
+	return dispatchers.NewFormattedWriter(fileWriter, currentFormat)
 }
 
 func checkUnexpectedAttribute(node *xmlNode, expectedAttrs ...string) os.Error {

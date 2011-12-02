@@ -4,6 +4,7 @@ package dispatchers
 
 import (
 	. "sealog/common"
+	"sealog/format"
 	"os"
 	"io"
 	"fmt"
@@ -16,23 +17,36 @@ type DispatcherInterface interface {
 }
 
 type dispatcher struct {
-	writers     []io.Writer
+	formatter *format.Formatter
+	writers     []*FormattedWriter
 	dispatchers []DispatcherInterface
 }
 
 // Creates a dispatcher which dispatches data to a list of receivers. 
 // Each receiver should be either a Dispatcher or io.Writer, otherwise an error will be returned
-func createDispatcher(receivers []interface{}) (*dispatcher, os.Error) {
+func createDispatcher(formatter *format.Formatter, receivers []interface{}) (*dispatcher, os.Error) {
+	if formatter == nil {
+		return nil, os.NewError("Formatter can not be nil")
+	}
 	if receivers == nil || len(receivers) == 0 {
 		return nil, os.NewError("Receivers can not be nil or empty")
 	}
 
-	disp := &dispatcher{make([]io.Writer, 0), make([]DispatcherInterface, 0)}
-
+	disp := &dispatcher{formatter, make([]*FormattedWriter, 0), make([]DispatcherInterface, 0)}
 	for _, receiver := range receivers {
+		writer, ok := receiver.(*FormattedWriter)
+		if ok {
+			disp.writers = append(disp.writers, writer)
+			continue
+		}
+		
 		ioWriter, ok := receiver.(io.Writer)
 		if ok {
-			disp.writers = append(disp.writers, ioWriter)
+			writer, err := NewFormattedWriter(ioWriter, disp.formatter)
+			if err != nil {
+				return nil, err
+			}
+			disp.writers = append(disp.writers,  writer)
 			continue
 		}
 
@@ -50,7 +64,7 @@ func createDispatcher(receivers []interface{}) (*dispatcher, os.Error) {
 
 func (disp *dispatcher) Dispatch(message string, level LogLevel, context *LogContext, errorFunc func(err os.Error)) {
 	for _, writer := range disp.writers {
-		_, err := writer.Write([]byte(message))
+		err := writer.Write(message, level, context)
 		if err != nil {
 			errorFunc(err)
 		}
@@ -61,7 +75,7 @@ func (disp *dispatcher) Dispatch(message string, level LogLevel, context *LogCon
 	}
 }
 
-func (disp *dispatcher) Writers() []io.Writer {
+func (disp *dispatcher) Writers() []*FormattedWriter{
 	return disp.writers
 }
 
@@ -70,7 +84,9 @@ func (disp *dispatcher) Dispatchers() []DispatcherInterface {
 }
 
 func (disp *dispatcher) String() string {
-	str := "    ->Dispatchers:"
+	str := "Formatter: " + disp.formatter.String() + "\n"
+	
+	str += "    ->Dispatchers:"
 
 	if len(disp.dispatchers) == 0 {
 		str += "none\n"
@@ -90,7 +106,7 @@ func (disp *dispatcher) String() string {
 		str += "\n"
 
 		for _, writer := range disp.writers {
-			str += fmt.Sprintf("        ->%s", writer)
+			str += fmt.Sprintf("        ->%s\n", writer)
 		}
 	}
 

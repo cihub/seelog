@@ -52,7 +52,7 @@ func NewLogLevelException(funcPattern string, filePattern string, constraints Lo
 
 // MatchesContext returns true if context matches the patterns of this LogLevelException
 func (logLevelEx *LogLevelException) MatchesContext(context *LogContext) bool {
-	return true
+	return logLevelEx.match(context.Func(), context.FullPath())
 }
 
 // IsAllowed returns true if log level is allowed according to the constraints of this LogLevelException

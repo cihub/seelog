@@ -1,11 +1,10 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog
-DEPS = common config
+TARG=sealog/format
+DEPS = ../common
 
 GOFILES = \
-	config.go \
-	log.go \
+	format.go \
 
 include $(GOROOT)/src/Make.pkg
 
@@ -14,5 +13,5 @@ clean:
 	for i in $(DEPS); do $(MAKE) -C $$i clean; done
 	
 test:
-	#gotest
+	gotest
 	for i in $(DEPS); do $(MAKE) -C $$i test; done

@@ -4,6 +4,7 @@ import (
 	. "sealog/common"
 	"os"
 	"fmt"
+	"sealog/format"
 )
 
 // A FilterDispatcher writes the given message to underlying receivers only if message log level 
@@ -14,8 +15,8 @@ type FilterDispatcher struct {
 }
 
 // NewFilterDispatcher creates a new FilterDispatcher using a list of allowed levels. 
-func NewFilterDispatcher(receivers []interface{}, allowList ...LogLevel) (*FilterDispatcher, os.Error) {
-	disp, err := createDispatcher(receivers)
+func NewFilterDispatcher(formatter *format.Formatter, receivers []interface{}, allowList ...LogLevel) (*FilterDispatcher, os.Error) {
+	disp, err := createDispatcher(formatter, receivers)
 	if err != nil {
 		return nil, err
 	}

@@ -3,14 +3,25 @@ package dispatchers
 import (
 	"testing"
 	"os"
+	"fmt"
 	. "sealog/common"
 	. "sealog/test"
+	"sealog/format"
 )
+
+var onlyMessageFormatForTest *format.Formatter
+func init() {
+	var err os.Error
+	onlyMessageFormatForTest, err = format.NewFormatter("%Msg")
+	if err != nil {
+		fmt.Println("Can not create only message format: " + err.String())
+	}
+}
 
 func TestSplitDispatcher(t *testing.T) {
 	writer1, _ := NewBytesVerfier(t)
 	writer2, _ := NewBytesVerfier(t)
-	spliter, err := NewSplitDispatcher([]interface{}{writer1, writer2})
+	spliter, err := NewSplitDispatcher(onlyMessageFormatForTest, []interface{}{writer1, writer2})
 	if err != nil {
 		t.Error(err)
 		return
