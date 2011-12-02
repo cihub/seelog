@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.inc 
 
 TARG=github.com/cihub/sealog
-DEPS = github.com/cihub/common github.com/cihub/config
+DEPS = common config
 
 GOFILES = \
 	config.go \
