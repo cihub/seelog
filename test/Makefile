@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog/test
+TARG=github.com/cihub/sealog/test
 
 GOFILES = \
 	writers.go \

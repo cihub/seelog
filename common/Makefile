@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog/common
+TARG=github.com/cihub/sealog/common
 
 GOFILES = \
 	loglevel.go \
