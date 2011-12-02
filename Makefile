@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc 
 
-TARG=sealog
+TARG=github.com/cihub/sealog
 DEPS = common config
 
 GOFILES = \
