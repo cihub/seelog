@@ -2,7 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=github.com/cihub/sealog/common
 
-GOFILES = \
+GOFILES=\
 	loglevel.go \
 	context.go \
 	constraints.go \

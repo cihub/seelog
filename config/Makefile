@@ -1,9 +1,9 @@
 include $(GOROOT)/src/Make.inc 
 
 TARG=github.com/cihub/sealog/config
-DEPS = ../common ../writers ../dispatchers
+DEPS=../common ../writers ../dispatchers
 
-GOFILES = \
+GOFILES=\
 	logconfig.go \
 	parser.go \
 	xmlnode.go \
