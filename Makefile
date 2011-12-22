@@ -5,6 +5,11 @@ DEPS=common config
 
 GOFILES=\
 	config.go \
+	logger.go \
+	synclogger.go \
+	asynclogger.go \
+	asynclooplogger.go \
+	asynctimerlogger.go \
 	log.go \
 
 include $(GOROOT)/src/Make.pkg
@@ -14,5 +19,5 @@ clean:
 	for i in $(DEPS); do $(MAKE) -C $$i clean; done
 	
 test:
-	#gotest
+	gotest
 	for i in $(DEPS); do $(MAKE) -C $$i test; done

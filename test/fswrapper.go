@@ -1,22 +1,27 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package test
 
 import (
+	"errors"
 	"io"
-	"testing"
 	"path/filepath"
-	"os"
+	"testing"
 )
 
 // FileSystemWrapperInterface is used for testing. When sealog is used in a real app, osWrapper uses standard os
 // funcs. When sealog is being tested, FileSystemTestWrapper emulates some of the os funcs. Both osWrapper and
 // FileSystemTestWrapper implement this interface.
 type FileSystemWrapperInterface interface {
-	MkdirAll(folderPath string) os.Error
-	Create(fileName string) (io.WriteCloser, os.Error)
-	GetFileSize(fileName string) (int64, os.Error)
-	GetFileNames(folderPath string) ([]string, os.Error)
-	Rename(fileNameFrom string, fileNameTo string) os.Error
-	Remove(fileName string) os.Error
+	MkdirAll(folderPath string) error
+	Open(fileName string) (io.WriteCloser, error)
+	Create(fileName string) (io.WriteCloser, error)
+	GetFileSize(fileName string) (int64, error)
+	GetFileNames(folderPath string) ([]string, error)
+	Rename(fileNameFrom string, fileNameTo string) error
+	Remove(fileName string) error
 	Exists(path string) bool
 }
 
@@ -26,20 +31,20 @@ func SetWrapperTestEnvironment(wrapper FileSystemWrapperInterface) {
 	wrapperForTest = wrapper
 }
 
-func removeAndCheck(fileName string) os.Error {
+func removeAndCheck(fileName string) error {
 	err := wrapperForTest.Remove(fileName)
 	if err != nil {
 		return err
 	}
 
 	if wrapperForTest.Exists(fileName) {
-		return os.NewError("Must be deleted: " + fileName)
+		return errors.New("Must be deleted: " + fileName)
 	}
 
 	return nil
 }
 
-func createFile(fileName string) os.Error {
+func createFile(fileName string) error {
 	file, err := wrapperForTest.Create(fileName)
 	if err != nil {
 		return err

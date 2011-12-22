@@ -1,3 +1,7 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package config
 
 import (
@@ -159,7 +163,7 @@ func TestXmlNode(t *testing.T) {
 			t.Errorf("\n%s:\nXml input: %s\nExpected error:%t. Got error: %t\n", test.testName,
 				test.inputXml, test.errorExpected, (err != nil))
 			if err != nil {
-				t.Logf("%s\n", err.String())
+				t.Logf("%s\n", err.Error())
 			}
 			continue
 		}

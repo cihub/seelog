@@ -1,10 +1,14 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package config
 
 import (
-	"os"
-	"io"
-	"xml"
+	"encoding/xml"
+	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -43,13 +47,13 @@ func (this *xmlNode) String() string {
 	return str
 }
 
-func (this *xmlNode) unmarshal(startEl xml.StartElement) os.Error {
+func (this *xmlNode) unmarshal(startEl xml.StartElement) error {
 	this.name = startEl.Name.Local
 
 	for _, v := range startEl.Attr {
 		_, alreadyExists := this.attributes[v.Name.Local]
 		if alreadyExists {
-			return os.NewError("Tag '" + this.name + "' has duplicated attribute: '" + v.Name.Local + "'")
+			return errors.New("Tag '" + this.name + "' has duplicated attribute: '" + v.Name.Local + "'")
 		}
 		this.attributes[v.Name.Local] = v.Value
 	}
@@ -65,9 +69,13 @@ func (this *xmlNode) add(child *xmlNode) {
 	this.children = append(this.children, child)
 }
 
+func (this *xmlNode) hasChildren() bool {
+	return this.children != nil && len(this.children) > 0
+}
+
 //=============================================
 
-func unmarshalConfig(reader io.Reader) (*xmlNode, os.Error) {
+func unmarshalConfig(reader io.Reader) (*xmlNode, error) {
 	xmlParser := xml.NewParser(reader)
 
 	config, err := unmarshalNode(xmlParser, nil)
@@ -75,18 +83,18 @@ func unmarshalConfig(reader io.Reader) (*xmlNode, os.Error) {
 		return nil, err
 	}
 	if config == nil {
-		return nil, os.NewError("Xml has no content")
+		return nil, errors.New("Xml has no content")
 	}
 
 	nextConfigEntry, err := unmarshalNode(xmlParser, nil)
 	if nextConfigEntry != nil {
-		return nil, os.NewError("Xml contains more than one root element")
+		return nil, errors.New("Xml contains more than one root element")
 	}
 
 	return config, nil
 }
 
-func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, err os.Error) {
+func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, err error) {
 	firstLoop := true
 	for {
 		var tok xml.Token
@@ -102,7 +110,7 @@ func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, er
 
 		switch tt := tok.(type) {
 		case xml.SyntaxError:
-			err = os.NewError(tt.String())
+			err = errors.New(tt.Error())
 			return
 		case xml.CharData:
 			value := strings.TrimSpace(string([]byte(tt)))
@@ -136,9 +144,9 @@ func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, er
 	return
 }
 
-func getNextToken(xmlParser *xml.Parser) (tok xml.Token, err os.Error) {
+func getNextToken(xmlParser *xml.Parser) (tok xml.Token, err error) {
 	if tok, err = xmlParser.Token(); err != nil {
-		if err == os.EOF {
+		if err == io.EOF {
 			err = nil
 			return
 		}

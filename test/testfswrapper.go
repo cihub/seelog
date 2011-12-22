@@ -1,8 +1,13 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package test
 
 import (
+	"errors"
 	"io"
-	"os"
+
 	"path/filepath"
 	"strings"
 )
@@ -17,9 +22,9 @@ type FileSystemTestWrapper struct {
 }
 
 // NewFSTestWrapper creates a new fs wrapper for testing purposes.
-func NewFSTestWrapper(root *DirectoryWrapper, writeCloser io.WriteCloser, fileSize int64) (*FileSystemTestWrapper, os.Error) {
+func NewFSTestWrapper(root *DirectoryWrapper, writeCloser io.WriteCloser, fileSize int64) (*FileSystemTestWrapper, error) {
 	if root == nil {
-		var err os.Error
+		var err error
 		root, err = NewEmptyDirectoryWrapper("")
 		if err != nil {
 			return nil, err
@@ -29,7 +34,7 @@ func NewFSTestWrapper(root *DirectoryWrapper, writeCloser io.WriteCloser, fileSi
 	return &FileSystemTestWrapper{root, writeCloser, fileSize}, nil
 }
 
-func NewEmptyFSTestWrapper() (*FileSystemTestWrapper, os.Error) {
+func NewEmptyFSTestWrapper() (*FileSystemTestWrapper, error) {
 	return NewFSTestWrapper(nil, new(NullWriter), 0)
 }
 
@@ -53,7 +58,7 @@ func (testFS *FileSystemTestWrapper) Exists(path string) bool {
 	return found
 }
 
-func (testFS *FileSystemTestWrapper) MkdirAll(dirPath string) os.Error {
+func (testFS *FileSystemTestWrapper) MkdirAll(dirPath string) error {
 	pathParts := strings.Split(dirPath, string(filepath.Separator))
 
 	currentDirectory := testFS.root
@@ -74,26 +79,39 @@ func (testFS *FileSystemTestWrapper) MkdirAll(dirPath string) os.Error {
 	return nil
 }
 
-func (testFS *FileSystemTestWrapper) Create(filePath string) (io.WriteCloser, os.Error) {
+func (testFS *FileSystemTestWrapper) Open(filePath string) (io.WriteCloser, error) {
+	directoryPath, _ := filepath.Split(filePath)
+	_, found := testFS.root.FindDirectoryRecursively(directoryPath)
+	if !found {
+		return nil, errors.New("Directory not found: " + directoryPath)
+	}
+
+	if !testFS.Exists(filePath) {
+		return nil, errors.New("File already exists " + filePath)
+	}
+
+	return testFS.writeCloser, nil
+}
+func (testFS *FileSystemTestWrapper) Create(filePath string) (io.WriteCloser, error) {
 	directoryPath, fileName := filepath.Split(filePath)
 	directory, found := testFS.root.FindDirectoryRecursively(directoryPath)
 	if !found {
-		return nil, os.NewError("Directory not found: " + directoryPath)
+		return nil, errors.New("Directory not found: " + directoryPath)
 	}
 
-	if !testFS.Exists(fileName) {
+	if !testFS.Exists(filePath) {
 		directory.Files = append(directory.Files, NewFileWrapper(fileName))
 	}
 
 	return testFS.writeCloser, nil
 }
-func (testFS *FileSystemTestWrapper) GetFileSize(fileName string) (int64, os.Error) {
+func (testFS *FileSystemTestWrapper) GetFileSize(fileName string) (int64, error) {
 	return testFS.fileSize, nil
 }
-func (testFS *FileSystemTestWrapper) GetFileNames(folderPath string) ([]string, os.Error) {
+func (testFS *FileSystemTestWrapper) GetFileNames(folderPath string) ([]string, error) {
 	directory, found := testFS.root.FindDirectoryRecursively(folderPath)
 	if !found {
-		return nil, os.NewError("Directory not found: " + folderPath)
+		return nil, errors.New("Directory not found: " + folderPath)
 	}
 
 	files := make([]string, 0)
@@ -103,12 +121,12 @@ func (testFS *FileSystemTestWrapper) GetFileNames(folderPath string) ([]string, 
 
 	return files, nil
 }
-func (testFS *FileSystemTestWrapper) Rename(fileNameFrom string, fileNameTo string) os.Error {
+func (testFS *FileSystemTestWrapper) Rename(fileNameFrom string, fileNameTo string) error {
 	if testFS.Exists(fileNameTo) {
-		return os.NewError("Such file already exists")
+		return errors.New("Such file already exists")
 	}
 	if !testFS.Exists(fileNameFrom) {
-		return os.NewError("Cannot rename nonexistent file")
+		return errors.New("Cannot rename nonexistent file")
 	}
 
 	testFS.Remove(fileNameFrom)
@@ -116,11 +134,11 @@ func (testFS *FileSystemTestWrapper) Rename(fileNameFrom string, fileNameTo stri
 
 	return nil
 }
-func (testFS *FileSystemTestWrapper) Remove(path string) os.Error {
+func (testFS *FileSystemTestWrapper) Remove(path string) error {
 	parentDirPath, fileName := filepath.Split(path)
 	parentDir, found := testFS.root.FindDirectoryRecursively(parentDirPath)
 	if !found {
-		return os.NewError("Directory not found: " + parentDirPath)
+		return errors.New("Directory not found: " + parentDirPath)
 	}
 
 	_, found = parentDir.FindDirectory(fileName)
@@ -143,7 +161,7 @@ func (testFS *FileSystemTestWrapper) Remove(path string) os.Error {
 		}
 	}
 
-	return os.NewError("Cannot remove nonexistent file")
+	return errors.New("Cannot remove nonexistent file")
 }
 
 //=======================================================
@@ -154,24 +172,24 @@ type DirectoryWrapper struct {
 	Files       []*FileWrapper
 }
 
-func NewDirectoryWrapper(name string, directories []*DirectoryWrapper, files []*FileWrapper) (*DirectoryWrapper, os.Error) {
+func NewDirectoryWrapper(name string, directories []*DirectoryWrapper, files []*FileWrapper) (*DirectoryWrapper, error) {
 	if directories == nil {
-		return nil, os.NewError("directories param is nil")
+		return nil, errors.New("directories param is nil")
 	}
 	if files == nil {
-		return nil, os.NewError("files environment param is nil")
+		return nil, errors.New("files environment param is nil")
 	}
 
 	return &DirectoryWrapper{name, directories, files}, nil
 }
-func NewEmptyDirectoryWrapper(name string) (*DirectoryWrapper, os.Error) {
+func NewEmptyDirectoryWrapper(name string) (*DirectoryWrapper, error) {
 	return NewDirectoryWrapper(name, make([]*DirectoryWrapper, 0), make([]*FileWrapper, 0))
 }
 func (directory *DirectoryWrapper) GetFilesRecursively() []string {
 	files := make([]string, 0)
 
 	for _, file := range directory.Files {
-		files = append(files, filepath.Join(directory.Name, file.Name))
+		files = append(files, file.Name)
 	}
 
 	for _, directory := range directory.Directories {

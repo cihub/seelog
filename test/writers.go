@@ -1,11 +1,15 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package test provides utilities used to test most of sealog packages. This package shouldn't be actually used 
 // anywhere but sealog tests.
 package test
 
 import (
-	"os"
-	"testing"
+	"errors"
 	"strconv"
+	"testing"
 	"time"
 )
 
@@ -18,9 +22,9 @@ type BytesVerifier struct {
 	testEnv         *testing.T
 }
 
-func NewBytesVerfier(t *testing.T) (*BytesVerifier, os.Error) {
+func NewBytesVerfier(t *testing.T) (*BytesVerifier, error) {
 	if t == nil {
-		return nil, os.NewError("Testing environment param is nil")
+		return nil, errors.New("Testing environment param is nil")
 	}
 
 	verifier := new(BytesVerifier)
@@ -31,7 +35,7 @@ func NewBytesVerfier(t *testing.T) (*BytesVerifier, os.Error) {
 
 // Write is used to check whether verifier was waiting for input and whether bytes are the same as expectedBytes.
 // After Write call, waitingForInput is set to false.
-func (verifier *BytesVerifier) Write(bytes []byte) (n int, err os.Error) {
+func (verifier *BytesVerifier) Write(bytes []byte) (n int, err error) {
 	if !verifier.waitingForInput {
 		verifier.testEnv.Errorf("Unexpected input: %v", string(bytes))
 		return
@@ -45,12 +49,13 @@ func (verifier *BytesVerifier) Write(bytes []byte) (n int, err os.Error) {
 			verifier.testEnv.Errorf("Incoming 'bytes' is nil")
 		} else {
 			if len(bytes) != len(verifier.expectedBytes) {
-				verifier.testEnv.Errorf("'Bytes' has unexpected len. Expected: %d. Got: %d", len(verifier.expectedBytes), len(bytes))
+				verifier.testEnv.Errorf("'Bytes' has unexpected len. Expected: %d. Got: %d. . Expected string: %q. Got: %q",
+					len(verifier.expectedBytes), len(bytes), string(verifier.expectedBytes), string(bytes))
 			} else {
 				for i := 0; i < len(bytes); i++ {
 					if verifier.expectedBytes[i] != bytes[i] {
 						verifier.testEnv.Errorf("Incorrect data on position %d. Expected: %d. Got: %d. Expected string: %q. Got: %q",
-							i, verifier.expectedBytes[i], bytes[i], verifier.expectedBytes, bytes)
+							i, verifier.expectedBytes[i], bytes[i], string(verifier.expectedBytes), string(bytes))
 						break
 					}
 				}
@@ -72,13 +77,14 @@ func (verifier *BytesVerifier) MustNotExpect() {
 
 		if verifier.expectedBytes != nil {
 			errorText += "len = " + strconv.Itoa(len(verifier.expectedBytes))
+			errorText += ". text = " + string(verifier.expectedBytes)
 		}
 
 		verifier.testEnv.Errorf(errorText)
 	}
 }
 
-func (verifier *BytesVerifier) MustNotExpectWithDelay(delay int64) {
+func (verifier *BytesVerifier) MustNotExpectWithDelay(delay time.Duration) {
 	c := make(chan int)
 	time.AfterFunc(delay, func() {
 		verifier.MustNotExpect()
@@ -89,7 +95,7 @@ func (verifier *BytesVerifier) MustNotExpectWithDelay(delay int64) {
 	<-c
 }
 
-func (verifier *BytesVerifier) Close() os.Error {
+func (verifier *BytesVerifier) Close() error {
 	return nil
 }
 
@@ -98,10 +104,10 @@ type NullWriter struct {
 
 }
 
-func (this *NullWriter) Write(bytes []byte) (n int, err os.Error) {
+func (this *NullWriter) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (this *NullWriter) Close() os.Error {
+func (this *NullWriter) Close() error {
 	return nil
 }

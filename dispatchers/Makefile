@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.inc 
 
 TARG=github.com/cihub/sealog/dispatchers
-DEPS = ../common ../format
+DEPS=../common ../format
 
 GOFILES = \
 	formattedwriter.go \

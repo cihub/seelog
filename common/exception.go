@@ -1,7 +1,11 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package common
 
 import (
-	"os"
+	"errors"
 	"regexp"
 	"strings"
 	"fmt"
@@ -26,9 +30,9 @@ type LogLevelException struct {
 }
 
 // NewLogLevelException creates a new exception. 
-func NewLogLevelException(funcPattern string, filePattern string, constraints LogLevelConstraints) (*LogLevelException, os.Error) {
+func NewLogLevelException(funcPattern string, filePattern string, constraints LogLevelConstraints) (*LogLevelException, error) {
 	if constraints == nil {
-		return nil, os.NewError("Constraints can not be nil")
+		return nil, errors.New("Constraints can not be nil")
 	}
 
 	exception := new(LogLevelException)
@@ -71,10 +75,10 @@ func (logLevelEx *LogLevelException) FilePattern() string {
 }
 
 // initFuncPatternParts checks whether the func filter has a correct format and splits funcPattern on parts
-func (logLevelEx *LogLevelException) initFuncPatternParts(funcPattern string) (error os.Error) {
+func (logLevelEx *LogLevelException) initFuncPatternParts(funcPattern string) (err error) {
 
 	if funcFormatValidator.FindString(funcPattern) != funcPattern {
-		return os.NewError("Func path \"" + funcPattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 _ * . allowed)")
+		return errors.New("Func path \"" + funcPattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 _ * . allowed)")
 	}
 
 	logLevelEx.funcPatternParts = splitPattern(funcPattern)
@@ -82,14 +86,14 @@ func (logLevelEx *LogLevelException) initFuncPatternParts(funcPattern string) (e
 }
 
 // Checks whether the file filter has a correct format and splits file patterns using splitPattern.
-func (logLevelEx *LogLevelException) initFilePatternParts(filePattern string) (error os.Error) {
+func (logLevelEx *LogLevelException) initFilePatternParts(filePattern string) (err error) {
 
 	if fileFormatValidator.FindString(filePattern) != filePattern {
-		return os.NewError("File path \"" + filePattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 \\ / _ * . allowed)")
+		return errors.New("File path \"" + filePattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 \\ / _ * . allowed)")
 	}
 
 	logLevelEx.filePatternParts = splitPattern(filePattern)
-	return error
+	return err
 }
 
 func (logLevelEx *LogLevelException) match(funcPath string, filePath string) bool {
@@ -114,7 +118,7 @@ func (logLevelEx *LogLevelException) String() string {
 // splitPattern splits pattern into strings and asterisks. Example: "ab*cde**f" -> ["ab", "*", "cde", "*", "f"]
 func splitPattern(pattern string) []string {
 	patternParts := make([]string, 0)
-	var lastChar int
+	var lastChar rune
 	for _, char := range pattern {
 		if char == '*' {
 			if lastChar != '*' {

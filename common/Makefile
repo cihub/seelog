@@ -7,5 +7,7 @@ GOFILES=\
 	context.go \
 	constraints.go \
 	exception.go \
+	flusher.go \
+	closer.go \
 
 include $(GOROOT)/src/Make.pkg

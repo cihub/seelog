@@ -1,29 +1,34 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package dispatcher implements log dispatching functionality.
 // It allows to filter, duplicate, customize the flow of log streams.
 package dispatchers
 
 import (
-	. "github.com/cihub/sealog/common"
-	"github.com/cihub/sealog/format"
-	"os"
-	"io"
+	"errors"
 	"fmt"
+	. "github.com/cihub/sealog/common"
+
+	"github.com/cihub/sealog/format"
+	"io"
 )
 
 type FormattedWriter struct {
-	writer io.Writer
+	writer    io.Writer
 	formatter *format.Formatter
 }
 
-func NewFormattedWriter(writer io.Writer, formatter *format.Formatter) (*FormattedWriter, os.Error) {
+func NewFormattedWriter(writer io.Writer, formatter *format.Formatter) (*FormattedWriter, error) {
 	if formatter == nil {
-		return nil, os.NewError("Formatter can not be nil")
+		return nil, errors.New("Formatter can not be nil")
 	}
-	
-	return &FormattedWriter { writer, formatter }, nil
+
+	return &FormattedWriter{writer, formatter}, nil
 }
 
-func (formattedWriter *FormattedWriter) Write(message string, level LogLevel, context *LogContext) os.Error {
+func (formattedWriter *FormattedWriter) Write(message string, level LogLevel, context *LogContext) error {
 	str := formattedWriter.formatter.Format(message, level, context)
 	_, err := formattedWriter.writer.Write([]byte(str))
 	return err
@@ -31,4 +36,12 @@ func (formattedWriter *FormattedWriter) Write(message string, level LogLevel, co
 
 func (formattedWriter *FormattedWriter) String() string {
 	return fmt.Sprintf("writer: %s, format: %s", formattedWriter.writer, formattedWriter.formatter)
+}
+
+func (formattedWriter *FormattedWriter) Writer() io.Writer {
+	return formattedWriter.writer
+}
+
+func (formattedWriter *FormattedWriter) Format() *format.Formatter {
+	return formattedWriter.formatter
 }

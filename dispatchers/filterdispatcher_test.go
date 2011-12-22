@@ -1,11 +1,15 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package dispatchers
 
 import (
-	"testing"
-	"os"
 	. "github.com/cihub/sealog/common"
-	. "github.com/cihub/sealog/test"
+
 	"github.com/cihub/sealog/format"
+	. "github.com/cihub/sealog/test"
+	"testing"
 )
 
 func TestFilterDispatcher_Passing(t *testing.T) {
@@ -24,7 +28,7 @@ func TestFilterDispatcher_Passing(t *testing.T) {
 
 	bytes := []byte("Hello")
 	writer.ExpectBytes(bytes)
-	filter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
+	filter.Dispatch(string(bytes), TraceLvl, context, func(err error) {})
 	writer.MustNotExpect()
 }
 
@@ -43,5 +47,5 @@ func TestFilterDispatcher_Denying(t *testing.T) {
 	}
 
 	bytes := []byte("Hello")
-	filter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
+	filter.Dispatch(string(bytes), TraceLvl, context, func(err error) {})
 }

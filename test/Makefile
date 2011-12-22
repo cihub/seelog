@@ -6,5 +6,6 @@ GOFILES = \
 	writers.go \
 	fswrapper.go \
 	testfswrapper.go \
+	helpers.go \
 
 include $(GOROOT)/src/Make.pkg

@@ -1,9 +1,13 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package dispatchers
 
 import (
-	. "github.com/cihub/sealog/common"
-	"os"
 	"fmt"
+
+	. "github.com/cihub/sealog/common"
 	"github.com/cihub/sealog/format"
 )
 
@@ -15,7 +19,7 @@ type FilterDispatcher struct {
 }
 
 // NewFilterDispatcher creates a new FilterDispatcher using a list of allowed levels. 
-func NewFilterDispatcher(formatter *format.Formatter, receivers []interface{}, allowList ...LogLevel) (*FilterDispatcher, os.Error) {
+func NewFilterDispatcher(formatter *format.Formatter, receivers []interface{}, allowList ...LogLevel) (*FilterDispatcher, error) {
 	disp, err := createDispatcher(formatter, receivers)
 	if err != nil {
 		return nil, err
@@ -29,7 +33,7 @@ func NewFilterDispatcher(formatter *format.Formatter, receivers []interface{}, a
 	return &FilterDispatcher{disp, allows}, nil
 }
 
-func (filter *FilterDispatcher) Dispatch(message string, level LogLevel, context *LogContext, errorFunc func(err os.Error)) {
+func (filter *FilterDispatcher) Dispatch(message string, level LogLevel, context *LogContext, errorFunc func(err error)) {
 	isAllowed, ok := filter.allowList[level]
 	if ok && isAllowed {
 		filter.dispatcher.Dispatch(message, level, context, errorFunc)

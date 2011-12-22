@@ -1,20 +1,25 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package dispatchers
 
 import (
-	"testing"
-	"os"
 	"fmt"
+
 	. "github.com/cihub/sealog/common"
-	. "github.com/cihub/sealog/test"
 	"github.com/cihub/sealog/format"
+	. "github.com/cihub/sealog/test"
+	"testing"
 )
 
 var onlyMessageFormatForTest *format.Formatter
+
 func init() {
-	var err os.Error
+	var err error
 	onlyMessageFormatForTest, err = format.NewFormatter("%Msg")
 	if err != nil {
-		fmt.Println("Can not create only message format: " + err.String())
+		fmt.Println("Can not create only message format: " + err.Error())
 	}
 }
 
@@ -37,7 +42,7 @@ func TestSplitDispatcher(t *testing.T) {
 
 	writer1.ExpectBytes(bytes)
 	writer2.ExpectBytes(bytes)
-	spliter.Dispatch(string(bytes), TraceLvl, context, func(err os.Error) {})
+	spliter.Dispatch(string(bytes), TraceLvl, context, func(err error) {})
 	writer1.MustNotExpect()
 	writer2.MustNotExpect()
 }

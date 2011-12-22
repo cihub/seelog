@@ -1,7 +1,12 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package common
 
 import (
 	"os"
+	"errors"
 	"runtime"
 	"strings"
 	"path/filepath"
@@ -15,13 +20,23 @@ type LogContext struct {
 	fileName string
 }
 
-func CurrentContext() (*LogContext, os.Error) {
-	fullPath, shortPath, function, err := extractCallerInfo(2)
+// Returns context of the caller
+func CurrentContext() (*LogContext, error) {
+	return SpecificContext(1)
+}
+
+// Returns context of the function with placed "skip" stack frames of the caller
+// If skip == 0 then behaves like CurrentContext
+func SpecificContext(skip int) (*LogContext, error) {
+	if skip < 0 {
+		return nil, errors.New("Can not skip negative stack frames")
+	}
+	
+	fullPath, shortPath, function, err := extractCallerInfo(skip + 2)
 	if err != nil {
 		return nil, err
 	}
 	_, fileName := filepath.Split(fullPath)
-
 	return &LogContext{function, shortPath, fullPath, fileName}, nil
 }
 
@@ -57,11 +72,11 @@ func setWorkDir() {
 	workingDir = workDir + "/"
 }
 
-func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err os.Error) {
+func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err error) {
 	pc, fullPath, _, ok := runtime.Caller(skip)
 
 	if !ok {
-		return "", "", "", os.NewError("Error during runtime.Caller")
+		return "", "", "", errors.New("Error during runtime.Caller")
 	}
 
 	

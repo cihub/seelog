@@ -1,7 +1,10 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package dispatchers
 
 import (
-	"os"
 	"fmt"
 	"github.com/cihub/sealog/format"
 )
@@ -11,7 +14,7 @@ type SplitDispatcher struct {
 	*dispatcher
 }
 
-func NewSplitDispatcher(formatter *format.Formatter, receivers []interface{}) (*SplitDispatcher, os.Error) {
+func NewSplitDispatcher(formatter *format.Formatter, receivers []interface{}) (*SplitDispatcher, error) {
 	disp, err := createDispatcher(formatter, receivers)
 	if err != nil {
 		return nil, err

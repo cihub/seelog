@@ -1,10 +1,14 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package format
 
 import (
-	"time"
-	"testing"
-	"strings"
 	. "github.com/cihub/sealog/common"
+	"strings"
+	"testing"
+	"time"
 )
 
 const (
@@ -12,14 +16,14 @@ const (
 )
 
 type formatTest struct {
-	formatString string
-	input string
-	inputLogLevel LogLevel
+	formatString   string
+	input          string
+	inputLogLevel  LogLevel
 	expectedOutput string
-	errorExpected bool
+	errorExpected  bool
 }
 
-var formatTests = []formatTest {
+var formatTests = []formatTest{
 	{"test", "abcdef", TraceLvl, "test", false},
 	{"", "abcdef", TraceLvl, "", false},
 	{"%Level", "", TraceLvl, "Trace", false},
@@ -97,15 +101,15 @@ var formatTests = []formatTest {
 	{"[%Level]%MsgX[%Level]", "test", ErrorLvl, "[Error]testX[Error]", false},
 	{"%Levell%Msgl", "Test", CriticalLvl, "CriticallTestl", false},
 	{"%Lev%Msg%LEVEL%LEV%l%Msg", "Test", InfoLvl, "InfTestINFOINFiTest", false},
+	{"%n", "", CriticalLvl, "\n", false},
+	{"%t", "", CriticalLvl, "\t", false},
 }
-
-
 
 func TestFormats(t *testing.T) {
 
 	context, conErr := CurrentContext()
 	if conErr != nil {
-		t.Fatal("Cannot get current context:" + conErr.String())
+		t.Fatal("Cannot get current context:" + conErr.Error())
 		return
 	}
 
@@ -117,13 +121,13 @@ func TestFormats(t *testing.T) {
 			t.Errorf("Input: %s \nInput LL: %s\n* Expected error:%t Got error: %t\n",
 				test.input, test.inputLogLevel, test.errorExpected, (err != nil))
 			if err != nil {
-				t.Logf("%s\n", err.String())
+				t.Logf("%s\n", err.Error())
 			}
 			continue
 		} else if err != nil {
 			continue
 		}
-		
+
 		msg := form.Format(test.input, test.inputLogLevel, context)
 
 		if err == nil && msg != test.expectedOutput {
@@ -136,29 +140,29 @@ func TestFormats(t *testing.T) {
 func TestDateFormat(t *testing.T) {
 	_, err := NewFormatter("%Date")
 	if err != nil {
-		t.Error("Unexpected error: " + err.String())
+		t.Error("Unexpected error: " + err.Error())
 	}
 }
 
 func TestDateParametrizedFormat(t *testing.T) {
 	testFormat := "Mon Jan 02 2006 15:04:05"
 	preciseForamt := "Mon Jan 02 2006 15:04:05.000"
-	
+
 	context, conErr := CurrentContext()
 	if conErr != nil {
-		t.Fatal("Cannot get current context:" + conErr.String())
+		t.Fatal("Cannot get current context:" + conErr.Error())
 		return
 	}
-	
+
 	form, err := NewFormatter("%Date(" + preciseForamt + ")")
 	if err != nil {
-		t.Error("Unexpected error: " + err.String())
+		t.Error("Unexpected error: " + err.Error())
 	}
-	
-	dateBefore := time.LocalTime().Format(testFormat)
+
+	dateBefore := time.Now().Format(testFormat)
 	msg := form.Format("", TraceLvl, context)
-	dateAfter := time.LocalTime().Format(testFormat)
-	
+	dateAfter := time.Now().Format(testFormat)
+
 	if !strings.HasPrefix(msg, dateBefore) && !strings.HasPrefix(msg, dateAfter) {
 		t.Errorf("Incorrect message: %v. Expected %v or %v", msg, dateBefore, dateAfter)
 	}

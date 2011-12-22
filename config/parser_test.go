@@ -1,15 +1,19 @@
-// Package config contains configuration functionality of sealog
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package config
 
 import (
 	"testing"
-	"reflect"
+	//"reflect"
 	"github.com/cihub/sealog/dispatchers"
 	"github.com/cihub/sealog/writers"
 	. "github.com/cihub/sealog/common"
 	"github.com/cihub/sealog/test"
 	"github.com/cihub/sealog/format"
 	"strings"
+	"fmt"
 )
 
 var parserTests []parserTest
@@ -27,7 +31,6 @@ func getParserTests() []parserTest {
 
 		testName := "Simple file output"
 		testConfig := `
-<!-- test 1 -->
 <sealog>
 	<outputs>
 		<file path="log.log"/>
@@ -38,24 +41,139 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testFileWriter, _ := writers.NewFileWriter("log.log")
 		testHeadSplitter, _ := dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
-		testName = "Default output"
+		testName = "Filter dispatcher"
 		testConfig = `
-<sealog/>
-`
+<sealog type="sync">
+	<outputs>
+		<filter levels="debug, info, critical">
+			<file path="log.log"/>
+		</filter>
+	</outputs>
+</sealog>`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testFileWriter, _ = writers.NewFileWriter("log.log")
+		testFilter, _ := dispatchers.NewFilterDispatcher(format.DefaultFormatter, []interface{}{testFileWriter}, DebugLvl, InfoLvl, CriticalLvl)
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFilter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Console writer"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<console />
+	</outputs>
+</sealog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ := writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Default output"
+		testConfig = `
+<sealog type="sync"/>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testConsoleWriter, _ = writers.NewConsoleWriter()
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Asyncloop behavior"
+		testConfig = `
+<sealog type="asyncloop"/>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testConsoleWriter, _ = writers.NewConsoleWriter()
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Asynctimer behavior"
+		testConfig = `
+<sealog type="asynctimer" asyncinterval="101"/>
+`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testConsoleWriter, _ = writers.NewConsoleWriter()
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncTimerLoggerType
+		testExpected.LoggerData = AsyncTimerLoggerData{101}
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Rolling file writer size"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<rollingfile type="size" filename="log.log" maxsize="100" maxrolls="5" />
+	</outputs>
+</sealog>`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testRollingFileWriter, _ := writers.NewRollingFileWriterSize("log.log", 100, 5)
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testRollingFileWriter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Rolling file writer date"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" />
+	</outputs>
+</sealog>`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testRollingFileWriter, _ = writers.NewRollingFileWriterDate("log.log", "2006-01-02T15:04:05Z07:00")
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testRollingFileWriter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Buffered writer"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<buffered size="100500" flushperiod="100">
+			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" />
+		</buffered>
+	</outputs>
+</sealog>`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testRollingFileWriter, _ = writers.NewRollingFileWriterDate("log.log", "2006-01-02T15:04:05Z07:00")
+		testBufferedWriter, _ := writers.NewBufferedWriter(testRollingFileWriter, 100500, 100)
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testBufferedWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Inner splitter output"
 		testConfig = `
-<sealog>
+<sealog type="sync">
 	<outputs>
 		<file path="log.log"/>
 		<splitter>
@@ -73,12 +191,13 @@ func getParserTests() []parserTest {
 		testInnerSplitter, _ := dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter1, testFileWriter2})
 		testFileWriter, _ = writers.NewFileWriter("log.log")
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testFileWriter, testInnerSplitter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Format"
 		testConfig = `
-<sealog>
+<sealog type="sync">
 	<outputs formatid="dateFormat">
 		<file path="log.log"/>
 	</outputs>
@@ -93,12 +212,13 @@ func getParserTests() []parserTest {
 		testFileWriter, _ = writers.NewFileWriter("log.log")
 		testFormat, _ := format.NewFormatter("%Level %Msg %File")
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(testFormat, []interface{}{testFileWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Format2"
 		testConfig = `
-<sealog>
+<sealog type="sync">
 	<outputs formatid="format1">
 		<file path="log.log"/>
 		<file formatid="format2" path="log1.log"/>
@@ -118,6 +238,7 @@ func getParserTests() []parserTest {
 		testFormat2, _ := format.NewFormatter("%l %Msg")
 		formattedWriter, _ := dispatchers.NewFormattedWriter(testFileWriter1, testFormat2)
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(testFormat1, []interface{}{testFileWriter, formattedWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -128,6 +249,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -138,6 +260,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -148,6 +271,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -158,6 +282,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -173,6 +298,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = AsyncLoopLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
@@ -216,10 +342,46 @@ func getParserTests() []parserTest {
 		testConfig = `<sealog levels="off" something="abc"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
+		testName = "Errors #11"
+		testConfig = `<sealog><output/></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #12"
+		testConfig = `<sealog><outputs/><outputs/></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #13"
+		testConfig = `<sealog><exceptions/></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #14"
+		testConfig = `<sealog><formats/></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #15"
+		testConfig = `<sealog><outputs><splitter/></outputs></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+
+		testName = "Errors #16"
+		testConfig = `<sealog><outputs><filter/></outputs></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #17"
+		testConfig = `<sealog><outputs><file path="log.log"><something/></file></outputs></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #18"
+		testConfig = `<sealog><outputs><buffered size="100500" flushperiod="100"/></outputs></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+
+		testName = "Errors #19"
+		testConfig = `<sealog><outputs></outputs></sealog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+
 		testName = "Exceptions: restricting"
 		testConfig =
 			`
-<sealog>
+<sealog type="sync">
 	<exceptions>
 		<exception funcpattern="Test*" filepattern="someFile.go" minlevel="off"/>
 	</exceptions>
@@ -232,13 +394,14 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Exceptions: allowing #1"
 		testConfig =
 			`
-<sealog levels="error">
+<sealog type="sync" levels="error">
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 	</exceptions>
@@ -251,13 +414,14 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Exceptions: allowing #2"
 		testConfig =
 			`
-<sealog levels="off">
+<sealog type="sync" levels="off">
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 	</exceptions>
@@ -270,12 +434,13 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = []*LogLevelException{exception}
 		testConsoleWriter, _ = writers.NewConsoleWriter()
 		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{testConsoleWriter})
+		testExpected.LogType = SyncLoggerType
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Errors #11"
 		testConfig = `
-<sealog><exceptions>
+<sealog type="sync"><exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 </exceptions></sealog>`
@@ -283,21 +448,21 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #12"
 		testConfig = `
-<sealog><exceptions>
+<sealog type="sync"><exceptions>
 		<exception filepattern="!@+$)!!%&@(^$" minlevel="trace"/>
 </exceptions></sealog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #13"
 		testConfig = `
-<sealog><exceptions>
+<sealog type="sync"><exceptions>
 		<exception filepattern="*" minlevel="unknown"/>
 </exceptions></sealog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #14"
 		testConfig = `
-<sealog levels=”off”>
+<sealog type="sync" levels=”off”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="off"/>
 	</exceptions>
@@ -307,7 +472,7 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #15"
 		testConfig = `
-<sealog levels=”trace”>
+<sealog type="sync" levels=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" levels="trace"/>
 	</exceptions>
@@ -317,7 +482,7 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #16"
 		testConfig = `
-<sealog minlevel=”trace”>
+<sealog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 	</exceptions>
@@ -327,7 +492,7 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #17"
 		testConfig = `
-<sealog minlevel=”trace”>
+<sealog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 	</exceptions>
@@ -340,7 +505,7 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #18"
 		testConfig = `
-<sealog minlevel=”trace”>
+<sealog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go"/>
 	</exceptions>
@@ -350,7 +515,7 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #19"
 		testConfig = `
-<sealog minlevel=”trace”>
+<sealog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception minlevel="warn"/>
 	</exceptions>
@@ -360,16 +525,125 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #20"
 		testConfig = `
-<sealog minlevel=”trace”>
+<sealog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception/>
 	</exceptions>
 </sealog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #21"
+		testConfig = `
+<sealog>
+	<outputs>
+		<splitter>
+		</splitter>
+	</outputs>
+</sealog>
+`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #22"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<filter levels="debug, info, critical">
+
+		</filter>
+	</outputs>
+</sealog>
+`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #23"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<buffered size="100500" flushperiod="100">
+
+		</buffered>
+	</outputs>
+</sealog>
+`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #24"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<buffered size="100500" flushperiod="100">
+			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
+		</buffered>
+	</outputs>
+	<formats>
+		<format id="testFormat" format="%Level %Msg %File 123" />
+	</formats>
+</sealog>
+`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #25"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<outputs>
+			<file path="file.log"/>
+		</outputs>
+		<outputs>
+			<file path="file.log"/>
+		</outputs>
+	</outputs>
+</sealog>
+`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Buffered writer same formatid override"
+		testConfig = `
+<sealog type="sync">
+	<outputs>
+		<buffered size="100500" flushperiod="100" formatid="testFormat">
+			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
+		</buffered>
+	</outputs>
+	<formats>
+		<format id="testFormat" format="%Level %Msg %File 123" />
+	</formats>
+</sealog>`
+		testExpected = new(LogConfig)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testRollingFileWriter, _ = writers.NewRollingFileWriterDate("log.log", "2006-01-02T15:04:05Z07:00")
+		testBufferedWriter, _ = writers.NewBufferedWriter(testRollingFileWriter, 100500, 100)
+		testFormat, _ = format.NewFormatter("%Level %Msg %File 123")
+		formattedWriter, _ = dispatchers.NewFormattedWriter(testBufferedWriter, testFormat)
+		testHeadSplitter, _ = dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{formattedWriter})
+		testExpected.LogType = SyncLoggerType
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+		
+
 	}
 
 	return parserTests
+}
+
+// We are waiting for structs equality (Planned in Go 1 release) and this func is a
+// temporary solution
+func configsAreEqual(conf1 *LogConfig, conf2 interface{}) bool {
+	if conf1 == nil {
+		return conf2 == nil
+	}
+	if conf2 == nil {
+		return conf1 == nil
+	}
+	logConfig, ok := conf2.(*LogConfig)
+	
+	if !ok {
+		return false
+	}
+	
+	return fmt.Sprintf("%s", conf1) == fmt.Sprintf("%s", logConfig)
 }
 
 func TestParser(t *testing.T) {
@@ -377,7 +651,7 @@ func TestParser(t *testing.T) {
 	testFSWrapper, err := test.NewEmptyFSTestWrapper()
 
 	if err != nil {
-		t.Fatalf("Fatal error in test fs initialization: %s", err.String())
+		t.Fatalf("Fatal error in test fs initialization: %s", err.Error())
 	}
 
 	writers.SetTestMode(testFSWrapper)
@@ -390,12 +664,12 @@ func TestParser(t *testing.T) {
 			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected error:%t. Got error: %t\n", test.testName,
 				test.config, test.errorExpected, (err != nil))
 			if err != nil {
-				t.Logf("%s\n", err.String())
+				t.Logf("%s\n", err.Error())
 			}
 			continue
 		}
 
-		if err == nil && !reflect.DeepEqual(conf, test.expected) {
+		if err == nil && !configsAreEqual(conf, test.expected) {
 			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n", test.testName, test.config, test.expected, conf)
 		}
 	}

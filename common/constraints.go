@@ -1,7 +1,11 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package common
 
 import (
-	"os"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -18,15 +22,15 @@ type MinMaxConstraints struct {
 }
 
 // NewMinMaxConstraints creates a new MinMaxConstraints struct with the specified min and max levels.
-func NewMinMaxConstraints(min LogLevel, max LogLevel) (*MinMaxConstraints, os.Error) {
+func NewMinMaxConstraints(min LogLevel, max LogLevel) (*MinMaxConstraints, error) {
 	if min > max {
-		return nil, os.NewError(fmt.Sprintf("Min level can't be greater than max. Got min: %d, max: %d", min, max))
+		return nil, errors.New(fmt.Sprintf("Min level can't be greater than max. Got min: %d, max: %d", min, max))
 	}
 	if min < TraceLvl || min > CriticalLvl {
-		return nil, os.NewError(fmt.Sprintf("Min level can't be less than Trace or greater than Critical. Got min: %d", min))
+		return nil, errors.New(fmt.Sprintf("Min level can't be less than Trace or greater than Critical. Got min: %d", min))
 	}
 	if max < TraceLvl || max > CriticalLvl {
-		return nil, os.NewError(fmt.Sprintf("Max level can't be less than Trace or greater than Critical. Got max: %d", max))
+		return nil, errors.New(fmt.Sprintf("Max level can't be less than Trace or greater than Critical. Got max: %d", max))
 	}
 
 	return &MinMaxConstraints{min, max}, nil
@@ -49,9 +53,9 @@ type ListConstraints struct {
 }
 
 // NewListConstraints creates a new ListConstraints struct with the specified allowed levels.
-func NewListConstraints(allowList []LogLevel) (*ListConstraints, os.Error) {
+func NewListConstraints(allowList []LogLevel) (*ListConstraints, error) {
 	if allowList == nil {
-		return nil, os.NewError("List can't be nil")
+		return nil, errors.New("List can't be nil")
 	}
 
 	allowLevels, err := createMapFromList(allowList)
@@ -82,19 +86,19 @@ func (listConstr *ListConstraints) String() string {
 	return allowedList
 }
 
-func createMapFromList(allowedList []LogLevel) (map[LogLevel]bool, os.Error) {
+func createMapFromList(allowedList []LogLevel) (map[LogLevel]bool, error) {
 	allowedLevels := make(map[LogLevel]bool, 0)
 	for _, level := range allowedList {
 		if level < TraceLvl || level > Off {
-			return nil, os.NewError(fmt.Sprintf("Level can't be less than Trace or greater than Critical. Got level: %d", level))
+			return nil, errors.New(fmt.Sprintf("Level can't be less than Trace or greater than Critical. Got level: %d", level))
 		}
 		allowedLevels[level] = true
 	}
 	return allowedLevels, nil
 }
-func validateOffLevel(allowedLevels map[LogLevel]bool) os.Error {
+func validateOffLevel(allowedLevels map[LogLevel]bool) error {
 	if _, ok := allowedLevels[Off]; ok && len(allowedLevels) > 1 {
-		return os.NewError("LogLevel Off cant be mixed with other levels")
+		return errors.New("LogLevel Off cant be mixed with other levels")
 	}
 
 	return nil
@@ -123,7 +127,7 @@ type OffConstraints struct {
 
 }
 
-func NewOffConstraints() (*OffConstraints, os.Error) {
+func NewOffConstraints() (*OffConstraints, error) {
 	return &OffConstraints{}, nil
 }
 

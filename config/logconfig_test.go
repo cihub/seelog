@@ -1,16 +1,18 @@
-// Package config contains configuration functionality of sealog
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package config
 
 import (
-	"testing"
 	. "github.com/cihub/sealog/common"
 	"strings"
-	"os"
+	"testing"
 )
 
 func TestConfig(t *testing.T) {
-		testConfig :=
-			`
+	testConfig :=
+		`
 <sealog levels="trace, debug">
 	<exceptions>
 		<exception funcpattern="*getFirst*" filepattern="*" minlevel="off" />
@@ -21,26 +23,26 @@ func TestConfig(t *testing.T) {
 
 	conf, err := ConfigFromReader(strings.NewReader(testConfig))
 	if err != nil {
-		t.Errorf("Parse error: %s\n", err.String())
+		t.Errorf("Parse error: %s\n", err.Error())
 		return
 	}
-	
+
 	context, err := CurrentContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.String())
+		t.Errorf("Cannot get current context:" + err.Error())
 		return
 	}
 	firstContext, err := getFirstContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.String())
+		t.Errorf("Cannot get current context:" + err.Error())
 		return
 	}
 	secondContext, err := getSecondContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.String())
+		t.Errorf("Cannot get current context:" + err.Error())
 		return
 	}
-	
+
 	if !conf.IsAllowed(TraceLvl, context) {
 		t.Errorf("Error: deny trace in current context")
 	}
@@ -53,7 +55,7 @@ func TestConfig(t *testing.T) {
 	if !conf.IsAllowed(ErrorLvl, secondContext) {
 		t.Errorf("Error: deny error in second context")
 	}
-	
+
 	// cache test
 	if !conf.IsAllowed(TraceLvl, context) {
 		t.Errorf("Error: deny trace in current context")
@@ -69,10 +71,10 @@ func TestConfig(t *testing.T) {
 	}
 }
 
-func getFirstContext() (*LogContext, os.Error) {
+func getFirstContext() (*LogContext, error) {
 	return CurrentContext()
 }
 
-func getSecondContext() (*LogContext, os.Error) {
+func getSecondContext() (*LogContext, error) {
 	return CurrentContext()
 }

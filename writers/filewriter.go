@@ -1,22 +1,25 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package writers contains a collection of writers that could be used by sealog dispatchers.
 // It allows to write to such receivers as: file, console, rolling(rotation) files, smtp, network, buffered file streams.
 package writers
 
 import (
-	"io"
-	"os"
-	"path/filepath"
 	"fmt"
+	"io"
+	"path/filepath"
 )
 
 // FileWriter is used to write to a file.
 type FileWriter struct {
-	innerWriter io.Writer
+	innerWriter io.WriteCloser
 	fileName    string
 }
 
 // Creates a new file and a corresponding writer. Returns error, if the file couldn't be created.
-func NewFileWriter(fileName string) (writer *FileWriter, err os.Error) {
+func NewFileWriter(fileName string) (writer *FileWriter, err error) {
 	newWriter := new(FileWriter)
 
 	newWriter.fileName = fileName
@@ -29,32 +32,40 @@ func NewFileWriter(fileName string) (writer *FileWriter, err os.Error) {
 	return newWriter, nil
 }
 
-// Create folder and file on WriteLog/Write first call
-func (this *FileWriter) Write(bytes []byte) (n int, err os.Error) {
-	return this.innerWriter.Write(bytes)
+func (fileWriter *FileWriter) Close() error {
+	return fileWriter.innerWriter.Close()
 }
 
-func (this *FileWriter) createFile() os.Error {
+// Create folder and file on WriteLog/Write first call
+func (fileWriter *FileWriter) Write(bytes []byte) (n int, err error) {
+	return fileWriter.innerWriter.Write(bytes)
+}
 
-	folder, _ := filepath.Split(this.fileName)
+func (fileWriter *FileWriter) createFile() error {
 
-	dirErr := fileSystemWrapper.MkdirAll(folder)
+	folder, _ := filepath.Split(fileWriter.fileName)
 
-	if dirErr != nil {
-		return dirErr
+	err := fileSystemWrapper.MkdirAll(folder)
+
+	if err != nil {
+		return err
 	}
 
-	innerWriter, fileError := fileSystemWrapper.Create(this.fileName)
-
-	if fileError != nil {
-		return fileError
+	var innerWriter io.WriteCloser
+	if fileSystemWrapper.Exists(fileWriter.fileName) {
+		innerWriter, err = fileSystemWrapper.Open(fileWriter.fileName)
+	} else {
+		innerWriter, err = fileSystemWrapper.Create(fileWriter.fileName)
+	}
+	if err != nil {
+		return err
 	}
 
-	this.innerWriter = innerWriter
+	fileWriter.innerWriter = innerWriter
 
 	return nil
 }
 
-func (this *FileWriter) String() string {
-	return fmt.Sprintf("File writer: %s", this.fileName)
+func (fileWriter *FileWriter) String() string {
+	return fmt.Sprintf("File writer: %s", fileWriter.fileName)
 }

@@ -1,3 +1,7 @@
+// Copyright 2011 Cloud Instruments Co. Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package common
 
 import (
@@ -8,7 +12,7 @@ import (
 
 const (
 	shortPath    = "context_test.go"
-	commonPrefix = "sealog/common."
+	commonPrefix = "github.com/cihub/sealog/common."
 )
 
 var testFullPath string
@@ -18,7 +22,7 @@ func fullPath(t *testing.T) string {
 		wd, err := os.Getwd()
 
 		if err != nil {
-			t.Fatalf("Cannot get working directory: %s", err.String())
+			t.Fatalf("Cannot get working directory: %s", err.Error())
 		}
 
 		testFullPath = filepath.Join(wd, shortPath)
@@ -33,7 +37,7 @@ func TestContext(t *testing.T) {
 	nameFunc := commonPrefix + "TestContext"
 
 	if err != nil {
-		t.Fatalf("Unexpected error: %s", err.String())
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 
 	if context == nil {
@@ -55,7 +59,7 @@ func TestContext(t *testing.T) {
 	}
 }
 
-func innerContext() (context *LogContext, err os.Error) {
+func innerContext() (context *LogContext, err error) {
 	return CurrentContext()
 }
 
@@ -65,7 +69,7 @@ func TestInnerContext(t *testing.T) {
 	nameFunc := commonPrefix + "innerContext"
 
 	if err != nil {
-		t.Fatalf("Unexpected error: %s", err.String())
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 
 	if context == nil {
