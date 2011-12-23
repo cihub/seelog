@@ -14,14 +14,15 @@ import (
 var longMessage = strings.Repeat("A", 1024*100)
 
 func main() {
-	syncBehavior()
+	defer log.Flush()
+	syncLogger()
 	fmt.Println()
-	asyncLoopBehavior()
+	asyncLoopLogger()
 	fmt.Println()
-	asyncTimerBehavior()
+	asyncTimerLogger()
 }
 
-func syncBehavior() {
+func syncLogger() {
 	fmt.Println("Sync test")
 
 	testConfig := `
@@ -37,13 +38,13 @@ func syncBehavior() {
 </sealog>
 `
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 
 	doTest()
 }
 
-func asyncLoopBehavior() {
+func asyncLoopLogger() {
 	fmt.Println("Async loop test")
 
 	testConfig := `
@@ -58,15 +59,15 @@ func asyncLoopBehavior() {
 	</outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 
 	doTest()
 
 	time.Sleep(1e9)
 }
 
-func asyncTimerBehavior() {
+func asyncTimerLogger() {
 	fmt.Println("Async timer test")
 
 	testConfig := `
@@ -81,8 +82,8 @@ func asyncTimerBehavior() {
 	</outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 
 	doTest()
 

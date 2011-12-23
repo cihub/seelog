@@ -59,7 +59,7 @@ var verbFuncsParametrized = map[string]verbFuncCreator{
 	"Date": createDateTimeVerbFunc,
 }
 
-// Format is used to write messages in a specific format, inserting such additional data
+// Formatter is used to write messages in a specific format, inserting such additional data
 // as log level, date/time, etc.
 type Formatter struct {
 	fmtStringOriginal string
@@ -74,7 +74,6 @@ func NewFormatter(formatString string) (*Formatter, error) {
 
 	err := newFormatter.buildVerbFuncs()
 	if err != nil {
-		//fmt.Println("Error: " + err.String())
 		return nil, err
 	}
 
@@ -82,7 +81,6 @@ func NewFormatter(formatString string) (*Formatter, error) {
 }
 
 func (formatter *Formatter) buildVerbFuncs() error {
-	//fmt.Println("buildVerbFuncs for " + formatter.fmtStringOriginal)
 	formatter.verbFuncs = make([]verbFunc, 0)
 	var fmtString string
 	for i := 0; i < len(formatter.fmtStringOriginal); i++ {
@@ -111,11 +109,9 @@ func (formatter *Formatter) buildVerbFuncs() error {
 
 		fmtString += "%v"
 		i = nextI
-		//fmt.Println("Add func for " + verb)
 		formatter.verbFuncs = append(formatter.verbFuncs, function)
 	}
 
-	//fmt.Println("FmtStr = " + fmtString)
 	formatter.fmtString = fmtString
 	return nil
 }
@@ -318,7 +314,7 @@ func verbTime(message string, level LogLevel, context *LogContext) interface{} {
 }
 
 func verbNs(message string, level LogLevel, context *LogContext) interface{} {
-	return time.Now()
+	return time.Now().UnixNano()
 }
 
 func verbn(message string, level LogLevel, context *LogContext) interface{} {

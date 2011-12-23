@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	defer log.Flush()
 	defaultFormat()
 	stdFormat()
 	dateTimeFormat()
@@ -26,11 +27,11 @@ func defaultFormat() {
 	testConfig := `
 <sealog type="sync" />`
 
-	conf, err := log.ConfigFromBytes([]byte(testConfig))
+	logger, err := log.LoggerFromBytes([]byte(testConfig))
 	if err != nil {
 		fmt.Println(err)
 	}
-	log.UseConfig(conf)
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -48,8 +49,8 @@ func stdFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -67,8 +68,8 @@ func dateTimeFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -86,8 +87,8 @@ func dateTimeCustomFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -105,8 +106,8 @@ func logLevelTypesFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -124,8 +125,8 @@ func fileTypesFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -143,8 +144,8 @@ func funcFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }
@@ -167,9 +168,9 @@ func xmlFormat() {
 	</formats>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
 
-	log.UseConfig(conf)
+	log.UseLogger(logger)
 	
 	log.Trace("Test message!")
 }

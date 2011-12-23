@@ -40,7 +40,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	log(level LogLevel, format string, params []interface{})
+	innerLog(level LogLevel, context *LogContext, format string, params []interface{})
 }
 
 
@@ -68,52 +68,28 @@ func newCommonLogger(config *cfg.LogConfig, internalLogger innerLoggerInterface)
 	return cLogger
 }
 
-func (syncLogger *commonLogger) Trace(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[TraceLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(TraceLvl, format, params)
+func (cLogger *commonLogger) Trace(format string, params ...interface{}) {
+	cLogger.log(TraceLvl, format, params)
 }
 
-func (syncLogger *commonLogger) Debug(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[DebugLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(DebugLvl, format, params)
+func (cLogger *commonLogger) Debug(format string, params ...interface{}) {
+	cLogger.log(DebugLvl, format, params)
 }
 
-func (syncLogger *commonLogger) Info(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[InfoLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(InfoLvl, format, params)
+func (cLogger *commonLogger) Info(format string, params ...interface{}) {
+	cLogger.log(InfoLvl, format, params)
 }
 
-func (syncLogger *commonLogger) Warn(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[WarnLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(WarnLvl, format, params)
+func (cLogger *commonLogger) Warn(format string, params ...interface{}) {
+	cLogger.log(WarnLvl, format, params)
 }
 
-func (syncLogger *commonLogger) Error(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[ErrorLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(ErrorLvl, format, params)
+func (cLogger *commonLogger) Error(format string, params ...interface{}) {
+	cLogger.log(ErrorLvl, format, params)
 }
 
-func (syncLogger *commonLogger) Critical(format string, params ...interface{}) {
-	if syncLogger.unusedLevels[CriticalLvl] {
-		return
-	}
-	
-	syncLogger.innerLogger.log(CriticalLvl, format, params)
+func (cLogger *commonLogger) Critical(format string, params ...interface{}) {
+	cLogger.log(CriticalLvl, format, params)
 }
 
 
@@ -127,7 +103,7 @@ func (cLogger *commonLogger) fillUnusedLevels() {
 	}
 	
 	cLogger.fillUnusedLevelsByContraint(cLogger.config.Constraints)
-	
+
 	for _, exception := range cLogger.config.Exceptions {
 		cLogger.fillUnusedLevelsByContraint(exception)
 	}
@@ -140,6 +116,29 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint LogLevelCons
 		}
 	}
 }
+
+func (cLogger *commonLogger) log(
+    level LogLevel, 
+	format string, 
+	params []interface{}) {
+	
+	if cLogger.Closed() {
+		return
+	}
+	
+	if cLogger.unusedLevels[level] {
+		return
+	}
+	
+	context, err := SpecificContext(3)
+	if err != nil {
+		reportInternalError(err)
+		return
+	}
+	
+	cLogger.innerLogger.innerLog(level, context, format, params)
+}
+
 
 func (cLogger *commonLogger) processLogMsg(
     level LogLevel, 

@@ -27,13 +27,13 @@ func Test_Sync(t *testing.T) {
 	</formats>
 </sealog>`
 
-	conf, _ := ConfigFromBytes([]byte(testConfig))
-	err := UseConfig(conf)
+	logger, _ := LoggerFromBytes([]byte(testConfig))
+	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer currentLogger.Close()
+	defer Flush()
 	
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))

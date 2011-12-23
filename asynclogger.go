@@ -13,6 +13,10 @@ import (
 	"errors"
 )
 
+const (
+	MaxQueueSize = 10000
+)
+
 type msgQueueItem struct {
 	level LogLevel
 	context *LogContext
@@ -41,16 +45,11 @@ func newAsyncLogger(config *cfg.LogConfig) (*asyncLogger){
 	return asnLogger
 }
 
-func (asnLogger *asyncLogger) log(
+func (asnLogger *asyncLogger) innerLog(
     level LogLevel, 
+	context *LogContext,
 	format string, 
 	params []interface{}) {
-		
-	context, err := SpecificContext(3)
-	if err != nil {
-		reportInternalError(err)
-		return
-	}
 		
 	asnLogger.addMsgToQueue(level, context, format, params)
 }
@@ -97,6 +96,11 @@ func (asnLogger *asyncLogger) processQueueElement() {
 func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *LogContext, format string, params []interface{}) {
 	asnLogger.queueMutex.Lock()
 	if !asnLogger.closed {
+		if asnLogger.msgQueue.Len() >= MaxQueueSize {
+			fmt.Printf("Sealog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
+			asnLogger.flushQueue()
+		}
+		
 		param := params
 		queueItem := msgQueueItem{level, context, format, param}
 		asnLogger.msgQueue.PushBack(queueItem)

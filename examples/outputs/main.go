@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	defer log.Flush()
 	runExample(consoleWriter)
 	runExample(fileWriter)
 	runExample(rollingFileWriter)
@@ -36,8 +37,8 @@ func consoleWriter() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	doLog()
 }
@@ -52,8 +53,8 @@ func fileWriter() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	doLog()
 }
@@ -68,8 +69,8 @@ func rollingFileWriter() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	doLog()
 }
@@ -84,8 +85,8 @@ func rollingFileWriterManyRolls() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	doLogBig()
 }
@@ -102,8 +103,8 @@ func bufferedWriter() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	for i := 0; i < 3; i++ {
 		doLog()	
@@ -125,8 +126,8 @@ func bufferedWriterWithOverflow() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 
 	for i := 0; i < 3; i++ {
 		doLog()	
@@ -148,8 +149,8 @@ func splitDispatcher() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	doLog()	
 }
@@ -167,8 +168,8 @@ func filterDispatcher() {
 	</outputs>
 </sealog>
 `
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	for i:=0; i < 5; i++ {
 		log.Trace("This message on console and in file")

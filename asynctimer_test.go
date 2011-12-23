@@ -27,8 +27,8 @@ func Test_Asynctimer(t *testing.T) {
 	</formats>
 </sealog>`
 
-	conf, _ := ConfigFromBytes([]byte(testConfig))
-	err := UseConfig(conf)
+	logger, _ := LoggerFromBytes([]byte(testConfig))
+	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
@@ -38,7 +38,7 @@ func Test_Asynctimer(t *testing.T) {
 		Trace(strconv.Itoa(i))
 	}
 	
-	currentLogger.Close()
+	Flush()
 	
 	gotCount, err := test.CountSequencedRowsInFile(fileName)
 	if err != nil {

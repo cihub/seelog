@@ -107,7 +107,7 @@ var fileBufferedAsyncLoopConfig = `
 var fileBufferedAsyncTimer100Config = `
 <sealog type="asynctimer" asyncinterval="100">
 	<outputs>
-		<buffered size="100 formatid="testFormat"">
+		<buffered size="100" formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
 		</buffered>
 	</outputs>
@@ -147,11 +147,11 @@ var configPool = []string {
 	fileAsyncTimer100Config,
 	fileAsyncTimer1000Config,
 	fileAsyncTimer10000Config,
-	/*fileBufferedConfig,
+	fileBufferedConfig,
 	fileBufferedAsyncLoopConfig,
 	fileBufferedAsyncTimer100Config,
 	fileBufferedAsyncTimer1000Config,
-	fileBufferedAsyncTimer10000Config,*/
+	fileBufferedAsyncTimer10000Config,
 }
 
 func switchToRandomConfigFromPool() {
@@ -164,15 +164,13 @@ func switchToRandomConfigFromPool() {
 	
 	randomCfg := configPool[int(configIndex.Int64())]
 	
-	conf, err := log.ConfigFromBytes([]byte(randomCfg))
+	logger, err := log.LoggerFromBytes([]byte(randomCfg))
 
 	if err != nil {
 		panic(fmt.Sprintf("Error during config creation: %s", err.Error()))
 	}
-	
-	//fmt.Println(configIndex)
-	//fmt.Println(conf)
-	log.UseConfig(conf)
+
+	log.ReplaceLogger(logger)
 }
 
 func logRoutine(ind int) {
@@ -204,7 +202,6 @@ func main() {
 	}
 	
 	waitGroup.Wait()
-	//time.Sleep(200000)
 	log.Flush()
 	
 	gotCount, err := test.CountSequencedRowsInFile(filepath.Join(LogDir, LogFile))

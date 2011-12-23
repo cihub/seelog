@@ -24,17 +24,12 @@ func NewSyncLogger(config *cfg.LogConfig) (*SyncLogger){
 	return syncLogger
 }
 
-func (cLogger *SyncLogger) log(
+func (cLogger *SyncLogger) innerLog(
     level LogLevel, 
+	context *LogContext,
 	format string, 
 	params []interface{}) {
 	
-	context, err := SpecificContext(3)
-	if err != nil {
-		reportInternalError(err)
-		return
-	}
-		
 	cLogger.processLogMsg(level, format, params, context)
 }
 

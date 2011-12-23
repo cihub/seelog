@@ -9,21 +9,32 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"sync"
 	cfg "github.com/cihub/sealog/config"
 )
 
-var currentLogger LoggerInterface
-var defaultConfig *cfg.LogConfig
+var Current LoggerInterface
+var Default LoggerInterface
+var Disabled LoggerInterface
+
+var pkgOperationsMutex *sync.Mutex
 
 func init() {
-	if defaultConfig == nil {
-		var err error
-		defaultConfig, err = ConfigFromBytes([]byte("<sealog />"))
-		if err != nil {
-			panic(fmt.Sprintf("Sealog couldn't start. Error: %s", err.Error()))
-		}
+	pkgOperationsMutex = new(sync.Mutex)
+	var err error
+	
+	if Default == nil {
+		Default, err = LoggerFromBytes([]byte("<sealog />"))
 	}
-	UseDefaultConfig()
+	if Disabled == nil {
+		Disabled, err = LoggerFromBytes([]byte("<sealog levels=\"off\"/>"))
+	}
+
+	if err != nil {
+		panic(fmt.Sprintf("Sealog couldn't start. Error: %s", err.Error()))
+	}
+	
+	Current = Default
 }
 
 func createLoggerFromConfig(config *cfg.LogConfig) (LoggerInterface, error) {
@@ -49,12 +60,28 @@ func createLoggerFromConfig(config *cfg.LogConfig) (LoggerInterface, error) {
 	return nil, errors.New("Invalid config log type/data")
 }
 
-// UseConfig uses the given configuration to create a logger from it and use it
-// for all Trace/Debug/... funcs.
-// The logger that was previously used would be disposed.
-func UseConfig(config *cfg.LogConfig) error {
-	if config == nil {
-		return errors.New("Config can not be nil")
+// UseConfig uses the given logger for all Trace/Debug/... funcs.
+func UseLogger(logger LoggerInterface) error {
+	pkgOperationsMutex.Lock()
+	if logger == nil {
+		return errors.New("Logger can not be nil")
+	}
+	
+	oldLogger := Current
+	Current = logger
+	
+	if oldLogger != nil {
+		oldLogger.Flush()
+	}
+	pkgOperationsMutex.Unlock()
+	return nil
+}
+
+// Acts as UseLogger but the logger that was previously used would be disposed (except Default and Disabled loggers).
+func ReplaceLogger(logger LoggerInterface) error {
+	pkgOperationsMutex.Lock()
+	if logger == nil {
+		return errors.New("Logger can not be nil")
 	}
 	
 	defer func() {
@@ -63,57 +90,68 @@ func UseConfig(config *cfg.LogConfig) error {
 		}
 	}()
 
-	if currentLogger != nil && !currentLogger.Closed() {
-		currentLogger.Flush()
-		currentLogger.Close()
-	}
+	if Current == Default {
+		Current.Flush()
+	} else if Current != nil && !Current.Closed() &&
+		Current != Disabled {
+			
+		Current.Flush()
+		Current.Close()
+	} 
 	
-	newLogger, err := createLoggerFromConfig(config)
 	
-	if err == nil {
-		currentLogger = newLogger
-	}
-
-	return err
-}
-
-// UseDefaultConfig uses default configuration
-func UseDefaultConfig() error {
-	return UseConfig(defaultConfig)
+	
+	Current = logger
+	pkgOperationsMutex.Unlock()
+	return nil
 }
 
 // Trace formats message according to format specifier and writes to default logger with log level = Trace
 func Trace(format string, params ...interface{}) {
-	currentLogger.Trace(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Trace(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Debug formats message according to format specifier and writes to default logger with log level = Debug
 func Debug(format string, params ...interface{}) {
-	currentLogger.Debug(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Debug(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Info formats message according to format specifier and writes to default logger with log level = Info
 func Info(format string, params ...interface{}) {
-	currentLogger.Info(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Info(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Warn formats message according to format specifier and writes to default logger with log level = Warn
 func Warn(format string, params ...interface{}) {
-	currentLogger.Warn(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Warn(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Error formats message according to format specifier and writes to default logger with log level = Error
 func Error(format string, params ...interface{}) {
-	currentLogger.Error(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Error(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Critical formats message according to format specifier and writes to default logger with log level = Critical
 func Critical(format string, params ...interface{}) {
-	currentLogger.Critical(format, params...)
+	pkgOperationsMutex.Lock()
+	Current.Critical(format, params...)
+	pkgOperationsMutex.Unlock()
 }
 
 // Flush performs all cleanup, flushes all queued messages, etc. Call this method when your app
 // is going to shut down not to lose any log messages.
 func Flush() {
-	currentLogger.Flush()
+	pkgOperationsMutex.Lock()
+	Current.Flush()
+	pkgOperationsMutex.Unlock()
 }

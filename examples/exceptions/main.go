@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	defer log.Flush()
 	testMinMax()
 	testMin()
 	testMax()
@@ -26,8 +27,8 @@ func testMinMax() {
 	<outputs><console/></outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("NOT Printed")
 	log.Debug("NOT Printed")
@@ -44,8 +45,8 @@ func testMin() {
 	<outputs><console/></outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("NOT Printed")
 	log.Debug("NOT Printed")
@@ -62,8 +63,8 @@ func testMax() {
 	<outputs><console/></outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Printed")
 	log.Debug("Printed")
@@ -80,8 +81,8 @@ func testList() {
 	<outputs><console/></outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("Printed")
 	log.Debug("NOT Printed")
@@ -103,8 +104,8 @@ func testFuncException() {
 	</outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("NOT Printed")
 	log.Debug("NOT Printed")
@@ -126,8 +127,8 @@ func testFileException() {
 	</outputs>
 </sealog>`
 
-	conf, _ := log.ConfigFromBytes([]byte(testConfig))
-	log.UseConfig(conf)
+	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	log.UseLogger(logger)
 	
 	log.Trace("NOT Printed")
 	log.Debug("NOT Printed")
