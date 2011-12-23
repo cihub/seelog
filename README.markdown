@@ -54,8 +54,6 @@ Sealog has a github wiki page that contains a detailed Sealog reference: https:/
 Examples
 ---------------
 
-## Examples
-
 Sealog examples can be found in 'sealog/examples' folder. Current list of examples: 
 
 * **examples/exceptions** - demonstrates constraints and exceptions
