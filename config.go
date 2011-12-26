@@ -14,8 +14,8 @@ import (
 	"os"
 )
 
-// ConfigFromFile creates a config from file. File should contain valid sealog xml.
-func LoggerFromFile(fileName string) (LoggerInterface, error) {
+// LoggerFromConfigAsFile creates logger with config from file. File should contain valid sealog xml.
+func LoggerFromConfigAsFile(fileName string) (LoggerInterface, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -30,8 +30,8 @@ func LoggerFromFile(fileName string) (LoggerInterface, error) {
 	return createLoggerFromConfig(conf)
 }
 
-// ConfigFromBytes creates a config from bytes stream. Bytes should contain valid sealog xml.
-func LoggerFromBytes(data []byte) (LoggerInterface, error) {
+// LoggerFromConfigAsBytes creates a logger with config from bytes stream. Bytes should contain valid sealog xml.
+func LoggerFromConfigAsBytes(data []byte) (LoggerInterface, error) {
 	conf, err := config.ConfigFromReader(bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
@@ -40,9 +40,14 @@ func LoggerFromBytes(data []byte) (LoggerInterface, error) {
 	return createLoggerFromConfig(conf)
 }
 
-// ConfigFromWriter creates a simple config for usage with non-Sealog systems. 
-// Configures system to write to output with minimal level = minLevel.
-func LoggerFromWriterAndLevel(output io.Writer, minLevel LogLevel) (LoggerInterface, error) {
+// LoggerFromConfigAsString creates a logger with config from a string. String should contain valid sealog xml.
+func LoggerFromConfigAsString(data string) (LoggerInterface, error) {
+	return LoggerFromConfigAsBytes([]byte(data))
+}
+
+// LoggerFromWriterWithMinLevel creates a simple logger for usage with non-Sealog systems. 
+// Creates logger that writes to output with minimal level = minLevel.
+func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerInterface, error) {
 	constraints, err := NewMinMaxConstraints(minLevel, CriticalLvl)
 	if err != nil {
 		return nil, err

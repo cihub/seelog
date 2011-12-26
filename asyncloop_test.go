@@ -27,7 +27,7 @@ func Test_Asyncloop(t *testing.T) {
 	</formats>
 </sealog>`
 
-	logger, _ := LoggerFromBytes([]byte(testConfig))
+	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
@@ -68,7 +68,7 @@ func Test_AsyncloopOff(t *testing.T) {
 	</formats>
 </sealog>`
 
-	logger, _ := LoggerFromBytes([]byte(testConfig))
+	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)

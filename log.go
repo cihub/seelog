@@ -24,10 +24,10 @@ func init() {
 	var err error
 	
 	if Default == nil {
-		Default, err = LoggerFromBytes([]byte("<sealog />"))
+		Default, err = LoggerFromConfigAsBytes([]byte("<sealog />"))
 	}
 	if Disabled == nil {
-		Disabled, err = LoggerFromBytes([]byte("<sealog levels=\"off\"/>"))
+		Disabled, err = LoggerFromConfigAsBytes([]byte("<sealog levels=\"off\"/>"))
 	}
 
 	if err != nil {

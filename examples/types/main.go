@@ -38,7 +38,7 @@ func syncLogger() {
 </sealog>
 `
 
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 
 	doTest()
@@ -59,7 +59,7 @@ func asyncLoopLogger() {
 	</outputs>
 </sealog>`
 
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 
 	doTest()
@@ -82,7 +82,7 @@ func asyncTimerLogger() {
 	</outputs>
 </sealog>`
 
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 
 	doTest()

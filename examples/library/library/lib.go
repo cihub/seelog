@@ -45,7 +45,7 @@ func SetLogWriter(writer io.Writer) error {
 		return errors.New("Nil writer")
 	}
 	
-	newLogger, err := log.LoggerFromWriterAndLevel(writer, common.TraceLvl)
+	newLogger, err := log.LoggerFromWriterWithMinLevel(writer, common.TraceLvl)
 	if err != nil {
 		return err
 	}

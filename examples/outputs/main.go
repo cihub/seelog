@@ -37,7 +37,7 @@ func consoleWriter() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	doLog()
@@ -53,7 +53,7 @@ func fileWriter() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	doLog()
@@ -69,7 +69,7 @@ func rollingFileWriter() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	doLog()
@@ -85,7 +85,7 @@ func rollingFileWriterManyRolls() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	doLogBig()
@@ -103,7 +103,7 @@ func bufferedWriter() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	for i := 0; i < 3; i++ {
@@ -126,7 +126,7 @@ func bufferedWriterWithOverflow() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 
 	for i := 0; i < 3; i++ {
@@ -149,7 +149,7 @@ func splitDispatcher() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	doLog()	
@@ -168,7 +168,7 @@ func filterDispatcher() {
 	</outputs>
 </sealog>
 `
-	logger, _ := log.LoggerFromBytes([]byte(testConfig))
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
 	
 	for i:=0; i < 5; i++ {

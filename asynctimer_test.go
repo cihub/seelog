@@ -27,7 +27,7 @@ func Test_Asynctimer(t *testing.T) {
 	</formats>
 </sealog>`
 
-	logger, _ := LoggerFromBytes([]byte(testConfig))
+	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
