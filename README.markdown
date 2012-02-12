@@ -18,10 +18,9 @@ Features
   * File writer 
   * Buffered writer (Chunk writer)
   * Rolling log writer (Logging with rotation)
-  * SMTP writer
-  * TCP/UDP network writers
+  * (In progress) SMTP writer
   * others... (See [Wiki](https://github.com/cihub/seelog/wiki))
-* Log message wrappers (JSON, XML, etc.)
+* (In progress) Log message wrappers (JSON, XML, etc.)
 * Global variables and functions for easy usage in standalone apps
 * Functions for flexible usage in libraries
 
@@ -54,12 +53,7 @@ Seelog has a github wiki page that contains a detailed Seelog reference: https:/
 Examples
 ---------------
 
-Seelog examples can be found in 'seelog/examples' folder. Current list of examples: 
-
-* **examples/exceptions** - demonstrates constraints and exceptions
-* **examples/outputs** - demonstrates dispatchers and writers
-* **examples/formats** - demonstrates formats
-* **examples/types** - demonstrates logger types
+Seelog examples can be found here: [seelog-examples](https://github.com/cihub/seelog-examples)
 
 Issues
 ---------------
