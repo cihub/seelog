@@ -17,6 +17,7 @@ func main() {
 	runExample(rollingFileWriter)
 	runExample(rollingFileWriterManyRolls)
 	runExample(bufferedWriter)
+	runExample(bufferedWriterWithFlushPeriod)
 	runExample(bufferedWriterWithOverflow)
 	runExample(splitDispatcher)
 	runExample(filterDispatcher)
@@ -28,8 +29,6 @@ func runExample(exampleFunc func()) {
 }
 
 func consoleWriter() {
-	fmt.Println("Console writer")
-	
 	testConfig := `
 <sealog>
 	<outputs>
@@ -38,100 +37,119 @@ func consoleWriter() {
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("Console writer")
 	
 	doLog()
 }
 
 func fileWriter() {
-	fmt.Println("File writer")
 	
 	testConfig := `
 <sealog>
 	<outputs>
-		<file path="log.log"/>
+		<file path="./log/log.log"/>
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("File writer")
 	
 	doLog()
 }
 
 func rollingFileWriter() {
-	fmt.Println("Rolling file writer")
-	
 	testConfig := `
 <sealog>
 	<outputs>
-		<rollingfile type="size" filename="roll.log" maxsize="100" maxrolls="5" />
+		<rollingfile type="size" filename="./log/roll.log" maxsize="100" maxrolls="5" />
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("Rolling file writer")
 	
 	doLog()
 }
 
 func rollingFileWriterManyRolls() {
-	fmt.Println("Rolling file writer. Many rolls")
-	
 	testConfig := `
 <sealog>
 	<outputs>
-		<rollingfile type="size" filename="manyrolls.log" maxsize="100" maxrolls="4" />
+		<rollingfile type="size" filename="./log/manyrolls.log" maxsize="100" maxrolls="4" />
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("Rolling file writer. Many rolls")
 	
 	doLogBig()
 }
 
 func bufferedWriter() {
-	fmt.Println("Buffered file writer")
-	
 	testConfig := `
 <sealog>
 	<outputs>
-		<buffered size="10000" flushperiod="1000">
-			<file path="bufFile.log"/>
+		<buffered size="10000">
+			<file path="./log/bufFile.log"/>
 		</buffered>
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
-	
+	log.ReplaceLogger(logger)
+	fmt.Println("Buffered file writer. NOTE: file modification time not changed until next test (buffered)")
+	time.Sleep(3e9)
 	for i := 0; i < 3; i++ {
 		doLog()	
-		time.Sleep(1e9)
+		time.Sleep(5e9)
+	}
+	
+	time.Sleep(2e9)
+}
+
+func bufferedWriterWithFlushPeriod() {
+	testConfig := `
+<sealog>
+	<outputs>
+		<buffered size="10000" flushperiod="1000">
+			<file path="./log/bufFileFlush.log"/>
+		</buffered>
+	</outputs>
+</sealog>
+`
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
+	log.ReplaceLogger(logger)
+	fmt.Println("Buffered file writer with flush period. NOTE: file modification time changed after each 'doLog' because of small flush period.")
+	time.Sleep(3e9)
+	for i := 0; i < 3; i++ {
+		doLog()	
+		time.Sleep(5e9)
 	}
 	
 	time.Sleep(2e9)
 }
 
 func bufferedWriterWithOverflow() {
-	fmt.Println("Buffered file writer with overflow")
-	
 	testConfig := `
 <sealog>
 	<outputs>
 		<buffered size="20">
-			<file path="bufOverflow.log"/>
+			<file path="./log/bufOverflow.log"/>
 		</buffered>
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
-
+	log.ReplaceLogger(logger)
+	fmt.Println("Buffered file writer with overflow. NOTE: file modification time changes after each 'doLog' because of overflow")
+	time.Sleep(3e9)
 	for i := 0; i < 3; i++ {
 		doLog()	
-		time.Sleep(1e9)
+		time.Sleep(5e9)
 	}
 	
 	time.Sleep(1e9)
@@ -139,37 +157,35 @@ func bufferedWriterWithOverflow() {
 
 
 func splitDispatcher() {
-	fmt.Println("Split dispatcher")
-	
 	testConfig := `
 <sealog>
 	<outputs>
-		<file path="split.log"/>
+		<file path="./log/split.log"/>
 		<console />
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("Split dispatcher")
 	
 	doLog()	
 }
 
 func filterDispatcher() {
-	fmt.Println("Filter dispatcher")
-	
 	testConfig := `
 <sealog>
 	<outputs>
 		<filter levels="trace">
-			<file path="filter.log"/>
+			<file path="./log/filter.log"/>
 		</filter>
 		<console />
 	</outputs>
 </sealog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
-	log.UseLogger(logger)
+	log.ReplaceLogger(logger)
+	fmt.Println("Filter dispatcher")
 	
 	for i:=0; i < 5; i++ {
 		log.Trace("This message on console and in file")

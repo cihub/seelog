@@ -137,9 +137,13 @@ func (formatter *Formatter) extractVerbFunc(index int) (verbFunc, int, error) {
 
 func (formatter *Formatter) extractLetterSequence(index int) string {
 	letters := ""
-	parsedStr := utf8.NewString(formatter.fmtStringOriginal[index:])
-	for i := 0; i < parsedStr.RuneCount(); i++ {
-		rune := parsedStr.At(i)
+	
+	bytesToParse := []byte(formatter.fmtStringOriginal[index:])
+	runeCount := utf8.RuneCount(bytesToParse)
+	for i := 0; i < runeCount; i++ {
+		rune, runeSize := utf8.DecodeRune(bytesToParse)
+		bytesToParse = bytesToParse[runeSize:]
+
 		if unicode.IsLetter(rune) {
 			letters += string(rune)
 		} else {

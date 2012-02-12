@@ -6,7 +6,7 @@ package main
 
 import (
 	log "github.com/cihub/sealog"
-	library "../testlibrary"
+	library "github.com/cihub/sealog/examples/library/library"
 	"fmt"
 )
 
@@ -21,7 +21,7 @@ func loadAppConfig() {
     </formats>
 </sealog>
 `
-	logger, err := log.LoggerFromBytes([]byte(appConfig))
+	logger, err := log.LoggerFromConfigAsBytes([]byte(appConfig))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -37,6 +37,7 @@ func calcF() {
 	log.Debug("Got F = %d", result)
 }
 
+// Same config for both library and app
 func sameOutputConfig() {
 	libConfig := `
 <sealog type="sync">
@@ -44,20 +45,20 @@ func sameOutputConfig() {
         <console />
     </outputs>
     <formats>
-        <format id="library" format="testlibrary: [%LEV] %Msg%n" />
+        <format id="library" format="library + app: [%LEV] %Msg%n" />
     </formats>
 </sealog>
 `
-	logger, err := log.LoggerFromBytes([]byte(libConfig))
+	logger, err := log.LoggerFromConfigAsBytes([]byte(libConfig))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	log.ReplaceLogger(logger)
 	library.UseLogger(logger)
-
-	calcF()
 }
 
+// Special config for library (app config is not changed)
 func specialOutputConfig() {
 	libConfig := `
 <sealog type="sync">
@@ -65,31 +66,42 @@ func specialOutputConfig() {
         <console />
     </outputs>
     <formats>
-        <format id="library" format="library + app: %Msg [%LEV] %n" />
+        <format id="library" format="library: %Msg [%LEV] %n" />
     </formats>
 </sealog>
 `
-	logger, err := log.LoggerFromBytes([]byte(libConfig))
+	logger, err := log.LoggerFromConfigAsBytes([]byte(libConfig))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	library.UseLogger(logger)
-
-	calcF()
 }
 
 func main() {
 	defer library.FlushLog()
 	defer log.Flush()
-	log.Info("App started")
 	loadAppConfig()	
+	log.Info("App started")
 	log.Info("Config loaded")
-	sameOutputConfig()
-	log.Info("Same output config tested")
+
+	// Disable library log
+	log.Info("* Disabled library log test")
+	library.DisableLog();
+	calcF();
+	log.Info("* Disabled library log tested")
+
+	// Use a special logger for library
+	log.Info("* Special output test")
 	specialOutputConfig()
-	log.Info("Special output config tested")
+	calcF();
+	log.Info("* Special output tested")
+	
+	// Use the same logger for both app and library
+	log.Info("* Same output test")
+	sameOutputConfig()
+	calcF();
+	log.Info("* Same output tested")
+		
 	log.Info("App finished")
-	
-	
 }

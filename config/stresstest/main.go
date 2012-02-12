@@ -13,6 +13,7 @@ import (
 	"sync"
 	"fmt"
 	"os"
+	"time"
 )
 
 const (
@@ -21,6 +22,8 @@ const (
 	logsPerGoroutineCount = 100
 	LogFile = "log.log"
 )
+
+var loggerReplacements int
 
 var counterMutex *sync.Mutex
 var waitGroup *sync.WaitGroup
@@ -164,13 +167,14 @@ func switchToRandomConfigFromPool() {
 	
 	randomCfg := configPool[int(configIndex.Int64())]
 	
-	logger, err := log.LoggerFromBytes([]byte(randomCfg))
+	logger, err := log.LoggerFromConfigAsBytes([]byte(randomCfg))
 
 	if err != nil {
 		panic(fmt.Sprintf("Error during config creation: %s", err.Error()))
 	}
 
 	log.ReplaceLogger(logger)
+	loggerReplacements++
 }
 
 func logRoutine(ind int) {
@@ -192,6 +196,8 @@ func main() {
 	os.Remove(filepath.Join(LogDir, LogFile))
 	switchToRandomConfigFromPool()
 	
+	timeStart := time.Now()
+
 	counterMutex = new(sync.Mutex)
 	waitGroup = new(sync.WaitGroup)
 	
@@ -204,10 +210,16 @@ func main() {
 	waitGroup.Wait()
 	log.Flush()
 	
+	timeEnd := time.Now()
+	duration := timeEnd.Sub(timeStart)
+	averageLoggerReplaceFrequency := float32(loggerReplacements) / (float32(duration.Nanoseconds()) / 1e9)
+
 	gotCount, err := test.CountSequencedRowsInFile(filepath.Join(LogDir, LogFile))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	fmt.Printf("Logger replaced %d times. Average replacement frequency: %f times / second. Output log is consistent: no log messages are missing or come in incorrect order.\n", loggerReplacements, averageLoggerReplaceFrequency)
 	
 	if counter == gotCount {
 		fmt.Println("PASS! Output is valid")

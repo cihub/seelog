@@ -76,7 +76,7 @@ func (this *xmlNode) hasChildren() bool {
 //=============================================
 
 func unmarshalConfig(reader io.Reader) (*xmlNode, error) {
-	xmlParser := xml.NewParser(reader)
+	xmlParser := xml.NewDecoder(reader)
 
 	config, err := unmarshalNode(xmlParser, nil)
 	if err != nil {
@@ -94,7 +94,7 @@ func unmarshalConfig(reader io.Reader) (*xmlNode, error) {
 	return config, nil
 }
 
-func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, err error) {
+func unmarshalNode(xmlParser *xml.Decoder, curToken xml.Token) (node *xmlNode, err error) {
 	firstLoop := true
 	for {
 		var tok xml.Token
@@ -144,7 +144,7 @@ func unmarshalNode(xmlParser *xml.Parser, curToken xml.Token) (node *xmlNode, er
 	return
 }
 
-func getNextToken(xmlParser *xml.Parser) (tok xml.Token, err error) {
+func getNextToken(xmlParser *xml.Decoder) (tok xml.Token, err error) {
 	if tok, err = xmlParser.Token(); err != nil {
 		if err == io.EOF {
 			err = nil

@@ -16,7 +16,7 @@ Features
 * Different output writers
   * Console writer
   * File writer 
-  * Buffered file writer (Chunk writer)
+  * Buffered writer (Chunk writer)
   * Rolling log writer (Logging with rotation)
   * SMTP writer
   * TCP/UDP network writers

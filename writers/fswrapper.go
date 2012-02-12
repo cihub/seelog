@@ -36,7 +36,7 @@ func (_ *osWrapper) MkdirAll(folderPath string) error {
 	return os.MkdirAll(folderPath, defaultDirectoryPermissions)
 }
 func (_ *osWrapper) Open(fileName string) (io.WriteCloser, error) {
-	return os.OpenFile(fileName, os.O_WRONLY | os.O_APPEND, 0)
+	return os.OpenFile(fileName, os.O_WRONLY | os.O_APPEND, defaultFilePermissions)
 }
 func (_ *osWrapper) Create(fileName string) (io.WriteCloser, error) {
 	return os.Create(fileName)

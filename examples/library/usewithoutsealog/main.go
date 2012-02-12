@@ -5,7 +5,7 @@
 package main
 
 import (
-	library "../testlibrary"
+	library "github.com/cihub/sealog/examples/library/library"
 	"fmt"
 )
 
