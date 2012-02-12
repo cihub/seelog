@@ -43,7 +43,7 @@ Installation
 
 * If you don't have the Go development environment installed, visit the 
 [Getting Started](http://golang.org/doc/install.html) document and follow the instructions
-* goinstall github.com/cihub/seelog
+* go get github.com/cihub/seelog
 
 Documentation
 ---------------
