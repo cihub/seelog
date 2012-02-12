@@ -11,8 +11,8 @@ import (
 	"testing"
 )
 
-// FileSystemWrapperInterface is used for testing. When sealog is used in a real app, osWrapper uses standard os
-// funcs. When sealog is being tested, FileSystemTestWrapper emulates some of the os funcs. Both osWrapper and
+// FileSystemWrapperInterface is used for testing. When seelog is used in a real app, osWrapper uses standard os
+// funcs. When seelog is being tested, FileSystemTestWrapper emulates some of the os funcs. Both osWrapper and
 // FileSystemTestWrapper implement this interface.
 type FileSystemWrapperInterface interface {
 	MkdirAll(folderPath string) error

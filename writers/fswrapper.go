@@ -7,7 +7,7 @@ package writers
 // Real FileSystemWrapperInterface implementation that uses os package.
 
 import (
-	"github.com/cihub/sealog/test"
+	"github.com/cihub/seelog/test"
 	"io"
 	"os"
 )

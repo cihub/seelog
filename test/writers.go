@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package test provides utilities used to test most of sealog packages. This package shouldn't be actually used 
-// anywhere but sealog tests.
+// Package test provides utilities used to test most of seelog packages. This package shouldn't be actually used 
+// anywhere but seelog tests.
 package test
 
 import (

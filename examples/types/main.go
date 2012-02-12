@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/cihub/sealog"
+	log "github.com/cihub/seelog"
 	"strings"
 	"time"
 )
@@ -26,7 +26,7 @@ func syncLogger() {
 	fmt.Println("Sync test")
 
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<filter levels="trace">
 			<file path="log.log"/>
@@ -35,7 +35,7 @@ func syncLogger() {
 			<console />
 		</filter>
 	</outputs>
-</sealog>
+</seelog>
 `
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
@@ -48,7 +48,7 @@ func asyncLoopLogger() {
 	fmt.Println("Async loop test")
 
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<filter levels="trace">
 			<file path="log.log"/>
@@ -57,7 +57,7 @@ func asyncLoopLogger() {
 			<console />
 		</filter>
 	</outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -71,7 +71,7 @@ func asyncTimerLogger() {
 	fmt.Println("Async timer test")
 
 	testConfig := `
-<sealog type="asynctimer" asyncinterval="500">
+<seelog type="asynctimer" asyncinterval="500">
 	<outputs>
 		<filter levels="trace">
 			<file path="log.log"/>
@@ -80,7 +80,7 @@ func asyncTimerLogger() {
 			<console />
 		</filter>
 	</outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)

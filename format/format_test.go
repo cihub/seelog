@@ -5,7 +5,7 @@
 package format
 
 import (
-	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/seelog/common"
 	"strings"
 	"testing"
 	"time"

@@ -12,7 +12,7 @@ import (
 
 const (
 	shortPath    = "context_test.go"
-	commonPrefix = "github.com/cihub/sealog/common."
+	commonPrefix = "github.com/cihub/seelog/common."
 )
 
 var testFullPath string

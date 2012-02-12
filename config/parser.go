@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package config contains configuration functionality of sealog.
+// Package config contains configuration functionality of seelog.
 package config
 
 import (
 	"time"
 	"errors"
 	"fmt"
-	. "github.com/cihub/sealog/common"
-	"github.com/cihub/sealog/dispatchers"
-	"github.com/cihub/sealog/format"
-	"github.com/cihub/sealog/writers"
+	. "github.com/cihub/seelog/common"
+	"github.com/cihub/seelog/dispatchers"
+	"github.com/cihub/seelog/format"
+	"github.com/cihub/seelog/writers"
 	"io"
 	"strconv"
 	"strings"
 )
 
 const (
-	SealogConfigId             = "sealog"
+	SeelogConfigId             = "seelog"
 	OutputsId                  = "outputs"
 	FormatsId                  = "formats"
 	MinLevelId                 = "minlevel"
@@ -85,8 +85,8 @@ func ConfigFromReader(reader io.Reader) (*LogConfig, error) {
 		return nil, err
 	}
 
-	if config.name != SealogConfigId {
-		return nil, errors.New("Root xml tag must be '" + SealogConfigId + "'")
+	if config.name != SeelogConfigId {
+		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
 	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeAttr, AsyncLoggerIntervalAttr)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package writers contains a collection of writers that could be used by sealog dispatchers.
+// Package writers contains a collection of writers that could be used by seelog dispatchers.
 // It allows to write to such receivers as: file, console, rolling(rotation) files, smtp, network, buffered file streams.
 package writers
 

@@ -5,10 +5,10 @@
 package dispatchers
 
 import (
-	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/seelog/common"
 
-	"github.com/cihub/sealog/format"
-	. "github.com/cihub/sealog/test"
+	"github.com/cihub/seelog/format"
+	. "github.com/cihub/seelog/test"
 	"testing"
 )
 

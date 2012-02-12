@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sealog
+package seelog
 
 import (
-	cfg "github.com/cihub/sealog/config"
-	. "github.com/cihub/sealog/common"
+	cfg "github.com/cihub/seelog/config"
+	. "github.com/cihub/seelog/common"
 	"container/list"
 	"sync"
 	"fmt"
@@ -97,7 +97,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *LogContext,
 	asnLogger.queueMutex.Lock()
 	if !asnLogger.closed {
 		if asnLogger.msgQueue.Len() >= MaxQueueSize {
-			fmt.Printf("Sealog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
+			fmt.Printf("Seelog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
 			asnLogger.flushQueue()
 		}
 		

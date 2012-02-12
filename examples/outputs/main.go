@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/cihub/sealog"
+	log "github.com/cihub/seelog"
 	"time"
 )
 
@@ -30,11 +30,11 @@ func runExample(exampleFunc func()) {
 
 func consoleWriter() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<console />
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -46,11 +46,11 @@ func consoleWriter() {
 func fileWriter() {
 	
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<file path="./log/log.log"/>
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -61,11 +61,11 @@ func fileWriter() {
 
 func rollingFileWriter() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<rollingfile type="size" filename="./log/roll.log" maxsize="100" maxrolls="5" />
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -76,11 +76,11 @@ func rollingFileWriter() {
 
 func rollingFileWriterManyRolls() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<rollingfile type="size" filename="./log/manyrolls.log" maxsize="100" maxrolls="4" />
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -91,13 +91,13 @@ func rollingFileWriterManyRolls() {
 
 func bufferedWriter() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<buffered size="10000">
 			<file path="./log/bufFile.log"/>
 		</buffered>
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -113,13 +113,13 @@ func bufferedWriter() {
 
 func bufferedWriterWithFlushPeriod() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<buffered size="10000" flushperiod="1000">
 			<file path="./log/bufFileFlush.log"/>
 		</buffered>
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -135,13 +135,13 @@ func bufferedWriterWithFlushPeriod() {
 
 func bufferedWriterWithOverflow() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<buffered size="20">
 			<file path="./log/bufOverflow.log"/>
 		</buffered>
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -158,12 +158,12 @@ func bufferedWriterWithOverflow() {
 
 func splitDispatcher() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<file path="./log/split.log"/>
 		<console />
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)
@@ -174,14 +174,14 @@ func splitDispatcher() {
 
 func filterDispatcher() {
 	testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<filter levels="trace">
 			<file path="./log/filter.log"/>
 		</filter>
 		<console />
 	</outputs>
-</sealog>
+</seelog>
 `
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)

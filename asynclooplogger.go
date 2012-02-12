@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sealog
+package seelog
 
 import (
-	cfg "github.com/cihub/sealog/config"
+	cfg "github.com/cihub/seelog/config"
 )
 
 // AsyncLoopLogger represents asynchronous logger which processes the log queue in

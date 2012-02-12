@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package format contains formatting logic for sealog package and all available formats.
+// Package format contains formatting logic for seelog package and all available formats.
 package format
 
 import (
 	"errors"
 	"fmt"
-	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/seelog/common"
 	"strconv"
 	"strings"
 	"time"

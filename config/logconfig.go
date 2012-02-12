@@ -5,8 +5,8 @@
 package config
 
 import (
-	"github.com/cihub/sealog/dispatchers"
-	. "github.com/cihub/sealog/common"
+	"github.com/cihub/seelog/dispatchers"
+	. "github.com/cihub/seelog/common"
 	"errors"
 )
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package common contains constants and basic types for the sealog packages
+// Package common contains constants and basic types for the seelog packages
 package common
 
 // Log level type
@@ -51,7 +51,7 @@ func LogLevelFromString(levelStr string) (level LogLevel, found bool) {
 	return 0, false
 }
 
-// LogLevelToString returns sealog string representation for a specified level. Returns "" for invalid log levels.
+// LogLevelToString returns seelog string representation for a specified level. Returns "" for invalid log levels.
 func (level LogLevel) String() string {
 	levelStr, ok := levelToStringRepresentations[level]
 	if ok {

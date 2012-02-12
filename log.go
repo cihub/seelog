@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package sealog implements logging functionality with flexible dispatching, filtering, and formatting.
-package sealog
+// Package seelog implements logging functionality with flexible dispatching, filtering, and formatting.
+package seelog
 
 import (
 	"errors"
 	"fmt"
 	"time"
 	"sync"
-	cfg "github.com/cihub/sealog/config"
+	cfg "github.com/cihub/seelog/config"
 )
 
 var Current LoggerInterface
@@ -24,14 +24,14 @@ func init() {
 	var err error
 	
 	if Default == nil {
-		Default, err = LoggerFromConfigAsBytes([]byte("<sealog />"))
+		Default, err = LoggerFromConfigAsBytes([]byte("<seelog />"))
 	}
 	if Disabled == nil {
-		Disabled, err = LoggerFromConfigAsBytes([]byte("<sealog levels=\"off\"/>"))
+		Disabled, err = LoggerFromConfigAsBytes([]byte("<seelog levels=\"off\"/>"))
 	}
 
 	if err != nil {
-		panic(fmt.Sprintf("Sealog couldn't start. Error: %s", err.Error()))
+		panic(fmt.Sprintf("Seelog couldn't start. Error: %s", err.Error()))
 	}
 	
 	Current = Default

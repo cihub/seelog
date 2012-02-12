@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/cihub/sealog"
+	log "github.com/cihub/seelog"
 )
 
 func main() {
@@ -23,9 +23,9 @@ func main() {
 func testMinMax() {
 	fmt.Println("testMinMax")
 	testConfig := `
-<sealog type="sync" minlevel="info" maxlevel="error">
+<seelog type="sync" minlevel="info" maxlevel="error">
 	<outputs><console/></outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -41,9 +41,9 @@ func testMinMax() {
 func testMin() {
 	fmt.Println("testMin")
 	testConfig := `
-<sealog type="sync" minlevel="info">
+<seelog type="sync" minlevel="info">
 	<outputs><console/></outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -59,9 +59,9 @@ func testMin() {
 func testMax() {
 	fmt.Println("testMax")
 	testConfig := `
-<sealog type="sync" maxlevel="error">
+<seelog type="sync" maxlevel="error">
 	<outputs><console/></outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -77,9 +77,9 @@ func testMax() {
 func testList() {
 	fmt.Println("testList")
 	testConfig := `
-<sealog type="sync" levels="info, trace, critical">
+<seelog type="sync" levels="info, trace, critical">
 	<outputs><console/></outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -95,14 +95,14 @@ func testList() {
 func testFuncException() {
 	fmt.Println("testFuncException")
 	testConfig := `
-<sealog type="sync" minlevel="info">
+<seelog type="sync" minlevel="info">
 	<exceptions>
 		<exception funcpattern="*main.test*Except*" minlevel="error"/>
 	</exceptions>
 	<outputs>
 		<console/>
 	</outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -118,14 +118,14 @@ func testFuncException() {
 func testFileException() {
 	fmt.Println("testFileException")
 	testConfig := `
-<sealog type="sync" minlevel="info">
+<seelog type="sync" minlevel="info">
 	<exceptions>
 		<exception filepattern="*main.go" minlevel="error"/>
 	</exceptions>
 	<outputs>
 		<console/>
 	</outputs>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)

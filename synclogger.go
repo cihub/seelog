@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sealog
+package seelog
 
 import (
-	. "github.com/cihub/sealog/common"
-	cfg "github.com/cihub/sealog/config"
+	. "github.com/cihub/seelog/common"
+	cfg "github.com/cihub/seelog/config"
 )
 
 // SyncLogger performs logging in the same goroutine where 'Trace/Debug/...'

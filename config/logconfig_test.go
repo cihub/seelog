@@ -5,7 +5,7 @@
 package config
 
 import (
-	. "github.com/cihub/sealog/common"
+	. "github.com/cihub/seelog/common"
 	"strings"
 	"testing"
 )
@@ -13,12 +13,12 @@ import (
 func TestConfig(t *testing.T) {
 	testConfig :=
 		`
-<sealog levels="trace, debug">
+<seelog levels="trace, debug">
 	<exceptions>
 		<exception funcpattern="*getFirst*" filepattern="*" minlevel="off" />
 		<exception funcpattern="*getSecond*" filepattern="*" levels="info, error" />
 	</exceptions>
-</sealog>
+</seelog>
 `
 
 	conf, err := ConfigFromReader(strings.NewReader(testConfig))

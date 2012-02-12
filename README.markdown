@@ -1,7 +1,7 @@
-Sealog
+Seelog
 =======
 
-Sealog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting.
+Seelog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting.
 Natively written in the [Go](http://golang.org/) programming language. 
 
 Features
@@ -20,7 +20,7 @@ Features
   * Rolling log writer (Logging with rotation)
   * SMTP writer
   * TCP/UDP network writers
-  * others... (See [Wiki](https://github.com/cihub/sealog/wiki))
+  * others... (See [Wiki](https://github.com/cihub/seelog/wiki))
 * Log message wrappers (JSON, XML, etc.)
 * Global variables and functions for easy usage in standalone apps
 * Functions for flexible usage in libraries
@@ -31,11 +31,11 @@ Quick-start
 ```go
 package main
 
-import log "github.com/cihub/sealog"
+import log "github.com/cihub/seelog"
 
 func main() {
     defer log.Flush()
-    log.Info("Hello from Sealog!")
+    log.Info("Hello from Seelog!")
 }
 ```
 
@@ -44,17 +44,17 @@ Installation
 
 * If you don't have the Go development environment installed, visit the 
 [Getting Started](http://golang.org/doc/install.html) document and follow the instructions
-* goinstall github.com/cihub/sealog
+* goinstall github.com/cihub/seelog
 
 Documentation
 ---------------
 
-Sealog has a github wiki page that contains a detailed Sealog reference: https://github.com/cihub/sealog/wiki
+Seelog has a github wiki page that contains a detailed Seelog reference: https://github.com/cihub/seelog/wiki
 
 Examples
 ---------------
 
-Sealog examples can be found in 'sealog/examples' folder. Current list of examples: 
+Seelog examples can be found in 'seelog/examples' folder. Current list of examples: 
 
 * **examples/exceptions** - demonstrates constraints and exceptions
 * **examples/outputs** - demonstrates dispatchers and writers
@@ -64,5 +64,5 @@ Sealog examples can be found in 'sealog/examples' folder. Current list of exampl
 Issues
 ---------------
 
-Feel free to add any issues that could make Sealog better: https://github.com/cihub/sealog/issues
+Feel free to add any issues that could make Seelog better: https://github.com/cihub/seelog/issues
 

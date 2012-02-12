@@ -6,7 +6,7 @@ package dispatchers
 
 import (
 	"fmt"
-	"github.com/cihub/sealog/format"
+	"github.com/cihub/seelog/format"
 )
 
 // A SplitDispatcher just writes the given message to underlying receivers. (Splits the message stream.)

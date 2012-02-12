@@ -6,7 +6,7 @@ package writers
 
 import (
 	"testing"
-	"github.com/cihub/sealog/test"
+	"github.com/cihub/seelog/test"
 )
 
 func init() {

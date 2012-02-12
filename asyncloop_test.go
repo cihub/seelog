@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sealog
+package seelog
 
 import (
-	"github.com/cihub/sealog/test"
+	"github.com/cihub/seelog/test"
 	"testing"
 	"strconv"
 	"os"
@@ -18,14 +18,14 @@ func Test_Asyncloop(t *testing.T) {
 	os.Remove(fileName)
 	
 	testConfig := `
-<sealog type="asyncloop">
+<seelog type="asyncloop">
 	<outputs formatid="msg">
 		<file path="` + fileName + `"/>
 	</outputs>
 	<formats>
 		<format id="msg" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 	err := ReplaceLogger(logger)
@@ -59,14 +59,14 @@ func Test_AsyncloopOff(t *testing.T) {
 	os.Remove(fileName)
 	
 	testConfig := `
-<sealog type="asyncloop" levels="off">
+<seelog type="asyncloop" levels="off">
 	<outputs formatid="msg">
 		<file path="` + fileName + `"/>
 	</outputs>
 	<formats>
 		<format id="msg" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 	err := ReplaceLogger(logger)

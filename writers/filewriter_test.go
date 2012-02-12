@@ -5,7 +5,7 @@
 package writers
 
 import (
-	"github.com/cihub/sealog/test"
+	"github.com/cihub/seelog/test"
 	"io"
 	"path/filepath"
 	"strings"

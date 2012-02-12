@@ -5,8 +5,8 @@
 package main
 
 import (
-	log "github.com/cihub/sealog"
-	"github.com/cihub/sealog/test"
+	log "github.com/cihub/seelog"
+	"github.com/cihub/seelog/test"
 	"crypto/rand"
 	"path/filepath"
 	"math/big"
@@ -32,59 +32,59 @@ var counter int64
 
 
 var fileConfig = `
-<sealog type="asyncloop">
+<seelog type="asyncloop">
 	<outputs>
 		<file path="` + filepath.Join(LogDir, LogFile) + `" formatid="testFormat"/>
 	</outputs>
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileAsyncLoopConfig = `
-<sealog type="asyncloop">
+<seelog type="asyncloop">
 	<outputs>
 		<file path="` + filepath.Join(LogDir, LogFile) + `" formatid="testFormat"/>
 	</outputs>
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileAsyncTimer100Config = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<file path="` + filepath.Join(LogDir, LogFile) + `" formatid="testFormat"/>
 	</outputs>
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileAsyncTimer1000Config = `
-<sealog type="asynctimer" asyncinterval="1000">
+<seelog type="asynctimer" asyncinterval="1000">
 	<outputs>
 		<file path="` + filepath.Join(LogDir, LogFile) + `" formatid="testFormat"/>
 	</outputs>
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileAsyncTimer10000Config = `
-<sealog type="asynctimer" asyncinterval="10000">
+<seelog type="asynctimer" asyncinterval="10000">
 	<outputs>
 		<file path="` + filepath.Join(LogDir, LogFile) + `" formatid="testFormat"/>
 	</outputs>
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 
 
 var fileBufferedConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<buffered size="100" formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
@@ -93,10 +93,10 @@ var fileBufferedConfig = `
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileBufferedAsyncLoopConfig = `
-<sealog type="asyncloop">
+<seelog type="asyncloop">
 	<outputs>
 		<buffered size="100" formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
@@ -105,10 +105,10 @@ var fileBufferedAsyncLoopConfig = `
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileBufferedAsyncTimer100Config = `
-<sealog type="asynctimer" asyncinterval="100">
+<seelog type="asynctimer" asyncinterval="100">
 	<outputs>
 		<buffered size="100" formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
@@ -117,10 +117,10 @@ var fileBufferedAsyncTimer100Config = `
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileBufferedAsyncTimer1000Config = `
-<sealog type="asynctimer" asyncinterval="1000">
+<seelog type="asynctimer" asyncinterval="1000">
 	<outputs>
 		<buffered size="100" formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
@@ -129,10 +129,10 @@ var fileBufferedAsyncTimer1000Config = `
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 var fileBufferedAsyncTimer10000Config = `
-<sealog type="asynctimer" asyncinterval="10000">
+<seelog type="asynctimer" asyncinterval="10000">
 	<outputs>
 		<buffered size="100"  formatid="testFormat">
 			<file path="` + filepath.Join(LogDir, LogFile) + `"/>
@@ -141,7 +141,7 @@ var fileBufferedAsyncTimer10000Config = `
 	<formats>
 	    <format id="testFormat" format="%Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 
 var configPool = []string {

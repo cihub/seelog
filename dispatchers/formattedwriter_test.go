@@ -6,9 +6,9 @@ package dispatchers
 
 import (
 	"testing"
-	. "github.com/cihub/sealog/common"
-	. "github.com/cihub/sealog/test"
-	"github.com/cihub/sealog/format"
+	. "github.com/cihub/seelog/common"
+	. "github.com/cihub/seelog/test"
+	"github.com/cihub/seelog/format"
 )
 
 func TestFormattedWriter(t *testing.T) {

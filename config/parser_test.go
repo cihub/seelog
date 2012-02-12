@@ -7,11 +7,11 @@ package config
 import (
 	"testing"
 	//"reflect"
-	"github.com/cihub/sealog/dispatchers"
-	"github.com/cihub/sealog/writers"
-	. "github.com/cihub/sealog/common"
-	"github.com/cihub/sealog/test"
-	"github.com/cihub/sealog/format"
+	"github.com/cihub/seelog/dispatchers"
+	"github.com/cihub/seelog/writers"
+	. "github.com/cihub/seelog/common"
+	"github.com/cihub/seelog/test"
+	"github.com/cihub/seelog/format"
 	"strings"
 	"fmt"
 )
@@ -31,11 +31,11 @@ func getParserTests() []parserTest {
 
 		testName := "Simple file output"
 		testConfig := `
-<sealog>
+<seelog>
 	<outputs>
 		<file path="log.log"/>
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected := new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -47,13 +47,13 @@ func getParserTests() []parserTest {
 
 		testName = "Filter dispatcher"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<filter levels="debug, info, critical">
 			<file path="log.log"/>
 		</filter>
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -66,11 +66,11 @@ func getParserTests() []parserTest {
 
 		testName = "Console writer"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<console />
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -82,7 +82,7 @@ func getParserTests() []parserTest {
 
 		testName = "Default output"
 		testConfig = `
-<sealog type="sync"/>
+<seelog type="sync"/>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -95,7 +95,7 @@ func getParserTests() []parserTest {
 
 		testName = "Asyncloop behavior"
 		testConfig = `
-<sealog type="asyncloop"/>
+<seelog type="asyncloop"/>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -108,7 +108,7 @@ func getParserTests() []parserTest {
 
 		testName = "Asynctimer behavior"
 		testConfig = `
-<sealog type="asynctimer" asyncinterval="101"/>
+<seelog type="asynctimer" asyncinterval="101"/>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -122,11 +122,11 @@ func getParserTests() []parserTest {
 
 		testName = "Rolling file writer size"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<rollingfile type="size" filename="log.log" maxsize="100" maxrolls="5" />
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -138,11 +138,11 @@ func getParserTests() []parserTest {
 
 		testName = "Rolling file writer date"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" />
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -154,13 +154,13 @@ func getParserTests() []parserTest {
 
 		testName = "Buffered writer"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<buffered size="100500" flushperiod="100">
 			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" />
 		</buffered>
 	</outputs>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -173,7 +173,7 @@ func getParserTests() []parserTest {
 
 		testName = "Inner splitter output"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<file path="log.log"/>
 		<splitter>
@@ -181,7 +181,7 @@ func getParserTests() []parserTest {
 			<file path="log2.log"/>
 		</splitter>
 	</outputs>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -197,14 +197,14 @@ func getParserTests() []parserTest {
 
 		testName = "Format"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="dateFormat">
 		<file path="log.log"/>
 	</outputs>
 	<formats>
 		<format id="dateFormat" format="%Level %Msg %File" />
 	</formats>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -218,7 +218,7 @@ func getParserTests() []parserTest {
 
 		testName = "Format2"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="format1">
 		<file path="log.log"/>
 		<file formatid="format2" path="log1.log"/>
@@ -227,7 +227,7 @@ func getParserTests() []parserTest {
 		<format id="format1" format="%Level %Msg %File" />
 		<format id="format2" format="%l %Msg" />
 	</formats>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -243,7 +243,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Minlevel = warn"
-		testConfig = `<sealog minlevel="warn"/>`
+		testConfig = `<seelog minlevel="warn"/>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(WarnLvl, CriticalLvl)
 		testExpected.Exceptions = nil
@@ -254,7 +254,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Maxlevel = trace"
-		testConfig = `<sealog maxlevel="trace"/>`
+		testConfig = `<seelog maxlevel="trace"/>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, TraceLvl)
 		testExpected.Exceptions = nil
@@ -265,7 +265,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Level between info and error"
-		testConfig = `<sealog minlevel="info" maxlevel="error"/>`
+		testConfig = `<seelog minlevel="info" maxlevel="error"/>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(InfoLvl, ErrorLvl)
 		testExpected.Exceptions = nil
@@ -276,7 +276,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Off with minlevel"
-		testConfig = `<sealog minlevel="off"/>`
+		testConfig = `<seelog minlevel="off"/>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewOffConstraints()
 		testExpected.Exceptions = nil
@@ -287,11 +287,11 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Off with levels"
-		testConfig = `<sealog levels="off"/>`
+		testConfig = `<seelog levels="off"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Levels list"
-		testConfig = `<sealog levels="debug, info, critical"/>`
+		testConfig = `<seelog levels="debug, info, critical"/>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewListConstraints([]LogLevel{
 			DebugLvl, InfoLvl, CriticalLvl})
@@ -303,89 +303,89 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Errors #1"
-		testConfig = `<sealog minlevel="debug" minlevel="trace"/>`
+		testConfig = `<seelog minlevel="debug" minlevel="trace"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #2"
-		testConfig = `<sealog minlevel="error" maxlevel="debug"/>`
+		testConfig = `<seelog minlevel="error" maxlevel="debug"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #3"
-		testConfig = `<sealog maxlevel="debug" maxlevel="trace"/>`
+		testConfig = `<seelog maxlevel="debug" maxlevel="trace"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #4"
-		testConfig = `<sealog maxlevel="off"/>`
+		testConfig = `<seelog maxlevel="off"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #5"
-		testConfig = `<sealog minlevel="off" maxlevel="trace"/>`
+		testConfig = `<seelog minlevel="off" maxlevel="trace"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #6"
-		testConfig = `<sealog minlevel="warn" maxlevel="error" levels="debug"/>`
+		testConfig = `<seelog minlevel="warn" maxlevel="error" levels="debug"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #7"
-		testConfig = `<not_sealog/>`
+		testConfig = `<not_seelog/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #8"
-		testConfig = `<sealog levels="warn, debug, test"/>`
+		testConfig = `<seelog levels="warn, debug, test"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #9"
-		testConfig = `<sealog levels=""/>`
+		testConfig = `<seelog levels=""/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #10"
-		testConfig = `<sealog levels="off" something="abc"/>`
+		testConfig = `<seelog levels="off" something="abc"/>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #11"
-		testConfig = `<sealog><output/></sealog>`
+		testConfig = `<seelog><output/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #12"
-		testConfig = `<sealog><outputs/><outputs/></sealog>`
+		testConfig = `<seelog><outputs/><outputs/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #13"
-		testConfig = `<sealog><exceptions/></sealog>`
+		testConfig = `<seelog><exceptions/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #14"
-		testConfig = `<sealog><formats/></sealog>`
+		testConfig = `<seelog><formats/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #15"
-		testConfig = `<sealog><outputs><splitter/></outputs></sealog>`
+		testConfig = `<seelog><outputs><splitter/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #16"
-		testConfig = `<sealog><outputs><filter/></outputs></sealog>`
+		testConfig = `<seelog><outputs><filter/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #17"
-		testConfig = `<sealog><outputs><file path="log.log"><something/></file></outputs></sealog>`
+		testConfig = `<seelog><outputs><file path="log.log"><something/></file></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #18"
-		testConfig = `<sealog><outputs><buffered size="100500" flushperiod="100"/></outputs></sealog>`
+		testConfig = `<seelog><outputs><buffered size="100500" flushperiod="100"/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #19"
-		testConfig = `<sealog><outputs></outputs></sealog>`
+		testConfig = `<seelog><outputs></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Exceptions: restricting"
 		testConfig =
 			`
-<sealog type="sync">
+<seelog type="sync">
 	<exceptions>
 		<exception funcpattern="Test*" filepattern="someFile.go" minlevel="off"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
@@ -401,11 +401,11 @@ func getParserTests() []parserTest {
 		testName = "Exceptions: allowing #1"
 		testConfig =
 			`
-<sealog type="sync" levels="error">
+<seelog type="sync" levels="error">
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewListConstraints([]LogLevel{ErrorLvl})
@@ -421,11 +421,11 @@ func getParserTests() []parserTest {
 		testName = "Exceptions: allowing #2"
 		testConfig =
 			`
-<sealog type="sync" levels="off">
+<seelog type="sync" levels="off">
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewOffConstraints()
@@ -440,137 +440,137 @@ func getParserTests() []parserTest {
 
 		testName = "Errors #11"
 		testConfig = `
-<sealog type="sync"><exceptions>
+<seelog type="sync"><exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 		<exception filepattern="testfile.go" minlevel="warn"/>
-</exceptions></sealog>`
+</exceptions></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #12"
 		testConfig = `
-<sealog type="sync"><exceptions>
+<seelog type="sync"><exceptions>
 		<exception filepattern="!@+$)!!%&@(^$" minlevel="trace"/>
-</exceptions></sealog>`
+</exceptions></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #13"
 		testConfig = `
-<sealog type="sync"><exceptions>
+<seelog type="sync"><exceptions>
 		<exception filepattern="*" minlevel="unknown"/>
-</exceptions></sealog>`
+</exceptions></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #14"
 		testConfig = `
-<sealog type="sync" levels=”off”>
+<seelog type="sync" levels=”off”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="off"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #15"
 		testConfig = `
-<sealog type="sync" levels=”trace”>
+<seelog type="sync" levels=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" levels="trace"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #16"
 		testConfig = `
-<sealog type="sync" minlevel=”trace”>
+<seelog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="trace"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #17"
 		testConfig = `
-<sealog type="sync" minlevel=”trace”>
+<seelog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 	</exceptions>
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #18"
 		testConfig = `
-<sealog type="sync" minlevel=”trace”>
+<seelog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception filepattern="testfile.go"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #19"
 		testConfig = `
-<sealog type="sync" minlevel=”trace”>
+<seelog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception minlevel="warn"/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 
 		testName = "Errors #20"
 		testConfig = `
-<sealog type="sync" minlevel=”trace”>
+<seelog type="sync" minlevel=”trace”>
 	<exceptions>
 		<exception/>
 	</exceptions>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #21"
 		testConfig = `
-<sealog>
+<seelog>
 	<outputs>
 		<splitter>
 		</splitter>
 	</outputs>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #22"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<filter levels="debug, info, critical">
 
 		</filter>
 	</outputs>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #23"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<buffered size="100500" flushperiod="100">
 
 		</buffered>
 	</outputs>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #24"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<buffered size="100500" flushperiod="100">
 			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
@@ -579,13 +579,13 @@ func getParserTests() []parserTest {
 	<formats>
 		<format id="testFormat" format="%Level %Msg %File 123" />
 	</formats>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Errors #25"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<outputs>
 			<file path="file.log"/>
@@ -594,13 +594,13 @@ func getParserTests() []parserTest {
 			<file path="file.log"/>
 		</outputs>
 	</outputs>
-</sealog>
+</seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Buffered writer same formatid override"
 		testConfig = `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs>
 		<buffered size="100500" flushperiod="100" formatid="testFormat">
 			<rollingfile type="date" filename="log.log" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
@@ -609,7 +609,7 @@ func getParserTests() []parserTest {
 	<formats>
 		<format id="testFormat" format="%Level %Msg %File 123" />
 	</formats>
-</sealog>`
+</seelog>`
 		testExpected = new(LogConfig)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil

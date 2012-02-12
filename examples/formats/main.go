@@ -5,7 +5,7 @@
 package main
 
 import (
-	log "github.com/cihub/sealog"
+	log "github.com/cihub/seelog"
 	"fmt"
 )
 
@@ -25,7 +25,7 @@ func defaultFormat() {
 	fmt.Println("Default format")
 	
 	testConfig := `
-<sealog type="sync" />`
+<seelog type="sync" />`
 
 	logger, err := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	if err != nil {
@@ -40,14 +40,14 @@ func stdFormat() {
 	fmt.Println("Standard fast format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%Ns [%Level] %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -59,14 +59,14 @@ func dateTimeFormat() {
 	fmt.Println("Date time format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%Date/%Time [%Level] %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -78,14 +78,14 @@ func dateTimeCustomFormat() {
 	fmt.Println("Date time custom format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%Date(2006 Jan 02/3:04:05.000000000 PM MST) [%Level] %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -97,14 +97,14 @@ func logLevelTypesFormat() {
 	fmt.Println("Log level types format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%Level %Lev %LEVEL %LEV %l %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -116,14 +116,14 @@ func fileTypesFormat() {
 	fmt.Println("File types format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%File %FullPath %RelFile %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -135,14 +135,14 @@ func funcFormat() {
 	fmt.Println("Func format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
 	<formats>
 		<format id="main" format="%Func %Msg%n"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.UseLogger(logger)
@@ -154,7 +154,7 @@ func xmlFormat() {
 	fmt.Println("Xml format")
 	
 	testConfig := `
-<sealog type="sync">
+<seelog type="sync">
 	<outputs formatid="main">
 		<console/>
 	</outputs>
@@ -166,7 +166,7 @@ func xmlFormat() {
 			 `&lt;msg&gt;%Msg&lt;/msg&gt;` +
 		 `&lt;/log&gt;"/>
 	</formats>
-</sealog>`
+</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 

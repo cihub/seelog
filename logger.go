@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sealog
+package seelog
 
 import (
-	cfg "github.com/cihub/sealog/config"
-	. "github.com/cihub/sealog/common"
+	cfg "github.com/cihub/seelog/config"
+	. "github.com/cihub/seelog/common"
 	"fmt"
 )
 
@@ -22,10 +22,10 @@ func buildLogString(format string, params []interface{}) string {
 }
 
 func reportInternalError(err error) {
-	fmt.Println("Sealog error: " + err.Error())
+	fmt.Println("Seelog error: " + err.Error())
 }
 
-// LoggerInterface represents structs capable of logging Sealog messages
+// LoggerInterface represents structs capable of logging Seelog messages
 type LoggerInterface interface {
 	Trace(format string, params ...interface{})
 	Debug(format string, params ...interface{})

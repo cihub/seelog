@@ -5,21 +5,21 @@
 package main
 
 import (
-	log "github.com/cihub/sealog"
-	library "github.com/cihub/sealog/examples/library/library"
+	log "github.com/cihub/seelog"
+	library "github.com/cihub/seelog/examples/library/library"
 	"fmt"
 )
 
 func loadAppConfig() {
 	appConfig := `
-<sealog type="sync">
+<seelog type="sync">
     <outputs formatid="app">
         <console />
     </outputs>
     <formats>
         <format id="app" format="app: [%LEV] %Msg%n" />
     </formats>
-</sealog>
+</seelog>
 `
 	logger, err := log.LoggerFromConfigAsBytes([]byte(appConfig))
 	if err != nil {
@@ -40,14 +40,14 @@ func calcF() {
 // Same config for both library and app
 func sameOutputConfig() {
 	libConfig := `
-<sealog type="sync">
+<seelog type="sync">
     <outputs formatid="library">
         <console />
     </outputs>
     <formats>
         <format id="library" format="library + app: [%LEV] %Msg%n" />
     </formats>
-</sealog>
+</seelog>
 `
 	logger, err := log.LoggerFromConfigAsBytes([]byte(libConfig))
 	if err != nil {
@@ -61,14 +61,14 @@ func sameOutputConfig() {
 // Special config for library (app config is not changed)
 func specialOutputConfig() {
 	libConfig := `
-<sealog type="sync">
+<seelog type="sync">
     <outputs formatid="library">
         <console />
     </outputs>
     <formats>
         <format id="library" format="library: %Msg [%LEV] %n" />
     </formats>
-</sealog>
+</seelog>
 `
 	logger, err := log.LoggerFromConfigAsBytes([]byte(libConfig))
 	if err != nil {
