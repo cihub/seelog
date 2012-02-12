@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package dispatcher implements log dispatching functionality.
-// It allows to filter, duplicate, customize the flow of log streams.
 package dispatchers
 
 import (

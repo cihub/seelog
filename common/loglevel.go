@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package common contains constants and basic types for the seelog packages
 package common
 
 // Log level type

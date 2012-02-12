@@ -7,7 +7,6 @@ package test
 import (
 	"errors"
 	"io"
-
 	"path/filepath"
 	"strings"
 )
