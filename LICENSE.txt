@@ -1,4 +1,4 @@
-Copyright (c) 2011, Cloud Instruments Co., Ltd. <info@cin.io>
+Copyright (c) 2012, Cloud Instruments Co., Ltd. <info@cin.io>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
