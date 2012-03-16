@@ -333,11 +333,11 @@ func verbFunction(message string, level LogLevel, context *LogContext) interface
 }
 
 func verbTime(message string, level LogLevel, context *LogContext) interface{} {
-	return time.Now().Format(TimeFormat)
+	return context.CallTime().Format(TimeFormat)
 }
 
 func verbNs(message string, level LogLevel, context *LogContext) interface{} {
-	return time.Now().UnixNano()
+	return context.CallTime().UnixNano()
 }
 
 func verbn(message string, level LogLevel, context *LogContext) interface{} {

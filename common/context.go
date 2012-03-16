@@ -30,6 +30,7 @@ import (
 	"runtime"
 	"strings"
 	"path/filepath"
+	"time"
 )
 
 // Represents runtime caller context
@@ -38,6 +39,7 @@ type LogContext struct {
 	shortPath string
 	fullPath  string
 	fileName string
+	callTime time.Time
 }
 
 // Returns context of the caller
@@ -57,7 +59,7 @@ func SpecificContext(skip int) (*LogContext, error) {
 		return nil, err
 	}
 	_, fileName := filepath.Split(fullPath)
-	return &LogContext{function, shortPath, fullPath, fileName}, nil
+	return &LogContext{function, shortPath, fullPath, fileName, time.Now()}, nil
 }
 
 func (context *LogContext) Func() string {
@@ -74,6 +76,10 @@ func (context *LogContext) FullPath() string {
 
 func (context *LogContext) FileName() string {
 	return context.fileName
+}
+
+func (context *LogContext) CallTime() time.Time {
+	return context.callTime;
 }
 
 var workingDir = ""
