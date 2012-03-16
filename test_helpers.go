@@ -34,10 +34,6 @@ import (
 	"errors"
 )
 
-func main() {
-	fmt.Println("Hello World!")
-}
-
 func countSequencedRowsInFile(filePath string) (int64, error) {
 	bts, err := ioutil.ReadFile(filePath)
 	if err != nil {
