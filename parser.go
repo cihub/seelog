@@ -49,8 +49,8 @@ const (
 	FormatKeyAttrId            = "id"
 	OutputFormatId             = "formatid"
 	FilePathId                 = "path"
-	fileWriterId               = "file"
-	smtpWriterId               = "smtp"
+	FileWriterId               = "file"
+	SmtpWriterId               = "smtp"
 	SenderAddressId            = "senderaddress"
 	SenderNameId               = "sendername"
 	RecipientId                = "recipient"
@@ -60,10 +60,10 @@ const (
 	UserNameId                 = "username"
 	UserPassId                 = "password"
 	SpliterDispatcherId        = "splitter"
-	consoleWriterId            = "console"
-	filterDispatcherId         = "filter"
+	ConsoleWriterId            = "console"
+	FilterDispatcherId         = "filter"
 	FilterLevelsAttrId         = "levels"
-	rollingFileWriterId        = "rollingfile"
+	RollingFileWriterId        = "rollingfile"
 	RollingFileTypeAttr        = "type"
 	RollingFilePathAttr        = "filename"
 	RollingFileMaxSizeAttr     = "maxsize"
@@ -72,7 +72,7 @@ const (
 	bufferedWriterId           = "buffered"
 	BufferedSizeAttr           = "size"
 	BufferedFlushPeriodAttr    = "flushperiod"
-	loggerTypeFromStringAttr             = "type"
+	LoggerTypeFromStringAttr   = "type"
 	AsyncLoggerIntervalAttr    = "asyncinterval"
 )
 
@@ -95,13 +95,13 @@ var elementMap map[string]elementMapEntry
 
 func init() {
 	elementMap = map[string]elementMapEntry{
-		fileWriterId:        {createfileWriter},
+		FileWriterId:        {createfileWriter},
 		SpliterDispatcherId: {createSplitter},
-		filterDispatcherId:  {createFilter},
-		consoleWriterId:     {createconsoleWriter},
-		rollingFileWriterId: {createrollingFileWriter},
+		FilterDispatcherId:  {createFilter},
+		ConsoleWriterId:     {createconsoleWriter},
+		RollingFileWriterId: {createrollingFileWriter},
 		bufferedWriterId:    {createbufferedWriter},
-		smtpWriterId: 		 {createsmtpWriter},
+		SmtpWriterId: 		 {createsmtpWriter},
 	}
 }
 
@@ -118,7 +118,7 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, loggerTypeFromStringAttr, AsyncLoggerIntervalAttr)
+	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr, AsyncLoggerIntervalAttr)
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +358,7 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 }
 
 func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString, logData interface{}, err error) {
-	logTypeStr, loggerTypeExists := config.attributes[loggerTypeFromStringAttr]
+	logTypeStr, loggerTypeExists := config.attributes[LoggerTypeFromStringAttr]
 	
 	if !loggerTypeExists {
 		return DefaultloggerTypeFromString, nil, nil

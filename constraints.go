@@ -95,10 +95,13 @@ func (listConstr *listConstraints) String() string {
 
 	listLevel := make([]string, len(listConstr.allowedLevels))
 
+	var logLevel LogLevel
 	i := 0
-	for level, _ := range listConstr.allowedLevels {
-		listLevel[i] = level.String()
-		i++
+	for logLevel = TraceLvl; logLevel <= Off; logLevel++ {
+		if listConstr.allowedLevels[logLevel] {
+			listLevel[i] = logLevel.String()
+			i++
+		}
 	}
 
 	allowedList += strings.Join(listLevel, ",")
