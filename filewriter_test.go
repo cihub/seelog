@@ -37,7 +37,7 @@ const (
 
 var bytesFileTest = []byte(strings.Repeat("A", WriteMessageLen))
 
-func TestSimplefileWriter(t *testing.T) {
+func TestSimpleFileWriter(t *testing.T) {
 	newfileWriterTester(simplefileWriterTests, simplefileWriterGetter, t).test()
 }
 
@@ -76,7 +76,7 @@ func createRollingDatefileWriterTestCase(files []string, fileName string, datePa
 var simplefileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
 	createSimplefileWriterTestCase("log.txt", 1),
 	createSimplefileWriterTestCase("log.txt", 50),
-	createSimplefileWriterTestCase("dir/log.txt", 1),
+	createSimplefileWriterTestCase(filepath.Join("dir", "log.txt"), 1),
 }
 
 //===============================================================

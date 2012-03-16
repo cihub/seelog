@@ -105,6 +105,11 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 		return "", "", "", errors.New("Error during runtime.Caller")
 	}
 
+	//TODO:Currently fixes bug in weekly.2012-03-13+: Caller returns incorrect separators
+	//Delete later
+	
+	fullPath = strings.Replace(fullPath, "\\", string(os.PathSeparator), -1)
+
 	
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
