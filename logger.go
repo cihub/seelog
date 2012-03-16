@@ -25,8 +25,6 @@
 package seelog
 
 import (
-	cfg "github.com/cihub/seelog/config"
-	. "github.com/cihub/seelog/common"
 	"fmt"
 )
 
@@ -60,7 +58,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	innerLog(level LogLevel, context *LogContext, format string, params []interface{})
+	innerLog(level LogLevel, context *logContext, format string, params []interface{})
 }
 
 
@@ -69,14 +67,14 @@ type allowedContextCache map[string]map[string]map[string]bool
 
 // commonLogger contains all common data needed for logging and contains methods used to log messages.
 type commonLogger struct {
-	config *cfg.LogConfig // Config used for logging
+	config *logConfig // Config used for logging
 	contextCache allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
 	closed bool // 'true' when all writers are closed, all data is flushed, logger is unusable.
 	unusedLevels []bool 
 	innerLogger innerLoggerInterface
 }
 
-func newCommonLogger(config *cfg.LogConfig, internalLogger innerLoggerInterface) (*commonLogger) {
+func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*commonLogger) {
 	cLogger := new(commonLogger)
 	
 	cLogger.config = config
@@ -129,7 +127,7 @@ func (cLogger *commonLogger) fillUnusedLevels() {
 	}
 }
 
-func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint LogLevelConstraints) {
+func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelConstraints) {
 	for i:= 0; i < len(cLogger.unusedLevels); i++ {
 		if constraint.IsAllowed(LogLevel(i)) {
 			cLogger.unusedLevels[i] = false
@@ -150,7 +148,7 @@ func (cLogger *commonLogger) log(
 		return
 	}
 	
-	context, err := SpecificContext(3)
+	context, err := specificContext(3)
 	if err != nil {
 		reportInternalError(err)
 		return
@@ -164,7 +162,7 @@ func (cLogger *commonLogger) processLogMsg(
     level LogLevel, 
 	format string, 
 	params []interface{},
-	context *LogContext) {
+	context *logContext) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -179,7 +177,7 @@ func (cLogger *commonLogger) processLogMsg(
 }
 
 
-func (cLogger *commonLogger) isAllowed(level LogLevel, context *LogContext) bool {
+func (cLogger *commonLogger) isAllowed(level LogLevel, context *logContext) bool {
 	funcMap, ok := cLogger.contextCache[context.FullPath()]
 	if !ok {
 		funcMap = make(map[string]map[string]bool, 0)

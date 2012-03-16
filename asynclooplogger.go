@@ -24,20 +24,17 @@
 
 package seelog
 
-import (
-	cfg "github.com/cihub/seelog/config"
-)
 
-// AsyncLoopLogger represents asynchronous logger which processes the log queue in
+// asyncLoopLogger represents asynchronous logger which processes the log queue in
 // a 'for' loop
-type AsyncLoopLogger struct {
+type asyncLoopLogger struct {
 	asyncLogger
 }
 
-// NewAsyncLoopLogger creates a new asynchronous loop logger
-func NewAsyncLoopLogger(config *cfg.LogConfig) (*AsyncLoopLogger){
+// newAsyncLoopLogger creates a new asynchronous loop logger
+func newAsyncLoopLogger(config *logConfig) (*asyncLoopLogger){
 	
-	asnLoopLogger := new(AsyncLoopLogger)
+	asnLoopLogger := new(asyncLoopLogger)
 	
 	asnLoopLogger.asyncLogger = *newAsyncLogger(config)
 	
@@ -46,7 +43,7 @@ func NewAsyncLoopLogger(config *cfg.LogConfig) (*AsyncLoopLogger){
 	return asnLoopLogger
 }
 
-func (asnLoopLogger *AsyncLoopLogger) processQueue() {
+func (asnLoopLogger *asyncLoopLogger) processQueue() {
 	for !asnLoopLogger.closed {
 		asnLoopLogger.queueHasElements.L.Lock()
 		for asnLoopLogger.msgQueue.Len() == 0 && !asnLoopLogger.closed {

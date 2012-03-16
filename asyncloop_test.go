@@ -25,13 +25,13 @@
 package seelog
 
 import (
-	"github.com/cihub/seelog/test"
 	"testing"
 	"strconv"
 	"os"
 )
 
 func Test_Asyncloop(t *testing.T) {
+	switchToRealFSWrapper(t)
 	fileName := "log.log"
 	count := 100
 	
@@ -60,7 +60,7 @@ func Test_Asyncloop(t *testing.T) {
 	
 	Flush()
 	
-	gotCount, err := test.CountSequencedRowsInFile(fileName)
+	gotCount, err := countSequencedRowsInFile(fileName)
 	if err != nil {
 		t.Error(err)
 		return
@@ -101,7 +101,7 @@ func Test_AsyncloopOff(t *testing.T) {
 	
 	Flush()
 	
-	gotCount, err := test.CountSequencedRowsInFile(fileName)
+	gotCount, err := countSequencedRowsInFile(fileName)
 	if err != nil {
 		t.Error(err)
 		return

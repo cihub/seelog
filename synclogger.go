@@ -24,39 +24,34 @@
 
 package seelog
 
-import (
-	. "github.com/cihub/seelog/common"
-	cfg "github.com/cihub/seelog/config"
-)
-
-// SyncLogger performs logging in the same goroutine where 'Trace/Debug/...'
+// syncLogger performs logging in the same goroutine where 'Trace/Debug/...'
 // func was called
-type SyncLogger struct {
+type syncLogger struct {
 	commonLogger 
 }
 
-// NewSyncLogger creates a new synchronous logger
-func NewSyncLogger(config *cfg.LogConfig) (*SyncLogger){
-	syncLogger := new(SyncLogger)
+// newSyncLogger creates a new synchronous logger
+func newSyncLogger(config *logConfig) (*syncLogger){
+	syncLogger := new(syncLogger)
 	
 	syncLogger.commonLogger = *newCommonLogger(config, syncLogger)
 	
 	return syncLogger
 }
 
-func (cLogger *SyncLogger) innerLog(
+func (cLogger *syncLogger) innerLog(
     level LogLevel, 
-	context *LogContext,
+	context *logContext,
 	format string, 
 	params []interface{}) {
 	
 	cLogger.processLogMsg(level, format, params, context)
 }
 
-func (syncLogger *SyncLogger) Close() {
+func (syncLogger *syncLogger) Close() {
 	syncLogger.config.RootDispatcher.Close()
 }
 
-func (syncLogger *SyncLogger) Flush() {
+func (syncLogger *syncLogger) Flush() {
 	syncLogger.config.RootDispatcher.Flush()
 }

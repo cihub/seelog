@@ -25,8 +25,6 @@
 package seelog
 
 import (
-	cfg "github.com/cihub/seelog/config"
-	. "github.com/cihub/seelog/common"
 	"container/list"
 	"sync"
 	"fmt"
@@ -39,7 +37,7 @@ const (
 
 type msgQueueItem struct {
 	level LogLevel
-	context *LogContext
+	context *logContext
 	format string
 	params []interface{}
 }
@@ -53,7 +51,7 @@ type asyncLogger struct {
 }
 
 // newAsyncLogger creates a new asynchronous logger
-func newAsyncLogger(config *cfg.LogConfig) (*asyncLogger){
+func newAsyncLogger(config *logConfig) (*asyncLogger){
 	asnLogger := new(asyncLogger)
 	
 	asnLogger.msgQueue = list.New()
@@ -67,7 +65,7 @@ func newAsyncLogger(config *cfg.LogConfig) (*asyncLogger){
 
 func (asnLogger *asyncLogger) innerLog(
     level LogLevel, 
-	context *LogContext,
+	context *logContext,
 	format string, 
 	params []interface{}) {
 		
@@ -113,7 +111,7 @@ func (asnLogger *asyncLogger) processQueueElement() {
 	}
 }
 
-func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *LogContext, format string, params []interface{}) {
+func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *logContext, format string, params []interface{}) {
 	asnLogger.queueMutex.Lock()
 	if !asnLogger.closed {
 		if asnLogger.msgQueue.Len() >= MaxQueueSize {

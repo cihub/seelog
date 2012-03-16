@@ -30,7 +30,6 @@ import (
 	"fmt"
 	"time"
 	"sync"
-	cfg "github.com/cihub/seelog/config"
 )
 
 var Current LoggerInterface
@@ -57,25 +56,25 @@ func init() {
 	Current = Default
 }
 
-func createLoggerFromConfig(config *cfg.LogConfig) (LoggerInterface, error) {
-	if config.LogType == cfg.SyncLoggerType {
-		return NewSyncLogger(config), nil
-	} else if config.LogType == cfg.AsyncLoopLoggerType {
-		return NewAsyncLoopLogger(config), nil
-	} else if config.LogType == cfg.AsyncTimerLoggerType {
+func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
+	if config.LogType == syncloggerTypeFromString {
+		return newSyncLogger(config), nil
+	} else if config.LogType == asyncLooploggerTypeFromString {
+		return newAsyncLoopLogger(config), nil
+	} else if config.LogType == asyncTimerloggerTypeFromString {
 		logData := config.LoggerData
 		
 		if logData == nil {
 			return nil, errors.New("Invalid async timer interval!")
 		}
 		
-		asyncInt, ok := logData.(cfg.AsyncTimerLoggerData)
+		asyncInt, ok := logData.(asyncTimerLoggerData)
 		
 		if !ok {
 			return nil, errors.New("Invalid async timer data!")
 		}
 		
-		return NewAsyncTimerLogger(config, time.Duration(asyncInt.AsyncInterval)), nil
+		return newAsyncTimerLogger(config, time.Duration(asyncInt.AsyncInterval)), nil
 	}
 	return nil, errors.New("Invalid config log type/data")
 }

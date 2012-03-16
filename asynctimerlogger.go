@@ -25,20 +25,19 @@
 package seelog
 
 import (
-	cfg "github.com/cihub/seelog/config"
 	"time"
 )
 
-// AsyncTimerLogger represents asynchronous logger which processes the log queue each
+// asyncTimerLogger represents asynchronous logger which processes the log queue each
 // 'duration' nanoseconds
-type AsyncTimerLogger struct {
+type asyncTimerLogger struct {
 	asyncLogger
 	interval time.Duration
 }
 
-// NewAsyncLoopLogger creates a new asynchronous loop logger
-func NewAsyncTimerLogger(config *cfg.LogConfig, interval time.Duration) (*AsyncTimerLogger){
-	asnTimerLogger := new(AsyncTimerLogger)
+// newAsyncLoopLogger creates a new asynchronous loop logger
+func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger){
+	asnTimerLogger := new(asyncTimerLogger)
 	
 	asnTimerLogger.asyncLogger = *newAsyncLogger(config)
 	asnTimerLogger.interval = interval
@@ -48,7 +47,7 @@ func NewAsyncTimerLogger(config *cfg.LogConfig, interval time.Duration) (*AsyncT
 	return asnTimerLogger
 }
 
-func (asnTimerLogger *AsyncTimerLogger) processQueue() {
+func (asnTimerLogger *asyncTimerLogger) processQueue() {
 	for !asnTimerLogger.closed {
 		asnTimerLogger.queueHasElements.L.Lock()
 		for asnTimerLogger.msgQueue.Len() == 0 && !asnTimerLogger.closed {

@@ -25,13 +25,14 @@
 package seelog
 
 import (
-	"github.com/cihub/seelog/test"
 	"testing"
 	"strconv"
 	"os"
 )
 
 func Test_Sync(t *testing.T) {
+	switchToRealFSWrapper(t)
+	
 	fileName := "log.log"
 	count := 100
 	
@@ -59,7 +60,7 @@ func Test_Sync(t *testing.T) {
 		Trace(strconv.Itoa(i))
 	}
 	
-	gotCount, err := test.CountSequencedRowsInFile(fileName)
+	gotCount, err := countSequencedRowsInFile(fileName)
 	if err != nil {
 		t.Error(err)
 		return

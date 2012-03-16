@@ -26,10 +26,6 @@ package seelog
 
 import (
 	"bytes"
-	. "github.com/cihub/seelog/common"
-	"github.com/cihub/seelog/config"
-	"github.com/cihub/seelog/dispatchers"
-	"github.com/cihub/seelog/format"
 	"io"
 	"os"
 )
@@ -42,7 +38,7 @@ func LoggerFromConfigAsFile(fileName string) (LoggerInterface, error) {
 	}
 	defer file.Close()
 
-	conf, err := config.ConfigFromReader(file)
+	conf, err := configFromReader(file)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +48,7 @@ func LoggerFromConfigAsFile(fileName string) (LoggerInterface, error) {
 
 // LoggerFromConfigAsBytes creates a logger with config from bytes stream. Bytes should contain valid seelog xml.
 func LoggerFromConfigAsBytes(data []byte) (LoggerInterface, error) {
-	conf, err := config.ConfigFromReader(bytes.NewBuffer(data))
+	conf, err := configFromReader(bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +64,17 @@ func LoggerFromConfigAsString(data string) (LoggerInterface, error) {
 // LoggerFromWriterWithMinLevel creates a simple logger for usage with non-Seelog systems. 
 // Creates logger that writes to output with minimal level = minLevel.
 func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerInterface, error) {
-	constraints, err := NewMinMaxConstraints(minLevel, CriticalLvl)
+	constraints, err := newMinMaxConstraints(minLevel, CriticalLvl)
 	if err != nil {
 		return nil, err
 	}
 
-	dispatcher, err := dispatchers.NewSplitDispatcher(format.DefaultFormatter, []interface{}{output})
+	dispatcher, err := newSplitDispatcher(Defaultformatter, []interface{}{output})
 	if err != nil {
 		return nil, err
 	}
 
-	conf, err := config.NewConfig(constraints, make([]*LogLevelException, 0), dispatcher, config.SyncLoggerType, nil)
+	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil)
 	if err != nil {
 		return nil, err
 	}
