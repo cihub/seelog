@@ -73,6 +73,7 @@ func Test_Asyncloop(t *testing.T) {
 }
 
 func Test_AsyncloopOff(t *testing.T) {
+	switchToRealFSWrapper(t)
 	fileName := "log.log"
 	count := 100
 	

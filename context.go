@@ -109,6 +109,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	//Delete later
 	
 	fullPath = strings.Replace(fullPath, "\\", string(os.PathSeparator), -1)
+	fullPath = strings.Replace(fullPath, "/", string(os.PathSeparator), -1)
 
 	
 	if strings.HasPrefix(fullPath, workingDir) {
