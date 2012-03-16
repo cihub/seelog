@@ -91,11 +91,11 @@ func init() {
 func setWorkDir() {
 	workDir, workingDirError := os.Getwd()
 	if workingDirError != nil {
-		workingDir = "/"
+		workingDir = string(os.PathSeparator)
 		return
 	}
 
-	workingDir = workDir + "/"
+	workingDir = workDir + string(os.PathSeparator)
 }
 
 func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err error) {
