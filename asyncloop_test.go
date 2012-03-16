@@ -35,6 +35,7 @@ func Test_Asyncloop(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
+	Flush()
 	os.Remove(fileName)
 	
 	testConfig := `
@@ -77,6 +78,7 @@ func Test_AsyncloopOff(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
+	Flush()
 	os.Remove(fileName)
 	
 	testConfig := `

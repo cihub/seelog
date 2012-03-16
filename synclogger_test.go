@@ -36,6 +36,7 @@ func Test_Sync(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
+	Flush()
 	os.Remove(fileName)
 	
 	testConfig := `
@@ -55,6 +56,8 @@ func Test_Sync(t *testing.T) {
 		return
 	}
 	defer Flush()
+	
+	
 	
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))

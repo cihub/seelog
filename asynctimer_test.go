@@ -35,6 +35,7 @@ func Test_Asynctimer(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
+	Flush()
 	os.Remove(fileName)
 	
 	testConfig := `
@@ -53,6 +54,8 @@ func Test_Asynctimer(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	
+	
 	
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))
