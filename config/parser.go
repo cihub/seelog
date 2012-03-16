@@ -54,6 +54,15 @@ const (
 	OutputFormatId             = "formatid"
 	FilePathId                 = "path"
 	FileWriterId               = "file"
+	SMTPWriterId               = "smtp"
+	SenderAddressId            = "senderaddress"
+	SenderNameId               = "sendername"
+	RecipientId                = "recipient"
+	AddressId                  = "address"
+	HostNameId                 = "hostname"
+	HostPortId                 = "hostport"
+	UserNameId                 = "username"
+	UserPassId                 = "password"
 	SpliterDispatcherId        = "splitter"
 	ConsoleWriterId            = "console"
 	FilterDispatcherId         = "filter"
@@ -71,10 +80,9 @@ const (
 	AsyncLoggerIntervalAttr    = "asyncinterval"
 )
 
-const (
-	nodeMustHaveChildrenErrorStr = "Node must have children"
-	nodeCannotHaveChildrenErrorStr = "Node cannot have children"
-	
+var (
+	NodeMustHaveChildrenError = errors.New("Node must have children")
+	NodeCannotHaveChildrenError = errors.New("Node cannot have children")
 )
 
 type elementMapEntry struct {
@@ -91,7 +99,7 @@ func init() {
 		ConsoleWriterId:     {createConsoleWriter},
 		RollingFileWriterId: {createRollingFileWriter},
 		BufferedWriterId:    {createBufferedWriter},
-		//"smtp": { createSmtpWriter },
+		SMTPWriterId: 		 {createSMTPWriter},
 	}
 }
 
@@ -455,7 +463,7 @@ func createSplitter(node *xmlNode, formatFromParent *format.Formatter, formats m
 	}
 
 	if !node.hasChildren() {
-		return nil, errors.New(nodeMustHaveChildrenErrorStr)
+		return nil, NodeMustHaveChildrenError
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -478,7 +486,7 @@ func createFilter(node *xmlNode, formatFromParent *format.Formatter, formats map
 	}
 
 	if !node.hasChildren() {
-		return nil, errors.New(nodeMustHaveChildrenErrorStr)
+		return nil, NodeMustHaveChildrenError
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -511,7 +519,7 @@ func createFileWriter(node *xmlNode, formatFromParent *format.Formatter, formats
 	}
 
 	if node.hasChildren() {
-		return nil, errors.New(nodeCannotHaveChildrenErrorStr)
+		return nil, NodeCannotHaveChildrenError
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -532,6 +540,84 @@ func createFileWriter(node *xmlNode, formatFromParent *format.Formatter, formats
 	return dispatchers.NewFormattedWriter(fileWriter, currentFormat)
 }
 
+// Creates new SMTP writer if encountered in the config file
+func createSMTPWriter(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, error) {
+	err := checkUnexpectedAttribute(
+		node,
+		OutputFormatId,
+		SenderAddressId,
+		SenderNameId,
+		//RecipientsId,
+		HostNameId,
+		HostPortId,
+		UserNameId,
+		UserPassId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if node.hasChildren() {
+		return nil, NodeCannotHaveChildrenError
+	}
+	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
+	if err != nil {
+		return nil, err
+	}
+	senderAddress, ok := node.attributes[SenderAddressId]
+	if !ok {
+		return nil, missingArgumentError(node.name, SenderAddressId)
+	}
+	senderName, ok := node.attributes[SenderNameId]
+	if !ok {
+		return nil, missingArgumentError(node.name, SenderNameId)
+	}
+	recipientAddresses := make([]string, 0)
+	// Extract recipient addresses from child nodes
+	for _, childNode := range node.children {
+		if childNode.name == RecipientId {
+			address, ok := childNode.attributes[AddressId]
+			if !ok {
+				return nil, missingArgumentError(childNode.name, AddressId)
+			}
+			recipientAddresses = append(recipientAddresses, address)
+		}
+	}
+	hostName, ok := node.attributes[HostNameId]
+	if !ok {
+		return nil, missingArgumentError(node.name, HostNameId)
+	}
+	hostPort, ok := node.attributes[HostPortId]
+	if !ok {
+		return nil, missingArgumentError(node.name, HostPortId)
+	}
+	// Get int value from string
+	hPort, err := strconv.Atoi(hostPort)
+	if err != nil {
+		return nil, errors.New("Invalid host port number")
+	}
+	userName, ok := node.attributes[UserNameId]
+	if !ok {
+		return nil, missingArgumentError(node.name, UserNameId)
+	}
+	userPass, ok := node.attributes[UserPassId]
+	if !ok {
+		return nil, missingArgumentError(node.name, UserPassId)
+	}
+	smtpWriter, err := writers.NewSMTPWriter(
+		senderAddress,
+		senderName,
+		recipientAddresses,
+		hostName,
+		hPort,
+		userName,
+		userPass,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return dispatchers.NewFormattedWriter(smtpWriter, currentFormat)
+}
+
 func createConsoleWriter(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, OutputFormatId)
 	if err != nil {
@@ -539,7 +625,7 @@ func createConsoleWriter(node *xmlNode, formatFromParent *format.Formatter, form
 	}
 
 	if node.hasChildren() {
-		return nil, errors.New(nodeCannotHaveChildrenErrorStr)
+		return nil, NodeCannotHaveChildrenError
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -557,7 +643,7 @@ func createConsoleWriter(node *xmlNode, formatFromParent *format.Formatter, form
 
 func createRollingFileWriter(node *xmlNode, formatFromParent *format.Formatter, formats map[string]*format.Formatter) (interface{}, error) {
 	if node.hasChildren() {
-		return nil, errors.New(nodeCannotHaveChildrenErrorStr)
+		return nil, NodeCannotHaveChildrenError
 	}
 
 	rollingTypeStr, isRollingType := node.attributes[RollingFileTypeAttr]
@@ -642,7 +728,7 @@ func createBufferedWriter(node *xmlNode, formatFromParent *format.Formatter, for
 	}
 
 	if !node.hasChildren() {
-		return nil, errors.New(nodeMustHaveChildrenErrorStr)
+		return nil, NodeMustHaveChildrenError
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
