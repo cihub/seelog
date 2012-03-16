@@ -36,8 +36,12 @@ func Test_Sync(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
-	Flush()
-	os.Remove(fileName)
+	Current.Close()
+	err := os.Remove(fileName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	
 	testConfig := `
 <seelog type="sync">
@@ -50,7 +54,7 @@ func Test_Sync(t *testing.T) {
 </seelog>`
 
 	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err := ReplaceLogger(logger)
+	err = ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return

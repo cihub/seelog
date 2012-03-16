@@ -35,8 +35,12 @@ func Test_Asyncloop(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
-	Flush()
-	os.Remove(fileName)
+	Current.Close()
+	err := os.Remove(fileName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	
 	testConfig := `
 <seelog type="asyncloop">
@@ -49,7 +53,7 @@ func Test_Asyncloop(t *testing.T) {
 </seelog>`
 
 	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err := ReplaceLogger(logger)
+	err = ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
@@ -78,8 +82,12 @@ func Test_AsyncloopOff(t *testing.T) {
 	fileName := "log.log"
 	count := 100
 	
-	Flush()
-	os.Remove(fileName)
+	Current.Close()
+	err := os.Remove(fileName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	
 	testConfig := `
 <seelog type="asyncloop" levels="off">
@@ -92,7 +100,7 @@ func Test_AsyncloopOff(t *testing.T) {
 </seelog>`
 
 	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err := ReplaceLogger(logger)
+	err = ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
