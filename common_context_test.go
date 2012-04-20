@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	shortPath    = "context_test.go"
+	shortPath    = "common_context_test.go"
 	commonPrefix = "github.com/cihub/seelog."
 )
 

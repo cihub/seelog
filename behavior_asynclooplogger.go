@@ -24,43 +24,47 @@
 
 package seelog
 
-import (
-	"time"
-)
 
-// asyncTimerLogger represents asynchronous logger which processes the log queue each
-// 'duration' nanoseconds
-type asyncTimerLogger struct {
+// asyncLoopLogger represents asynchronous logger which processes the log queue in
+// a 'for' loop
+type asyncLoopLogger struct {
 	asyncLogger
-	interval time.Duration
 }
 
 // newAsyncLoopLogger creates a new asynchronous loop logger
-func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger){
-	asnTimerLogger := new(asyncTimerLogger)
+func newAsyncLoopLogger(config *logConfig) (*asyncLoopLogger){
 	
-	asnTimerLogger.asyncLogger = *newAsyncLogger(config)
-	asnTimerLogger.interval = interval
+	asnLoopLogger := new(asyncLoopLogger)
 	
-	go asnTimerLogger.processQueue()
+	asnLoopLogger.asyncLogger = *newAsyncLogger(config)
 	
-	return asnTimerLogger
+	go asnLoopLogger.processQueue()
+	
+	return asnLoopLogger
 }
 
-func (asnTimerLogger *asyncTimerLogger) processQueue() {
-	for !asnTimerLogger.closed {
-		asnTimerLogger.queueHasElements.L.Lock()
-		for asnTimerLogger.msgQueue.Len() == 0 && !asnTimerLogger.closed {
-	   		asnTimerLogger.queueHasElements.Wait()
-		}
+func (asnLoopLogger *asyncLoopLogger) processItem() (closed bool) {
+	asnLoopLogger.queueHasElements.L.Lock()
+	defer asnLoopLogger.queueHasElements.L.Unlock()
+	
+	for asnLoopLogger.msgQueue.Len() == 0 && !asnLoopLogger.closed {
+   		asnLoopLogger.queueHasElements.Wait()
+	}
 		
-		if asnTimerLogger.closed{
+	if asnLoopLogger.closed{
+		return true
+	}
+
+	asnLoopLogger.processQueueElement()
+	return false
+}
+
+func (asnLoopLogger *asyncLoopLogger) processQueue() {
+	for !asnLoopLogger.closed {
+		closed := asnLoopLogger.processItem()
+
+		if closed {
 			break
 		}
-    	asnTimerLogger.processQueueElement()
-	
-		asnTimerLogger.queueHasElements.L.Unlock()
-		
-		<-time.After(asnTimerLogger.interval)
 	}
 }

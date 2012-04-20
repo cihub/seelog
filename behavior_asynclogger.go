@@ -74,32 +74,33 @@ func (asnLogger *asyncLogger) innerLog(
 
 func (asnLogger *asyncLogger) Close() {
 	asnLogger.queueMutex.Lock()
+	defer asnLogger.queueMutex.Unlock()
+
 	if !asnLogger.closed {
 		asnLogger.flushQueue()
 		asnLogger.config.RootDispatcher.Flush()
 		asnLogger.config.RootDispatcher.Close()
 		asnLogger.queueHasElements.Broadcast()
 	}
-	asnLogger.queueMutex.Unlock()
 }
 
 func (asnLogger *asyncLogger) Flush() {
 	asnLogger.queueMutex.Lock()
+	defer asnLogger.queueMutex.Unlock()
 	
 	if !asnLogger.closed {
 		asnLogger.flushQueue()
 		asnLogger.config.RootDispatcher.Flush()
 	}
-	asnLogger.queueMutex.Unlock()
 }
 
 func (asnLogger *asyncLogger) flushQueue() {
 	asnLogger.queueHasElements.L.Lock()
+	defer asnLogger.queueHasElements.L.Unlock()
+
 	for asnLogger.msgQueue.Len() > 0 {
    		asnLogger.processQueueElement()
 	}
-
-	asnLogger.queueHasElements.L.Unlock()
 }
 
 func (asnLogger *asyncLogger) processQueueElement() {
@@ -113,6 +114,8 @@ func (asnLogger *asyncLogger) processQueueElement() {
 
 func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *logContext, format string, params []interface{}) {
 	asnLogger.queueMutex.Lock()
+	defer asnLogger.queueMutex.Unlock()
+
 	if !asnLogger.closed {
 		if asnLogger.msgQueue.Len() >= MaxQueueSize {
 			fmt.Printf("Seelog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
@@ -127,6 +130,5 @@ func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *logContext,
 		err := errors.New(fmt.Sprintf("Queue closed! Cannot process element: %d %s %v", level, format, params))
 		reportInternalError(err)
 	}
-	asnLogger.queueMutex.Unlock()
 }
 

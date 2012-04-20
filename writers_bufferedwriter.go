@@ -139,14 +139,19 @@ func (bufWriter *bufferedWriter) flushInner() (n int, err error) {
 	return bufWriter.buffer.Buffered() - bufferedLen, flushErr
 }
 
+func (bufWriter *bufferedWriter) flushBuffer() {
+	bufWriter.bufferMutex.Lock()
+	defer bufWriter.bufferMutex.Unlock()
+
+	bufWriter.buffer.Flush()
+}
+
 func (bufWriter *bufferedWriter) flushPeriodically() {
 	if bufWriter.flushPeriod > 0 {
 		ticker := time.NewTicker(bufWriter.flushPeriod)
 		for {
 			<-ticker.C
-			bufWriter.bufferMutex.Lock()
-			bufWriter.buffer.Flush()
-			bufWriter.bufferMutex.Unlock()
+			bufWriter.flushBuffer()
 		}
 	}
 }

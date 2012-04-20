@@ -30,20 +30,21 @@ import (
 	"os"
 )
 
-func Test_Asynctimer(t *testing.T) {
+func Test_Sync(t *testing.T) {
 	switchToRealFSWrapper(t)
+	
 	fileName := "log.log"
 	count := 100
 	
 	Current.Close()
 	err := os.Remove(fileName)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		t.Error(err)
 		return
 	}
 	
 	testConfig := `
-<seelog type="asynctimer" asyncinterval="100">
+<seelog type="sync">
 	<outputs formatid="msg">
 		<file path="` + fileName + `"/>
 	</outputs>
@@ -58,14 +59,13 @@ func Test_Asynctimer(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	defer Flush()
 	
 	
 	
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))
 	}
-	
-	Flush()
 	
 	gotCount, err := countSequencedRowsInFile(fileName)
 	if err != nil {

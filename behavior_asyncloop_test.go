@@ -37,7 +37,7 @@ func Test_Asyncloop(t *testing.T) {
 	
 	Current.Close()
 	err := os.Remove(fileName)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		t.Error(err)
 		return
 	}
@@ -84,7 +84,7 @@ func Test_AsyncloopOff(t *testing.T) {
 	
 	Current.Close()
 	err := os.Remove(fileName)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		t.Error(err)
 		return
 	}

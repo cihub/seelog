@@ -81,10 +81,12 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 
 // UseConfig uses the given logger for all Trace/Debug/... funcs.
 func UseLogger(logger LoggerInterface) error {
-	pkgOperationsMutex.Lock()
 	if logger == nil {
 		return errors.New("Logger can not be nil")
 	}
+
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	
 	oldLogger := Current
 	Current = logger
@@ -92,16 +94,18 @@ func UseLogger(logger LoggerInterface) error {
 	if oldLogger != nil {
 		oldLogger.Flush()
 	}
-	pkgOperationsMutex.Unlock()
+	
 	return nil
 }
 
 // Acts as UseLogger but the logger that was previously used would be disposed (except Default and Disabled loggers).
 func ReplaceLogger(logger LoggerInterface) error {
-	pkgOperationsMutex.Lock()
 	if logger == nil {
 		return errors.New("Logger can not be nil")
 	}
+
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	
 	defer func() {
 		if err := recover(); err != nil {
@@ -121,56 +125,56 @@ func ReplaceLogger(logger LoggerInterface) error {
 	
 	
 	Current = logger
-	pkgOperationsMutex.Unlock()
+	
 	return nil
 }
 
 // Trace formats message according to format specifier and writes to default logger with log level = Trace
 func Trace(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Trace(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Debug formats message according to format specifier and writes to default logger with log level = Debug
 func Debug(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Debug(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Info formats message according to format specifier and writes to default logger with log level = Info
 func Info(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Info(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Warn formats message according to format specifier and writes to default logger with log level = Warn
 func Warn(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Warn(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Error formats message according to format specifier and writes to default logger with log level = Error
 func Error(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Error(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Critical formats message according to format specifier and writes to default logger with log level = Critical
 func Critical(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Critical(format, params...)
-	pkgOperationsMutex.Unlock()
 }
 
 // Flush performs all cleanup, flushes all queued messages, etc. Call this method when your app
 // is going to shut down not to lose any log messages.
 func Flush() {
 	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
 	Current.Flush()
-	pkgOperationsMutex.Unlock()
 }

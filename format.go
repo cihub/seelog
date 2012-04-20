@@ -150,7 +150,7 @@ func (formatter *formatter) extractVerbFunc(index int) (verbFunc, int, error) {
 		return function, index + verbLength - 1, nil
 	}
 
-	return nil, 0, errors.New("Format error: unrecognized verb at " + strconv.Itoa(index))
+	return nil, 0, errors.New("Format error: unrecognized verb at " + strconv.Itoa(index) + ": " + letterSequence)
 }
 
 func (formatter *formatter) extractLetterSequence(index int) string {
