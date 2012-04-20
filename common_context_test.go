@@ -35,10 +35,6 @@ const (
 	commonPrefix = "github.com/cihub/seelog."
 )
 
-const (
-	
-)
-
 var testFullPath string
 
 func fullPath(t *testing.T) string {
