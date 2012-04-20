@@ -32,6 +32,11 @@ import (
 	"sync"
 )
 
+const (
+	staticFuncCallDepth = 3 // See 'commonLogger.log' method comments
+	loggerFuncCallDepth = 3
+)
+
 var Current LoggerInterface
 var Default LoggerInterface
 var Disabled LoggerInterface
@@ -133,42 +138,42 @@ func ReplaceLogger(logger LoggerInterface) error {
 func Trace(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Trace(format, params...)
+	Current.traceWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Debug formats message according to format specifier and writes to default logger with log level = Debug
 func Debug(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Debug(format, params...)
+	Current.debugWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Info formats message according to format specifier and writes to default logger with log level = Info
 func Info(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Info(format, params...)
+	Current.infoWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Warn formats message according to format specifier and writes to default logger with log level = Warn
 func Warn(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Warn(format, params...)
+	Current.warnWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Error formats message according to format specifier and writes to default logger with log level = Error
 func Error(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Error(format, params...)
+	Current.errorWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Critical formats message according to format specifier and writes to default logger with log level = Critical
 func Critical(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.Critical(format, params...)
+	Current.criticalWithCallDepth(staticFuncCallDepth, format, params)
 }
 
 // Flush performs all cleanup, flushes all queued messages, etc. Call this method when your app

@@ -51,6 +51,14 @@ type LoggerInterface interface {
 	Warn(format string, params ...interface{})
 	Error(format string, params ...interface{})
 	Critical(format string, params ...interface{})
+	
+	traceWithCallDepth(callDepth int, format string, params []interface{})
+	debugWithCallDepth(callDepth int, format string, params []interface{})
+	infoWithCallDepth(callDepth int, format string, params []interface{})
+	warnWithCallDepth(callDepth int, format string, params []interface{})
+	errorWithCallDepth(callDepth int, format string, params []interface{})
+	criticalWithCallDepth(callDepth int, format string, params []interface{})
+	
 	Close()
 	Flush()
 	Closed() bool
@@ -87,29 +95,52 @@ func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*c
 }
 
 func (cLogger *commonLogger) Trace(format string, params ...interface{}) {
-	cLogger.log(TraceLvl, format, params)
+	cLogger.traceWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
 func (cLogger *commonLogger) Debug(format string, params ...interface{}) {
-	cLogger.log(DebugLvl, format, params)
+	cLogger.debugWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
 func (cLogger *commonLogger) Info(format string, params ...interface{}) {
-	cLogger.log(InfoLvl, format, params)
+	cLogger.infoWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
 func (cLogger *commonLogger) Warn(format string, params ...interface{}) {
-	cLogger.log(WarnLvl, format, params)
+	cLogger.warnWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
 func (cLogger *commonLogger) Error(format string, params ...interface{}) {
-	cLogger.log(ErrorLvl, format, params)
+	cLogger.errorWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
 func (cLogger *commonLogger) Critical(format string, params ...interface{}) {
-	cLogger.log(CriticalLvl, format, params)
+	cLogger.criticalWithCallDepth(loggerFuncCallDepth, format, params)
 }
 
+func (cLogger *commonLogger) traceWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(TraceLvl, format, params, callDepth)
+}
+
+func (cLogger *commonLogger) debugWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(DebugLvl, format, params, callDepth)
+}
+
+func (cLogger *commonLogger) infoWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(InfoLvl, format, params, callDepth)
+}
+
+func (cLogger *commonLogger) warnWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(WarnLvl, format, params, callDepth)
+}
+
+func (cLogger *commonLogger) errorWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(ErrorLvl, format, params, callDepth)
+}
+
+func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, format string, params []interface{}) {
+	cLogger.log(CriticalLvl, format, params, callDepth)
+}
 
 func (cLogger *commonLogger) Closed() bool {
 	return cLogger.closed
@@ -135,10 +166,14 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 	}
 }
 
+// stackCallDepth is used to indicate the call depth of 'log' func.
+// This depth level is used in the runtime.Caller(...) call. See 
+// common_context.go -> specificContext, extractCallerInfo for details.
 func (cLogger *commonLogger) log(
     level LogLevel, 
 	format string, 
-	params []interface{}) {
+	params []interface{},
+	stackCallDepth int) {
 	
 	if cLogger.Closed() {
 		return
@@ -148,7 +183,7 @@ func (cLogger *commonLogger) log(
 		return
 	}
 	
-	context, err := specificContext(3)
+	context, err := specificContext(stackCallDepth)
 	if err != nil {
 		reportInternalError(err)
 		return
