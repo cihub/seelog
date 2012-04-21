@@ -2,7 +2,7 @@ Seelog
 =======
 
 Seelog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting log messages.
-Seelog is natively written in the [Go](http://golang.org/) programming language. 
+It is natively written in the [Go](http://golang.org/) programming language. 
 
 Features
 ------------------
@@ -12,7 +12,7 @@ Features
 * Possibility to set different log configurations for different project files and functions
 * Adjustable message formatting
 * Simultaneous log output to multiple streams
-* Choosing logger priority strategy to minimize performance impact
+* Choosing logger priority strategy to minimize performance hit
 * Different output writers
   * Console writer
   * File writer 
@@ -43,6 +43,7 @@ Installation
 
 * If you don't have the Go development environment installed, visit the 
 [Getting Started](http://golang.org/doc/install.html) document and follow the instructions
+
 ```
 go get -u github.com/cihub/seelog
 ```
@@ -50,7 +51,7 @@ go get -u github.com/cihub/seelog
 Documentation
 ---------------
 
-Seelog has a github wiki page that contains a detailed Seelog reference: https://github.com/cihub/seelog/wiki
+Seelog has github wiki pages that contains a detailed Seelog reference: https://github.com/cihub/seelog/wiki
 
 Examples
 ---------------
