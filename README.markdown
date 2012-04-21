@@ -1,8 +1,8 @@
 Seelog
 =======
 
-Seelog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting.
-Natively written in the [Go](http://golang.org/) programming language. 
+Seelog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting log messages.
+Seelog is natively written in the [Go](http://golang.org/) programming language. 
 
 Features
 ------------------
@@ -18,8 +18,8 @@ Features
   * File writer 
   * Buffered writer (Chunk writer)
   * Rolling log writer (Logging with rotation)
-  * (In progress) SMTP writer
-  * others... (See [Wiki](https://github.com/cihub/seelog/wiki))
+  * SMTP writer
+  * Others... (See [Wiki](https://github.com/cihub/seelog/wiki))
 * (In progress) Log message wrappers (JSON, XML, etc.)
 * Global variables and functions for easy usage in standalone apps
 * Functions for flexible usage in libraries
@@ -43,7 +43,9 @@ Installation
 
 * If you don't have the Go development environment installed, visit the 
 [Getting Started](http://golang.org/doc/install.html) document and follow the instructions
-* go get github.com/cihub/seelog
+```
+go get -u github.com/cihub/seelog
+```
 
 Documentation
 ---------------
@@ -58,5 +60,5 @@ Seelog examples can be found here: [seelog-examples](https://github.com/cihub/se
 Issues
 ---------------
 
-Feel free to add any issues that could make Seelog better: https://github.com/cihub/seelog/issues
+Feel free to push issues that could make Seelog better: https://github.com/cihub/seelog/issues
 
