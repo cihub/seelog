@@ -79,7 +79,7 @@ func TestContext(t *testing.T) {
 	}
 }
 
-func innerContext() (context *logContext, err error) {
+func innerContext() (context logContextInterface, err error) {
 	return currentContext()
 }
 

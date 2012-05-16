@@ -75,7 +75,7 @@ func newLogLevelException(funcPattern string, filePattern string, constraints lo
 }
 
 // MatchesContext returns true if context matches the patterns of this logLevelException
-func (logLevelEx *logLevelException) MatchesContext(context *logContext) bool {
+func (logLevelEx *logLevelException) MatchesContext(context logContextInterface) bool {
 	return logLevelEx.match(context.Func(), context.FullPath())
 }
 

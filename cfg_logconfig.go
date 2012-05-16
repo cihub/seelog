@@ -101,14 +101,15 @@ func newConfig(
 // IsAllowed returns true if logging with specified log level is allowed in current context.
 // If any of exception patterns match current context, then exception constraints are applied. Otherwise,
 // the general constraints are used.
-func (config *logConfig) IsAllowed(level LogLevel, context *logContext) bool {
+func (config *logConfig) IsAllowed(level LogLevel, context logContextInterface) bool {
 	allowed := config.Constraints.IsAllowed(level) // General rule
 
 	// Exceptions:
-
-	for _, exception := range config.Exceptions {
-		if exception.MatchesContext(context) {
-			return exception.IsAllowed(level)
+	if context.IsValid() {
+		for _, exception := range config.Exceptions {
+			if exception.MatchesContext(context) {
+				return exception.IsAllowed(level)
+			}
 		}
 	}
 

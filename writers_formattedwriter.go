@@ -43,7 +43,7 @@ func newFormattedWriter(writer io.Writer, formatter *formatter) (*formattedWrite
 	return &formattedWriter{writer, formatter}, nil
 }
 
-func (formattedWriter *formattedWriter) Write(message string, level LogLevel, context *logContext) error {
+func (formattedWriter *formattedWriter) Write(message string, level LogLevel, context logContextInterface) error {
 	str := formattedWriter.formatter.Format(message, level, context)
 	_, err := formattedWriter.writer.Write([]byte(str))
 	return err

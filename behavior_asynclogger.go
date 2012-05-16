@@ -37,7 +37,7 @@ const (
 
 type msgQueueItem struct {
 	level LogLevel
-	context *logContext
+	context logContextInterface
 	format string
 	params []interface{}
 }
@@ -65,7 +65,7 @@ func newAsyncLogger(config *logConfig) (*asyncLogger){
 
 func (asnLogger *asyncLogger) innerLog(
     level LogLevel, 
-	context *logContext,
+	context logContextInterface,
 	format string, 
 	params []interface{}) {
 		
@@ -112,7 +112,11 @@ func (asnLogger *asyncLogger) processQueueElement() {
 	}
 }
 
-func (asnLogger *asyncLogger) addMsgToQueue(level LogLevel, context *logContext, format string, params []interface{}) {
+func (asnLogger *asyncLogger) addMsgToQueue(
+		level LogLevel,
+		context logContextInterface, 
+		format string, 
+		params []interface{}) {
 	asnLogger.queueMutex.Lock()
 	defer asnLogger.queueMutex.Unlock()
 

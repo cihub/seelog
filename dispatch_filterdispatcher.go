@@ -50,7 +50,11 @@ func newFilterDispatcher(formatter *formatter, receivers []interface{}, allowLis
 	return &filterDispatcher{disp, allows}, nil
 }
 
-func (filter *filterDispatcher) Dispatch(message string, level LogLevel, context *logContext, errorFunc func(err error)) {
+func (filter *filterDispatcher) Dispatch(
+		message string, 
+		level LogLevel, 
+		context logContextInterface, 
+		errorFunc func(err error)) {
 	isAllowed, ok := filter.allowList[level]
 	if ok && isAllowed {
 		filter.dispatcher.Dispatch(message, level, context, errorFunc)

@@ -53,7 +53,7 @@ func init() {
 	}
 }
 
-type verbFunc func(message string, level LogLevel, context *logContext) interface{}
+type verbFunc func(message string, level LogLevel, context logContextInterface) interface{}
 type verbFuncCreator func(param string) verbFunc
 
 var verbFuncs = map[string]verbFunc{
@@ -226,7 +226,7 @@ func (formatter *formatter) findparameter(startIndex int) (string, int, bool) {
 
 // Format processes a message with special verbs, log level, and context. Returns formatted string
 // with all verb identifiers changed to appropriate values.
-func (formatter *formatter) Format(message string, level LogLevel, context *logContext) string {
+func (formatter *formatter) Format(message string, level LogLevel, context logContextInterface) string {
 	if len(formatter.verbFuncs) == 0 {
 		return formatter.fmtString
 	}
@@ -279,7 +279,7 @@ var levelToShortestString = map[LogLevel]string{
 	Off:         "o",
 }
 
-func verbLevel(message string, level LogLevel, context *logContext) interface{} {
+func verbLevel(message string, level LogLevel, context logContextInterface) interface{} {
 	levelStr, ok := levelToString[level]
 	if !ok {
 		return wrongLogLevel
@@ -287,7 +287,7 @@ func verbLevel(message string, level LogLevel, context *logContext) interface{} 
 	return levelStr
 }
 
-func verbLev(message string, level LogLevel, context *logContext) interface{} {
+func verbLev(message string, level LogLevel, context logContextInterface) interface{} {
 	levelStr, ok := levelToShortString[level]
 	if !ok {
 		return wrongLogLevel
@@ -295,15 +295,15 @@ func verbLev(message string, level LogLevel, context *logContext) interface{} {
 	return levelStr
 }
 
-func verbLEVEL(message string, level LogLevel, context *logContext) interface{} {
+func verbLEVEL(message string, level LogLevel, context logContextInterface) interface{} {
 	return strings.ToTitle(verbLevel(message, level, context).(string))
 }
 
-func verbLEV(message string, level LogLevel, context *logContext) interface{} {
+func verbLEV(message string, level LogLevel, context logContextInterface) interface{} {
 	return strings.ToTitle(verbLev(message, level, context).(string))
 }
 
-func verbl(message string, level LogLevel, context *logContext) interface{} {
+func verbl(message string, level LogLevel, context logContextInterface) interface{} {
 	levelStr, ok := levelToShortestString[level]
 	if !ok {
 		return wrongLogLevel
@@ -311,39 +311,39 @@ func verbl(message string, level LogLevel, context *logContext) interface{} {
 	return levelStr
 }
 
-func verbMsg(message string, level LogLevel, context *logContext) interface{} {
+func verbMsg(message string, level LogLevel, context logContextInterface) interface{} {
 	return message
 }
 
-func verbFullPath(message string, level LogLevel, context *logContext) interface{} {
+func verbFullPath(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.FullPath()
 }
 
-func verbFile(message string, level LogLevel, context *logContext) interface{} {
+func verbFile(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.FileName()
 }
 
-func verbRelFile(message string, level LogLevel, context *logContext) interface{} {
+func verbRelFile(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.ShortPath()
 }
 
-func verbFunction(message string, level LogLevel, context *logContext) interface{} {
+func verbFunction(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.Func()
 }
 
-func verbTime(message string, level LogLevel, context *logContext) interface{} {
+func verbTime(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.CallTime().Format(TimeFormat)
 }
 
-func verbNs(message string, level LogLevel, context *logContext) interface{} {
+func verbNs(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.CallTime().UnixNano()
 }
 
-func verbn(message string, level LogLevel, context *logContext) interface{} {
+func verbn(message string, level LogLevel, context logContextInterface) interface{} {
 	return "\n"
 }
 
-func verbt(message string, level LogLevel, context *logContext) interface{} {
+func verbt(message string, level LogLevel, context logContextInterface) interface{} {
 	return "\t"
 }
 
@@ -352,7 +352,7 @@ func createDateTimeVerbFunc(dateTimeFormat string) verbFunc {
 	if format == "" {
 		format = DateDefaultFormat
 	}
-	return func(message string, level LogLevel, context *logContext) interface{} {
+	return func(message string, level LogLevel, context logContextInterface) interface{} {
 		return time.Now().Format(format)
 	}
 }

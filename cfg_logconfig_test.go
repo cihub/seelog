@@ -90,10 +90,10 @@ func TestConfig(t *testing.T) {
 	}
 }
 
-func getFirstContext() (*logContext, error) {
+func getFirstContext() (logContextInterface, error) {
 	return currentContext()
 }
 
-func getSecondContext() (*logContext, error) {
+func getSecondContext() (logContextInterface, error) {
 	return currentContext()
 }

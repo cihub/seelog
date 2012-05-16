@@ -33,55 +33,6 @@ import (
 	"time"
 )
 
-// Represents runtime caller context
-type logContext struct {
-	funcName  string
-	shortPath string
-	fullPath  string
-	fileName string
-	callTime time.Time
-}
-
-// Returns context of the caller
-func currentContext() (*logContext, error) {
-	return specificContext(1)
-}
-
-// Returns context of the function with placed "skip" stack frames of the caller
-// If skip == 0 then behaves like currentContext
-func specificContext(skip int) (*logContext, error) {
-	if skip < 0 {
-		return nil, errors.New("Can not skip negative stack frames")
-	}
-	
-	fullPath, shortPath, function, err := extractCallerInfo(skip + 2)
-	if err != nil {
-		return nil, err
-	}
-	_, fileName := filepath.Split(fullPath)
-	return &logContext{function, shortPath, fullPath, fileName, time.Now()}, nil
-}
-
-func (context *logContext) Func() string {
-	return context.funcName
-}
-
-func (context *logContext) ShortPath() string {
-	return context.shortPath
-}
-
-func (context *logContext) FullPath() string {
-	return context.fullPath
-}
-
-func (context *logContext) FileName() string {
-	return context.fileName
-}
-
-func (context *logContext) CallTime() time.Time {
-	return context.callTime;
-}
-
 var workingDir = ""
 
 func init() {
@@ -96,6 +47,22 @@ func setWorkDir() {
 	}
 
 	workingDir = workDir + string(os.PathSeparator)
+}
+
+
+// Represents runtime caller context
+type logContextInterface interface {
+	Func() string
+	ShortPath() string
+	FullPath() string
+	FileName() string
+	IsValid() bool
+	CallTime() time.Time
+}
+
+// Returns context of the caller
+func currentContext() (logContextInterface, error) {
+	return specificContext(1)
 }
 
 func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err error) {
@@ -127,4 +94,95 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	}
 
 	return fullPath, shortPath, functionName, nil
+}
+
+// Returns context of the function with placed "skip" stack frames of the caller
+// If skip == 0 then behaves like currentContext
+// Context is returned in any situation, even if error occurs. But, if an error 
+// occurs, the returned context is an error context, which contains no paths
+// or names, but states that they can't be extracted.
+func specificContext(skip int) (logContextInterface, error) {
+	callTime := time.Now()
+	
+	if skip < 0 {
+		negativeStackFrameErr := errors.New("Can not skip negative stack frames")
+		return &errorContext{callTime, negativeStackFrameErr}, negativeStackFrameErr
+	}
+	
+	fullPath, shortPath, function, err := extractCallerInfo(skip + 2)
+	if err != nil {
+		return &errorContext{callTime, err}, err
+	}
+	_, fileName := filepath.Split(fullPath)
+	return &logContext{function, shortPath, fullPath, fileName, callTime}, nil
+}
+
+// Represents a normal runtime caller context
+type logContext struct {
+	funcName  string
+	shortPath string
+	fullPath  string
+	fileName string
+	callTime time.Time
+}
+
+func (context *logContext) IsValid() bool {
+	return true
+}
+
+func (context *logContext) Func() string {
+	return context.funcName
+}
+
+func (context *logContext) ShortPath() string {
+	return context.shortPath
+}
+
+func (context *logContext) FullPath() string {
+	return context.fullPath
+}
+
+func (context *logContext) FileName() string {
+	return context.fileName
+}
+
+func (context *logContext) CallTime() time.Time {
+	return context.callTime;
+}
+
+const (
+	errorContextFunc = "Func() error:"
+	errorContextShortPath = "ShortPath() error:"
+	errorContextFullPath = "FullPath() error:"
+	errorContextFileName = "FileName() error:"
+)
+
+// Represents an error context
+type errorContext struct {
+	errorTime time.Time
+	err	error
+}
+
+func (errContext *errorContext) IsValid() bool {
+	return false
+}
+
+func (errContext *errorContext) Func() string {
+	return errorContextFunc + errContext.err.Error()
+}
+
+func (errContext *errorContext) ShortPath() string {
+	return errorContextShortPath + errContext.err.Error()
+}
+
+func (errContext *errorContext) FullPath() string {
+	return errorContextFullPath + errContext.err.Error()
+}
+
+func (errContext *errorContext) FileName() string {
+	return errorContextFileName + errContext.err.Error()
+}
+
+func (errContext *errorContext) CallTime() time.Time {
+	return errContext.errorTime;
 }

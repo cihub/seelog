@@ -66,7 +66,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	innerLog(level LogLevel, context *logContext, format string, params []interface{})
+	innerLog(level LogLevel, context logContextInterface, format string, params []interface{})
 }
 
 
@@ -183,11 +183,16 @@ func (cLogger *commonLogger) log(
 		return
 	}
 	
-	context, err := specificContext(stackCallDepth)
-	if err != nil {
+	context, _ := specificContext(stackCallDepth)
+	
+	// Context errors are not reported because there are situations
+	// in which context errors are normal Seelog usage cases. For 
+	// example in executables with stripped symbols.
+	// Error contexts are returned instead. See common_context.go.
+	/*if err != nil {
 		reportInternalError(err)
 		return
-	}
+	}*/
 	
 	cLogger.innerLogger.innerLog(level, context, format, params)
 }
@@ -197,7 +202,7 @@ func (cLogger *commonLogger) processLogMsg(
     level LogLevel, 
 	format string, 
 	params []interface{},
-	context *logContext) {
+	context logContextInterface) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -212,7 +217,7 @@ func (cLogger *commonLogger) processLogMsg(
 }
 
 
-func (cLogger *commonLogger) isAllowed(level LogLevel, context *logContext) bool {
+func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterface) bool {
 	funcMap, ok := cLogger.contextCache[context.FullPath()]
 	if !ok {
 		funcMap = make(map[string]map[string]bool, 0)
