@@ -71,7 +71,7 @@ type innerLoggerInterface interface {
 
 
 // [file path][func name][level] -> [allowed]
-type allowedContextCache map[string]map[string]map[string]bool
+type allowedContextCache map[string]map[string]map[LogLevel]bool
 
 // commonLogger contains all common data needed for logging and contains methods used to log messages.
 type commonLogger struct {
@@ -86,7 +86,7 @@ func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*c
 	cLogger := new(commonLogger)
 	
 	cLogger.config = config
-	cLogger.contextCache = make(map[string]map[string]map[string]bool)
+	cLogger.contextCache = make(allowedContextCache)
 	cLogger.unusedLevels = make([]bool, Off)
 	cLogger.fillUnusedLevels()
 	cLogger.innerLogger = internalLogger
@@ -220,20 +220,20 @@ func (cLogger *commonLogger) processLogMsg(
 func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterface) bool {
 	funcMap, ok := cLogger.contextCache[context.FullPath()]
 	if !ok {
-		funcMap = make(map[string]map[string]bool, 0)
+		funcMap = make(map[string]map[LogLevel]bool, 0)
 		cLogger.contextCache[context.FullPath()] = funcMap
 	}
 	
 	levelMap, ok := funcMap[context.Func()]
 	if !ok {
-		levelMap = make(map[string]bool, 0)
+		levelMap = make(map[LogLevel]bool, 0)
 		funcMap[context.Func()] = levelMap
 	}
 	
-	isAllowValue, ok := levelMap[level.String()]
+	isAllowValue, ok := levelMap[level]
 	if !ok {
 		isAllowValue = cLogger.config.IsAllowed(level, context)
-		levelMap[level.String()] = isAllowValue
+		levelMap[level] = isAllowValue
 	}
 	
 	return isAllowValue
