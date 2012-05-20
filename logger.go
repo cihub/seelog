@@ -140,6 +140,7 @@ func (cLogger *commonLogger) errorWithCallDepth(callDepth int, format string, pa
 
 func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, format string, params []interface{}) {
 	cLogger.log(CriticalLvl, format, params, callDepth)
+	cLogger.Flush()
 }
 
 func (cLogger *commonLogger) Closed() bool {
