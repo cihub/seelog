@@ -25,58 +25,57 @@
 package seelog
 
 import (
-	"time"
-	"errors"
+	"testing"
+	"strconv"
+	"os"
 )
 
-// asyncTimerLogger represents asynchronous logger which processes the log queue each
-// 'duration' nanoseconds
-type asyncTimerLogger struct {
-	asyncLogger
-	interval time.Duration
-}
-
-// newAsyncLoopLogger creates a new asynchronous loop logger
-func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger, error){
+func Test_Adaptive(t *testing.T) {
+	switchToRealFSWrapper(t)
+	fileName := "log.log"
+	count := 100
 	
-	if interval <= 0 {
-		return nil, errors.New("Async logger interval should be > 0")
+	Current.Close()
+	err := os.Remove(fileName)
+	if err != nil && !os.IsNotExist(err) {
+		t.Error(err)
+		return
 	}
 	
-	asnTimerLogger := new(asyncTimerLogger)
-	
-	asnTimerLogger.asyncLogger = *newAsyncLogger(config)
-	asnTimerLogger.interval = interval
-	
-	go asnTimerLogger.processQueue()
-	
-	return asnTimerLogger, nil
-}
+	testConfig := `
+<seelog type="adaptive" mininterval="1000" maxinterval="1000000" critmsgcount="100">
+	<outputs formatid="msg">
+		<file path="` + fileName + `"/>
+	</outputs>
+	<formats>
+		<format id="msg" format="%Msg%n"/>
+	</formats>
+</seelog>`
 
-func (asnTimerLogger *asyncTimerLogger) processItem() (closed bool) {
-	asnTimerLogger.queueHasElements.L.Lock()
-	defer asnTimerLogger.queueHasElements.L.Unlock()
+	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
 
-	for asnTimerLogger.msgQueue.Len() == 0 && !asnTimerLogger.closed {
-   		asnTimerLogger.queueHasElements.Wait()
+	err = ReplaceLogger(logger)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 	
-	if asnTimerLogger.closed{
-		return true
+	
+	
+	for i := 0; i < count; i++ {
+		Trace(strconv.Itoa(i))
 	}
-
-    	asnTimerLogger.processQueueElement()
-	return false
-}
-
-func (asnTimerLogger *asyncTimerLogger) processQueue() {
-	for !asnTimerLogger.closed {
-		closed := asnTimerLogger.processItem()
-
-		if closed {
-			break
-		}		
-
-		<-time.After(asnTimerLogger.interval)
+	
+	Flush()
+	
+	gotCount, err := countSequencedRowsInFile(fileName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	
+	if int64(count) != gotCount {
+		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
+		return
 	}
 }

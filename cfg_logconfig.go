@@ -34,6 +34,7 @@ const (
 	syncloggerTypeFromString = iota
 	asyncLooploggerTypeFromString
 	asyncTimerloggerTypeFromString
+	adaptiveLoggerTypeFromString
 	DefaultloggerTypeFromString = asyncLooploggerTypeFromString
 )
 
@@ -41,6 +42,7 @@ const (
 	syncloggerTypeFromStringStr = "sync"
 	AsyncloggerTypeFromStringStr = "asyncloop"
 	asyncTimerloggerTypeFromStringStr = "asynctimer"
+	adaptiveLoggerTypeFromStringStr = "adaptive"
 )
 
 // asyncTimerLoggerData represents specific data for async timer logger
@@ -48,10 +50,18 @@ type asyncTimerLoggerData struct {
 	AsyncInterval uint32
 }
 
+// adaptiveLoggerData represents specific data for adaptive timer logger
+type adaptiveLoggerData struct {
+	MinInterval 		uint32
+	MaxInterval 		uint32
+	CriticalMsgCount 	uint32
+}
+
 var loggerTypeToStringRepresentations = map[loggerTypeFromString]string{
 	syncloggerTypeFromString:    		syncloggerTypeFromStringStr,
 	asyncLooploggerTypeFromString:    AsyncloggerTypeFromStringStr,
 	asyncTimerloggerTypeFromString:   asyncTimerloggerTypeFromStringStr,
+	adaptiveLoggerTypeFromString:	  adaptiveLoggerTypeFromStringStr,
 }
 
 // loggerTypeFromStringFromString parses a string and returns a corresponding logger type, if sucessfull. 

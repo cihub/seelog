@@ -74,6 +74,9 @@ const (
 	BufferedFlushPeriodAttr    = "flushperiod"
 	LoggerTypeFromStringAttr   = "type"
 	AsyncLoggerIntervalAttr    = "asyncinterval"
+	AdaptLoggerMinIntervalAttr = "mininterval"
+	AdaptLoggerMaxIntervalAttr = "maxinterval"
+	AdaptLoggerCriticalMsgCountAttr	= "critmsgcount"
 )
 
 var (
@@ -118,7 +121,9 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr, AsyncLoggerIntervalAttr)
+	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr, 
+								   AsyncLoggerIntervalAttr, AdaptLoggerMinIntervalAttr, AdaptLoggerMaxIntervalAttr,
+								   AdaptLoggerCriticalMsgCountAttr)
 	if err != nil {
 		return nil, err
 	}
@@ -382,6 +387,27 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 		}
 		
 		logData = asyncTimerLoggerData{uint32(interval)}
+	} else if logType == adaptiveLoggerTypeFromString {
+		
+		// Min interval
+		minIntStr, minIntExists := config.attributes[AdaptLoggerMinIntervalAttr]
+		if !minIntExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerMinIntervalAttr)}
+		minInterval, err := strconv.ParseUint(minIntStr, 10, 32)
+		if err != nil {return 0, nil, err}
+		
+		// Max interval
+		maxIntStr, maxIntExists := config.attributes[AdaptLoggerMaxIntervalAttr]
+		if !maxIntExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerMaxIntervalAttr)}
+		maxInterval, err := strconv.ParseUint(maxIntStr, 10, 32)
+		if err != nil {return 0, nil, err}
+		
+		// Critical msg count
+		criticalMsgCountStr, criticalMsgCountExists := config.attributes[AdaptLoggerCriticalMsgCountAttr]
+		if !criticalMsgCountExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerCriticalMsgCountAttr)}
+		criticalMsgCount, err := strconv.ParseUint(criticalMsgCountStr, 10, 32)
+		if err != nil {return 0, nil, err}
+		
+		logData = adaptiveLoggerData{uint32(minInterval), uint32(maxInterval), uint32(criticalMsgCount)}
 	}
 	
 	return logType, logData, nil
