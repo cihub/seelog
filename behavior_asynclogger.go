@@ -36,39 +36,39 @@ const (
 )
 
 type msgQueueItem struct {
-	level LogLevel
+	level   LogLevel
 	context logContextInterface
-	format string
-	params []interface{}
+	format  string
+	params  []interface{}
 }
 
 // asyncLogger represents common data for all asynchronous loggers
 type asyncLogger struct {
-	commonLogger 
-	msgQueue *list.List
-	queueMutex *sync.Mutex
+	commonLogger
+	msgQueue         *list.List
+	queueMutex       *sync.Mutex
 	queueHasElements *sync.Cond
 }
 
 // newAsyncLogger creates a new asynchronous logger
-func newAsyncLogger(config *logConfig) (*asyncLogger){
+func newAsyncLogger(config *logConfig) *asyncLogger {
 	asnLogger := new(asyncLogger)
-	
+
 	asnLogger.msgQueue = list.New()
 	asnLogger.queueMutex = new(sync.Mutex)
 	asnLogger.queueHasElements = sync.NewCond(new(sync.Mutex))
-	
+
 	asnLogger.commonLogger = *newCommonLogger(config, asnLogger)
-	
+
 	return asnLogger
 }
 
 func (asnLogger *asyncLogger) innerLog(
-    level LogLevel, 
+	level LogLevel,
 	context logContextInterface,
-	format string, 
+	format string,
 	params []interface{}) {
-		
+
 	asnLogger.addMsgToQueue(level, context, format, params)
 }
 
@@ -87,7 +87,7 @@ func (asnLogger *asyncLogger) Close() {
 func (asnLogger *asyncLogger) Flush() {
 	asnLogger.queueMutex.Lock()
 	defer asnLogger.queueMutex.Unlock()
-	
+
 	if !asnLogger.closed {
 		asnLogger.flushQueue()
 		asnLogger.config.RootDispatcher.Flush()
@@ -99,7 +99,7 @@ func (asnLogger *asyncLogger) flushQueue() {
 	defer asnLogger.queueHasElements.L.Unlock()
 
 	for asnLogger.msgQueue.Len() > 0 {
-   		asnLogger.processQueueElement()
+		asnLogger.processQueueElement()
 	}
 }
 
@@ -113,10 +113,10 @@ func (asnLogger *asyncLogger) processQueueElement() {
 }
 
 func (asnLogger *asyncLogger) addMsgToQueue(
-		level LogLevel,
-		context logContextInterface, 
-		format string, 
-		params []interface{}) {
+	level LogLevel,
+	context logContextInterface,
+	format string,
+	params []interface{}) {
 	asnLogger.queueMutex.Lock()
 	defer asnLogger.queueMutex.Unlock()
 
@@ -125,7 +125,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 			fmt.Printf("Seelog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
 			asnLogger.flushQueue()
 		}
-		
+
 		param := params
 		queueItem := msgQueueItem{level, context, format, param}
 		asnLogger.msgQueue.PushBack(queueItem)
@@ -135,4 +135,3 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 		reportInternalError(err)
 	}
 }
-

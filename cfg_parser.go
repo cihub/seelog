@@ -34,53 +34,54 @@ import (
 )
 
 const (
-	SeelogConfigId             = "seelog"
-	OutputsId                  = "outputs"
-	FormatsId                  = "formats"
-	MinLevelId                 = "minlevel"
-	MaxLevelId                 = "maxlevel"
-	LevelsId                   = "levels"
-	ExceptionsId               = "exceptions"
-	ExceptionId                = "exception"
-	FuncPatternId              = "funcpattern"
-	FilePatternId              = "filepattern"
-	FormatId                   = "format"
-	FormatAttrId               = "format"
-	FormatKeyAttrId            = "id"
-	OutputFormatId             = "formatid"
-	FilePathId                 = "path"
-	FileWriterId               = "file"
-	SmtpWriterId               = "smtp"
-	SenderAddressId            = "senderaddress"
-	SenderNameId               = "sendername"
-	RecipientId                = "recipient"
-	AddressId                  = "address"
-	HostNameId                 = "hostname"
-	HostPortId                 = "hostport"
-	UserNameId                 = "username"
-	UserPassId                 = "password"
-	SpliterDispatcherId        = "splitter"
-	ConsoleWriterId            = "console"
-	FilterDispatcherId         = "filter"
-	FilterLevelsAttrId         = "levels"
-	RollingFileWriterId        = "rollingfile"
-	RollingFileTypeAttr        = "type"
-	RollingFilePathAttr        = "filename"
-	RollingFileMaxSizeAttr     = "maxsize"
-	RollingFileMaxRollsAttr    = "maxrolls"
-	RollingFileDataPatternAttr = "datepattern"
-	bufferedWriterId           = "buffered"
-	BufferedSizeAttr           = "size"
-	BufferedFlushPeriodAttr    = "flushperiod"
-	LoggerTypeFromStringAttr   = "type"
-	AsyncLoggerIntervalAttr    = "asyncinterval"
-	AdaptLoggerMinIntervalAttr = "mininterval"
-	AdaptLoggerMaxIntervalAttr = "maxinterval"
-	AdaptLoggerCriticalMsgCountAttr	= "critmsgcount"
+	SeelogConfigId                  = "seelog"
+	OutputsId                       = "outputs"
+	FormatsId                       = "formats"
+	MinLevelId                      = "minlevel"
+	MaxLevelId                      = "maxlevel"
+	LevelsId                        = "levels"
+	ExceptionsId                    = "exceptions"
+	ExceptionId                     = "exception"
+	FuncPatternId                   = "funcpattern"
+	FilePatternId                   = "filepattern"
+	FormatId                        = "format"
+	FormatAttrId                    = "format"
+	FormatKeyAttrId                 = "id"
+	OutputFormatId                  = "formatid"
+	FilePathId                      = "path"
+	FileWriterId                    = "file"
+	SmtpWriterId                    = "smtp"
+	SenderAddressId                 = "senderaddress"
+	SenderNameId                    = "sendername"
+	RecipientId                     = "recipient"
+	AddressId                       = "address"
+	HostNameId                      = "hostname"
+	HostPortId                      = "hostport"
+	UserNameId                      = "username"
+	UserPassId                      = "password"
+	SpliterDispatcherId             = "splitter"
+	ConsoleWriterId                 = "console"
+	FilterDispatcherId              = "filter"
+	FilterLevelsAttrId              = "levels"
+	RollingFileWriterId             = "rollingfile"
+	RollingFileTypeAttr             = "type"
+	RollingFilePathAttr             = "filename"
+	RollingFileMaxSizeAttr          = "maxsize"
+	RollingFileMaxRollsAttr         = "maxrolls"
+	RollingFileDataPatternAttr      = "datepattern"
+	bufferedWriterId                = "buffered"
+	BufferedSizeAttr                = "size"
+	BufferedFlushPeriodAttr         = "flushperiod"
+	LoggerTypeFromStringAttr        = "type"
+	AsyncLoggerIntervalAttr         = "asyncinterval"
+	AdaptLoggerMinIntervalAttr      = "mininterval"
+	AdaptLoggerMaxIntervalAttr      = "maxinterval"
+	AdaptLoggerCriticalMsgCountAttr = "critmsgcount"
+	PredefinedPrefix                = "std:"
 )
 
 var (
-	nodeMustHaveChildrenError = errors.New("Node must have children")
+	nodeMustHaveChildrenError   = errors.New("Node must have children")
 	nodeCannotHaveChildrenError = errors.New("Node cannot have children")
 )
 
@@ -95,6 +96,7 @@ type elementMapEntry struct {
 }
 
 var elementMap map[string]elementMapEntry
+var predefinedFormats map[string]*formatter
 
 func init() {
 	elementMap = map[string]elementMapEntry{
@@ -104,8 +106,46 @@ func init() {
 		ConsoleWriterId:     {createconsoleWriter},
 		RollingFileWriterId: {createrollingFileWriter},
 		bufferedWriterId:    {createbufferedWriter},
-		SmtpWriterId: 		 {createsmtpWriter},
+		SmtpWriterId:        {createsmtpWriter},
 	}
+
+	err := fillPredefinedFormats()
+
+	if err != nil {
+		panic(fmt.Sprintf("Seelog couldn't start: predefined formats creation failed. Error: %s", err.Error()))
+	}
+}
+
+func fillPredefinedFormats() error {
+	predefinedFormatsWithoutPrefix := map[string]string{
+		"xml-debug":       `<time>%Ns</time><lev>%Lev</lev><msg>%Msg</msg><path>%RelFile</path><func>%Func</func>`,
+		"xml-debug-short": `<t>%Ns</t><l>%l</l><m>%Msg</m><p>%RelFile</p><f>%Func</f>`,
+		"xml":             `<time>%Ns</time><lev>%Lev</lev><msg>%Msg</msg>`,
+		"xml-short":       `<t>%Ns</t><l>%l</l><m>%Msg</m>`,
+
+		"json-debug":       `{"time":%Ns,"lev":"%Lev","msg":"%Msg","path":"%RelFile","func":"%Func"}`,
+		"json-debug-short": `{"t":%Ns,"l":"%Lev","m":"%Msg","p":"%RelFile","f":"%Func"}`,
+		"json":             `{"time":%Ns,"lev":"%Lev","msg":"%Msg"}`,
+		"json-short":       `{"t":%Ns,"l":"%Lev","m":"%Msg"}`,
+
+		"debug":       `[%LEVEL] %RelFile:%Func %Date %Time %Msg%n`,
+		"debug-short": `[%LEVEL] %Date %Time %Msg%n`,
+		"fast":        `%Ns %l %Msg%n`,
+	}
+
+	predefinedFormats = make(map[string]*formatter)
+
+	for formatKey, format := range predefinedFormatsWithoutPrefix {
+
+		formatter, err := newFormatter(format)
+		if err != nil {
+			return err
+		}
+
+		predefinedFormats[PredefinedPrefix+formatKey] = formatter
+	}
+
+	return nil
 }
 
 // configFromReader parses data from a given reader. 
@@ -121,15 +161,15 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr, 
-								   AsyncLoggerIntervalAttr, AdaptLoggerMinIntervalAttr, AdaptLoggerMaxIntervalAttr,
-								   AdaptLoggerCriticalMsgCountAttr)
+	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr,
+		AsyncLoggerIntervalAttr, AdaptLoggerMinIntervalAttr, AdaptLoggerMaxIntervalAttr,
+		AdaptLoggerCriticalMsgCountAttr)
 	if err != nil {
 		return nil, err
 	}
 
-	err = checkExpectedElements(config, optionalElement(OutputsId), optionalElement(FormatsId), 
-								optionalElement(ExceptionsId))
+	err = checkExpectedElements(config, optionalElement(OutputsId), optionalElement(FormatsId),
+		optionalElement(ExceptionsId))
 	if err != nil {
 		return nil, err
 	}
@@ -364,17 +404,17 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 
 func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString, logData interface{}, err error) {
 	logTypeStr, loggerTypeExists := config.attributes[LoggerTypeFromStringAttr]
-	
+
 	if !loggerTypeExists {
 		return DefaultloggerTypeFromString, nil, nil
 	}
-	
+
 	logType, found := loggerTypeFromStringFromString(logTypeStr)
-	
+
 	if !found {
 		return 0, nil, errors.New(fmt.Sprintf("Unknown logger type: %s", logTypeStr))
 	}
-	
+
 	if logType == asyncTimerloggerTypeFromString {
 		intervalStr, intervalExists := config.attributes[AsyncLoggerIntervalAttr]
 		if !intervalExists {
@@ -385,31 +425,43 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 		if err != nil {
 			return 0, nil, err
 		}
-		
+
 		logData = asyncTimerLoggerData{uint32(interval)}
 	} else if logType == adaptiveLoggerTypeFromString {
-		
+
 		// Min interval
 		minIntStr, minIntExists := config.attributes[AdaptLoggerMinIntervalAttr]
-		if !minIntExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerMinIntervalAttr)}
+		if !minIntExists {
+			return 0, nil, missingArgumentError(config.name, AdaptLoggerMinIntervalAttr)
+		}
 		minInterval, err := strconv.ParseUint(minIntStr, 10, 32)
-		if err != nil {return 0, nil, err}
-		
+		if err != nil {
+			return 0, nil, err
+		}
+
 		// Max interval
 		maxIntStr, maxIntExists := config.attributes[AdaptLoggerMaxIntervalAttr]
-		if !maxIntExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerMaxIntervalAttr)}
+		if !maxIntExists {
+			return 0, nil, missingArgumentError(config.name, AdaptLoggerMaxIntervalAttr)
+		}
 		maxInterval, err := strconv.ParseUint(maxIntStr, 10, 32)
-		if err != nil {return 0, nil, err}
-		
+		if err != nil {
+			return 0, nil, err
+		}
+
 		// Critical msg count
 		criticalMsgCountStr, criticalMsgCountExists := config.attributes[AdaptLoggerCriticalMsgCountAttr]
-		if !criticalMsgCountExists {return 0, nil, missingArgumentError(config.name, AdaptLoggerCriticalMsgCountAttr)}
+		if !criticalMsgCountExists {
+			return 0, nil, missingArgumentError(config.name, AdaptLoggerCriticalMsgCountAttr)
+		}
 		criticalMsgCount, err := strconv.ParseUint(criticalMsgCountStr, 10, 32)
-		if err != nil {return 0, nil, err}
-		
+		if err != nil {
+			return 0, nil, err
+		}
+
 		logData = adaptiveLoggerData{uint32(minInterval), uint32(maxInterval), uint32(criticalMsgCount)}
 	}
-	
+
 	return logType, logData, nil
 }
 
@@ -456,7 +508,15 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[st
 	if isFormatId {
 		format, ok := formats[formatId]
 		if !ok {
-			return nil, errors.New("Formatid = '" + formatId + "' doesn't exist")
+
+			// Test for predefined format match
+			pdFormat, pdOk := predefinedFormats[formatId]
+
+			if !pdOk {
+				return nil, errors.New("Formatid = '" + formatId + "' doesn't exist")
+			}
+
+			return pdFormat, nil
 		}
 
 		return format, nil
@@ -844,7 +904,6 @@ func multipleElements(name string) expectedElementInfo {
 func multipleMandatoryElements(name string) expectedElementInfo {
 	return expectedElementInfo{name, true, true}
 }
-
 
 func checkExpectedElements(node *xmlNode, elements ...expectedElementInfo) error {
 	for _, element := range elements {

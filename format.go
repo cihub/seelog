@@ -155,7 +155,7 @@ func (formatter *formatter) extractVerbFunc(index int) (verbFunc, int, error) {
 
 func (formatter *formatter) extractLetterSequence(index int) string {
 	letters := ""
-	
+
 	bytesToParse := []byte(formatter.fmtStringOriginal[index:])
 	runeCount := utf8.RuneCount(bytesToParse)
 	for i := 0; i < runeCount; i++ {
