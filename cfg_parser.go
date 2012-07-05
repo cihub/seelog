@@ -78,6 +78,10 @@ const (
 	AdaptLoggerMaxIntervalAttr      = "maxinterval"
 	AdaptLoggerCriticalMsgCountAttr = "critmsgcount"
 	PredefinedPrefix                = "std:"
+	ConnWriterId = "conn"
+	ConnWriterAddrAttr = "addr"
+	ConnWriterNetAttr = "net"
+	ConnWriterReconnectOnMsgAttr = "reconnectonmsg"
 )
 
 var (
@@ -107,6 +111,7 @@ func init() {
 		RollingFileWriterId: {createrollingFileWriter},
 		bufferedWriterId:    {createbufferedWriter},
 		SmtpWriterId:        {createsmtpWriter},
+		ConnWriterId:        {createconnWriter},
 	}
 
 	err := fillPredefinedFormats()
@@ -505,24 +510,23 @@ func getOutputsTree(config *xmlNode, formats map[string]*formatter) (dispatcherI
 
 func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (*formatter, error) {
 	formatId, isFormatId := node.attributes[OutputFormatId]
-	if isFormatId {
-		format, ok := formats[formatId]
-		if !ok {
-
-			// Test for predefined format match
-			pdFormat, pdOk := predefinedFormats[formatId]
-
-			if !pdOk {
-				return nil, errors.New("Formatid = '" + formatId + "' doesn't exist")
-			}
-
-			return pdFormat, nil
-		}
-
+	if !isFormatId {
+		return formatFromParent, nil
+	}
+	
+	format, ok := formats[formatId]
+	if ok {
 		return format, nil
 	}
 
-	return formatFromParent, nil
+	// Test for predefined format match
+	pdFormat, pdOk := predefinedFormats[formatId]
+
+	if !pdOk {
+		return nil, errors.New("Formatid = '" + formatId + "' doesn't exist")
+	}
+
+	return pdFormat, nil
 }
 
 func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*formatter) ([]interface{}, error) {
@@ -729,6 +733,48 @@ func createconsoleWriter(node *xmlNode, formatFromParent *formatter, formats map
 	}
 
 	return newFormattedWriter(consoleWriter, currentFormat)
+}
+
+func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
+	if node.hasChildren() {
+		return nil, nodeCannotHaveChildrenError
+	}
+	
+	err := checkUnexpectedAttribute(node, OutputFormatId, ConnWriterAddrAttr, ConnWriterNetAttr, ConnWriterReconnectOnMsgAttr)
+	if err != nil {
+		return nil, err
+	}
+	
+	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
+	if err != nil {
+		return nil, err
+	}
+	
+	addr, isAddr := node.attributes[ConnWriterAddrAttr]
+	if !isAddr {
+		return nil, missingArgumentError(node.name, ConnWriterAddrAttr)
+	}
+	
+	net, isNet := node.attributes[ConnWriterNetAttr]
+	if !isNet {
+		return nil, missingArgumentError(node.name, ConnWriterNetAttr)
+	}
+	
+	reconnectOnMsg := false
+	reconnectOnMsgStr, isReconnectOnMsgStr := node.attributes[ConnWriterReconnectOnMsgAttr]
+	if isReconnectOnMsgStr {
+		if reconnectOnMsgStr == "true" {
+			reconnectOnMsg = true
+		} else if reconnectOnMsgStr == "false" {
+			reconnectOnMsg = false
+		} else {
+			return nil, errors.New("Node '" + node.name + "' has incorrect '" + ConnWriterReconnectOnMsgAttr + "' attribute value")
+		}
+	}
+	
+	connWriter := newConnWriter(net, addr, reconnectOnMsg)
+
+	return newFormattedWriter(connWriter, currentFormat)
 }
 
 func createrollingFileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {

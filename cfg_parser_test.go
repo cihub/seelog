@@ -467,8 +467,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Exceptions: allowing #2"
-		testConfig =
-			`
+		testConfig = `
 <seelog type="sync" levels="off">
 	<exceptions>
 		<exception filepattern="testfile.go" minlevel="warn"/>
@@ -486,6 +485,77 @@ func getParserTests() []parserTest {
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
+		testName = "Predefined formats"
+		formatId := PredefinedPrefix + "xml-debug-short"
+		testConfig = `
+<seelog type="sync">
+	<outputs formatid="` + formatId + `">
+		<console />
+	</outputs>
+</seelog>`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testconsoleWriter, _ = newConsoleWriter()
+		testFormat, _ = predefinedFormats[formatId]
+		testHeadSplitter, _ = newSplitDispatcher(testFormat, []interface{}{testconsoleWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+		
+		testName = "Predefined formats redefine"
+		formatId = PredefinedPrefix + "xml-debug-short"
+		testConfig = `
+<seelog type="sync">
+	<outputs formatid="` + formatId + `">
+		<file path="log.log"/>
+	</outputs>
+	<formats>
+		<format id="` + formatId + `" format="%Level %Msg %File" />
+	</formats>
+</seelog>`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testfileWriter, _ = newFileWriter("log.log")
+		testFormat, _ = newFormatter("%Level %Msg %File")
+		testHeadSplitter, _ = newSplitDispatcher(testFormat, []interface{}{testfileWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Conn writer 1"
+		testConfig = `
+<seelog type="sync">
+	<outputs>
+		<conn net="tcp" addr=":8888" />
+	</outputs>
+</seelog>`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testConnWriter := newConnWriter("tcp", ":8888", false)
+		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testConnWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+		
+		testName = "Conn writer 2"
+		testConfig = `
+<seelog type="sync">
+	<outputs>
+		<conn net="tcp" addr=":8888" reconnectonmsg="true" />
+	</outputs>
+</seelog>`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testConnWriter = newConnWriter("tcp", ":8888", true)
+		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testConnWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+		
 		testName = "Errors #11"
 		testConfig = `
 <seelog type="sync"><exceptions>
@@ -644,6 +714,15 @@ func getParserTests() []parserTest {
 	</outputs>
 </seelog>
 `
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
+		
+		testName = "Errors #26"
+		testConfig = `
+<seelog type="sync">
+	<outputs>
+		<conn net="tcp" addr=":8888" reconnectonmsg="true1" />
+	</outputs>
+</seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
 		
 		testName = "Buffered writer same formatid override"
