@@ -166,42 +166,42 @@ func ReplaceLogger(logger LoggerInterface) error {
 func Tracef(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.traceWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.traceWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Debugf formats message according to format specifier and writes to default logger with log level = Debug
 func Debugf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.debugWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.debugWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Infof formats message according to format specifier and writes to default logger with log level = Info
 func Infof(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.infoWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.infoWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Warnf formats message according to format specifier and writes to default logger with log level = Warn
 func Warnf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.warnWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.warnWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Errorf formats message according to format specifier and writes to default logger with log level = Error
 func Errorf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.errorWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.errorWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Criticalf formats message according to format specifier and writes to default logger with log level = Critical
 func Criticalf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.criticalWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+	Current.criticalWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 // Trace formats message using the default formats for its operands and writes to default logger with log level = Trace

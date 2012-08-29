@@ -48,12 +48,12 @@ type LoggerInterface interface {
 	Error(v ...interface{})
 	Critical(v ...interface{})
 	
-	traceWithCallDepth(callDepth int, message *logMessage)
-	debugWithCallDepth(callDepth int, message *logMessage)
-	infoWithCallDepth(callDepth int, message *logMessage)
-	warnWithCallDepth(callDepth int, message *logMessage)
-	errorWithCallDepth(callDepth int, message *logMessage)
-	criticalWithCallDepth(callDepth int, message *logMessage)
+	traceWithCallDepth(callDepth int, message fmt.Stringer)
+	debugWithCallDepth(callDepth int, message fmt.Stringer)
+	infoWithCallDepth(callDepth int, message fmt.Stringer)
+	warnWithCallDepth(callDepth int, message fmt.Stringer)
+	errorWithCallDepth(callDepth int, message fmt.Stringer)
+	criticalWithCallDepth(callDepth int, message fmt.Stringer)
 	
 	Close()
 	Flush()
@@ -62,7 +62,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	innerLog(level LogLevel, context logContextInterface, message *logMessage)
+	innerLog(level LogLevel, context logContextInterface, message fmt.Stringer)
 	Flush()
 }
 
@@ -92,27 +92,27 @@ func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*c
 }
 
 func (cLogger *commonLogger) Tracef(format string, params ...interface{}) {
-	cLogger.traceWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.traceWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Debugf(format string, params ...interface{}) {
-	cLogger.debugWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.debugWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Infof(format string, params ...interface{}) {
-	cLogger.infoWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.infoWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Warnf(format string, params ...interface{}) {
-	cLogger.warnWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.warnWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Errorf(format string, params ...interface{}) {
-	cLogger.errorWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.errorWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Criticalf(format string, params ...interface{}) {
-	cLogger.criticalWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
+	cLogger.criticalWithCallDepth(loggerFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
 func (cLogger *commonLogger) Trace(v ...interface{}) {
@@ -139,27 +139,27 @@ func (cLogger *commonLogger) Critical(v ...interface{}) {
 	cLogger.criticalWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(TraceLvl, message, callDepth)
 }
 
-func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(DebugLvl, message, callDepth)
 }
 
-func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(InfoLvl, message, callDepth)
 }
 
-func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(WarnLvl, message, callDepth)
 }
 
-func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(ErrorLvl, message, callDepth)
 }
 
-func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message *logMessage) {
+func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(CriticalLvl, message, callDepth)
 	cLogger.innerLogger.Flush()
 }
@@ -193,7 +193,7 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 // common_context.go -> specificContext, extractCallerInfo for details.
 func (cLogger *commonLogger) log(
     level LogLevel, 
-	message *logMessage,
+	message fmt.Stringer,
 	stackCallDepth int) {
 	
 	if cLogger.Closed() {
@@ -221,7 +221,7 @@ func (cLogger *commonLogger) log(
 
 func (cLogger *commonLogger) processLogMsg(
     level LogLevel, 
-	message *logMessage,
+	message fmt.Stringer,
 	context logContextInterface) {
 
 	defer func() {
@@ -259,14 +259,16 @@ func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterfa
 }
 
 
-
 type logMessage struct {
-	isFormatted bool
+	params []interface{}
+}
+
+type logFormattedMessage struct {
 	format string
 	params []interface{}
 }
 
-func newLogMessage(params []interface{}) *logMessage {
+func newLogMessage(params []interface{}) fmt.Stringer {
 	message := new(logMessage)
 	
 	message.params = params
@@ -274,22 +276,19 @@ func newLogMessage(params []interface{}) *logMessage {
 	return message
 }
 
-func newFormattedLogMessage(format string, params []interface{}) *logMessage {
-	message := new(logMessage)
+func newLogFormattedMessage(format string, params []interface{}) *logFormattedMessage {
+	message := new(logFormattedMessage)
 	
 	message.params = params
 	message.format = format
-	message.isFormatted = true
 	
 	return message
 }
 
 func (message *logMessage) String() string {
-	if message.isFormatted {
-		return fmt.Sprintf(message.format, message.params...)
-	} else {
-		return fmt.Sprint(message.params...)
-	}
-	
-	panic("impossible")
+	return fmt.Sprint(message.params...)
+}
+
+func (message *logFormattedMessage) String() string {
+	return fmt.Sprintf(message.format, message.params...)
 }

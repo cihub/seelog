@@ -24,6 +24,10 @@
 
 package seelog
 
+import (
+	"fmt"
+)
+
 // syncLogger performs logging in the same goroutine where 'Trace/Debug/...'
 // func was called
 type syncLogger struct {
@@ -42,7 +46,7 @@ func newSyncLogger(config *logConfig) (*syncLogger){
 func (cLogger *syncLogger) innerLog(
     level LogLevel, 
 	context logContextInterface,
-	message *logMessage) {
+	message fmt.Stringer) {
 	
 	cLogger.processLogMsg(level, message, context)
 }

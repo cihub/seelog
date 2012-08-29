@@ -38,7 +38,7 @@ const (
 type msgQueueItem struct {
 	level   LogLevel
 	context logContextInterface
-	message  *logMessage
+	message  fmt.Stringer
 }
 
 // asyncLogger represents common data for all asynchronous loggers
@@ -65,7 +65,7 @@ func newAsyncLogger(config *logConfig) *asyncLogger {
 func (asnLogger *asyncLogger) innerLog(
 	level LogLevel,
 	context logContextInterface,
-	message *logMessage) {
+	message fmt.Stringer) {
 
 	asnLogger.addMsgToQueue(level, context, message)
 }
@@ -113,7 +113,7 @@ func (asnLogger *asyncLogger) processQueueElement() {
 func (asnLogger *asyncLogger) addMsgToQueue(
 	level LogLevel,
 	context logContextInterface,
-	message *logMessage) {
+	message fmt.Stringer) {
 	asnLogger.queueMutex.Lock()
 	defer asnLogger.queueMutex.Unlock()
 
