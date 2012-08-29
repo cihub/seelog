@@ -28,36 +28,32 @@ import (
 	"fmt"
 )
 
-func buildLogString(format string, params []interface{}) string {
-	var logString string
-	if len(params) != 0 {
-		logString = fmt.Sprintf(format, params...)
-	} else {
-		logString = format
-	}
-
-	return logString
-}
-
 func reportInternalError(err error) {
 	fmt.Println("Seelog error: " + err.Error())
 }
 
 // LoggerInterface represents structs capable of logging Seelog messages
 type LoggerInterface interface {
-	Trace(format string, params ...interface{})
-	Debug(format string, params ...interface{})
-	Info(format string, params ...interface{})
-	Warn(format string, params ...interface{})
-	Error(format string, params ...interface{})
-	Critical(format string, params ...interface{})
+	Tracef(format string, params ...interface{})
+	Debugf(format string, params ...interface{})
+	Infof(format string, params ...interface{})
+	Warnf(format string, params ...interface{})
+	Errorf(format string, params ...interface{})
+	Criticalf(format string, params ...interface{})
 	
-	traceWithCallDepth(callDepth int, format string, params []interface{})
-	debugWithCallDepth(callDepth int, format string, params []interface{})
-	infoWithCallDepth(callDepth int, format string, params []interface{})
-	warnWithCallDepth(callDepth int, format string, params []interface{})
-	errorWithCallDepth(callDepth int, format string, params []interface{})
-	criticalWithCallDepth(callDepth int, format string, params []interface{})
+	Trace(v ...interface{})
+	Debug(v ...interface{})
+	Info(v ...interface{})
+	Warn(v ...interface{})
+	Error(v ...interface{})
+	Critical(v ...interface{})
+	
+	traceWithCallDepth(callDepth int, message *logMessage)
+	debugWithCallDepth(callDepth int, message *logMessage)
+	infoWithCallDepth(callDepth int, message *logMessage)
+	warnWithCallDepth(callDepth int, message *logMessage)
+	errorWithCallDepth(callDepth int, message *logMessage)
+	criticalWithCallDepth(callDepth int, message *logMessage)
 	
 	Close()
 	Flush()
@@ -66,7 +62,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	innerLog(level LogLevel, context logContextInterface, format string, params []interface{})
+	innerLog(level LogLevel, context logContextInterface, message *logMessage)
 	Flush()
 }
 
@@ -95,52 +91,76 @@ func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*c
 	return cLogger
 }
 
-func (cLogger *commonLogger) Trace(format string, params ...interface{}) {
-	cLogger.traceWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Tracef(format string, params ...interface{}) {
+	cLogger.traceWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) Debug(format string, params ...interface{}) {
-	cLogger.debugWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Debugf(format string, params ...interface{}) {
+	cLogger.debugWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) Info(format string, params ...interface{}) {
-	cLogger.infoWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Infof(format string, params ...interface{}) {
+	cLogger.infoWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) Warn(format string, params ...interface{}) {
-	cLogger.warnWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Warnf(format string, params ...interface{}) {
+	cLogger.warnWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) Error(format string, params ...interface{}) {
-	cLogger.errorWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Errorf(format string, params ...interface{}) {
+	cLogger.errorWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) Critical(format string, params ...interface{}) {
-	cLogger.criticalWithCallDepth(loggerFuncCallDepth, format, params)
+func (cLogger *commonLogger) Criticalf(format string, params ...interface{}) {
+	cLogger.criticalWithCallDepth(loggerFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-func (cLogger *commonLogger) traceWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(TraceLvl, format, params, callDepth)
+func (cLogger *commonLogger) Trace(v ...interface{}) {
+	cLogger.traceWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) debugWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(DebugLvl, format, params, callDepth)
+func (cLogger *commonLogger) Debug(v ...interface{}) {
+	cLogger.debugWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) infoWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(InfoLvl, format, params, callDepth)
+func (cLogger *commonLogger) Info(v ...interface{}) {
+	cLogger.infoWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) warnWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(WarnLvl, format, params, callDepth)
+func (cLogger *commonLogger) Warn(v ...interface{}) {
+	cLogger.warnWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) errorWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(ErrorLvl, format, params, callDepth)
+func (cLogger *commonLogger) Error(v ...interface{}) {
+	cLogger.errorWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
 }
 
-func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, format string, params []interface{}) {
-	cLogger.log(CriticalLvl, format, params, callDepth)
+func (cLogger *commonLogger) Critical(v ...interface{}) {
+	cLogger.criticalWithCallDepth(loggerFuncCallDepth, newLogMessage(v))
+}
+
+func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(TraceLvl, message, callDepth)
+}
+
+func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(DebugLvl, message, callDepth)
+}
+
+func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(InfoLvl, message, callDepth)
+}
+
+func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(WarnLvl, message, callDepth)
+}
+
+func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(ErrorLvl, message, callDepth)
+}
+
+func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message *logMessage) {
+	cLogger.log(CriticalLvl, message, callDepth)
 	cLogger.innerLogger.Flush()
 }
 
@@ -173,8 +193,7 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 // common_context.go -> specificContext, extractCallerInfo for details.
 func (cLogger *commonLogger) log(
     level LogLevel, 
-	format string, 
-	params []interface{},
+	message *logMessage,
 	stackCallDepth int) {
 	
 	if cLogger.Closed() {
@@ -196,14 +215,13 @@ func (cLogger *commonLogger) log(
 		return
 	}*/
 	
-	cLogger.innerLogger.innerLog(level, context, format, params)
+	cLogger.innerLogger.innerLog(level, context, message)
 }
 
 
 func (cLogger *commonLogger) processLogMsg(
     level LogLevel, 
-	format string, 
-	params []interface{},
+	message *logMessage,
 	context logContextInterface) {
 
 	defer func() {
@@ -213,8 +231,7 @@ func (cLogger *commonLogger) processLogMsg(
 	}()
 
 	if cLogger.config.IsAllowed(level, context) {
-		message := buildLogString(format, params)
-		cLogger.config.RootDispatcher.Dispatch(message, level, context, reportInternalError)
+		cLogger.config.RootDispatcher.Dispatch(message.String(), level, context, reportInternalError)
 	}
 }
 
@@ -239,4 +256,40 @@ func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterfa
 	}
 	
 	return isAllowValue
+}
+
+
+
+type logMessage struct {
+	isFormatted bool
+	format string
+	params []interface{}
+}
+
+func newLogMessage(params []interface{}) *logMessage {
+	message := new(logMessage)
+	
+	message.params = params
+	
+	return message
+}
+
+func newFormattedLogMessage(format string, params []interface{}) *logMessage {
+	message := new(logMessage)
+	
+	message.params = params
+	message.format = format
+	message.isFormatted = true
+	
+	return message
+}
+
+func (message *logMessage) String() string {
+	if message.isFormatted {
+		return fmt.Sprintf(message.format, message.params...)
+	} else {
+		return fmt.Sprint(message.params...)
+	}
+	
+	panic("impossible")
 }

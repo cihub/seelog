@@ -162,46 +162,88 @@ func ReplaceLogger(logger LoggerInterface) error {
 	return nil
 }
 
-// Trace formats message according to format specifier and writes to default logger with log level = Trace
-func Trace(format string, params ...interface{}) {
+// Tracef formats message according to format specifier and writes to default logger with log level = Trace
+func Tracef(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.traceWithCallDepth(staticFuncCallDepth, format, params)
+	Current.traceWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-// Debug formats message according to format specifier and writes to default logger with log level = Debug
-func Debug(format string, params ...interface{}) {
+// Debugf formats message according to format specifier and writes to default logger with log level = Debug
+func Debugf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.debugWithCallDepth(staticFuncCallDepth, format, params)
+	Current.debugWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-// Info formats message according to format specifier and writes to default logger with log level = Info
-func Info(format string, params ...interface{}) {
+// Infof formats message according to format specifier and writes to default logger with log level = Info
+func Infof(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.infoWithCallDepth(staticFuncCallDepth, format, params)
+	Current.infoWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-// Warn formats message according to format specifier and writes to default logger with log level = Warn
-func Warn(format string, params ...interface{}) {
+// Warnf formats message according to format specifier and writes to default logger with log level = Warn
+func Warnf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.warnWithCallDepth(staticFuncCallDepth, format, params)
+	Current.warnWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-// Error formats message according to format specifier and writes to default logger with log level = Error
-func Error(format string, params ...interface{}) {
+// Errorf formats message according to format specifier and writes to default logger with log level = Error
+func Errorf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.errorWithCallDepth(staticFuncCallDepth, format, params)
+	Current.errorWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
 }
 
-// Critical formats message according to format specifier and writes to default logger with log level = Critical
-func Critical(format string, params ...interface{}) {
+// Criticalf formats message according to format specifier and writes to default logger with log level = Critical
+func Criticalf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.criticalWithCallDepth(staticFuncCallDepth, format, params)
+	Current.criticalWithCallDepth(staticFuncCallDepth, newFormattedLogMessage(format, params))
+}
+
+// Trace formats message using the default formats for its operands and writes to default logger with log level = Trace
+func Trace(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.traceWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Debug formats message using the default formats for its operands and writes to default logger with log level = Debug
+func Debug(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.debugWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Info formats message using the default formats for its operands and writes to default logger with log level = Info
+func Info(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.infoWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Warn formats message using the default formats for its operands and writes to default logger with log level = Warn
+func Warn(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.warnWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Error formats message using the default formats for its operands and writes to default logger with log level = Error
+func Error(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.errorWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Critical formats message using the default formats for its operands and writes to default logger with log level = Critical
+func Critical(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.criticalWithCallDepth(staticFuncCallDepth, newLogMessage(v))
 }
 
 // Flush performs all cleanup, flushes all queued messages, etc. Call this method when your app

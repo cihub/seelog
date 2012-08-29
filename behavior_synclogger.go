@@ -42,10 +42,9 @@ func newSyncLogger(config *logConfig) (*syncLogger){
 func (cLogger *syncLogger) innerLog(
     level LogLevel, 
 	context logContextInterface,
-	format string, 
-	params []interface{}) {
+	message *logMessage) {
 	
-	cLogger.processLogMsg(level, format, params, context)
+	cLogger.processLogMsg(level, message, context)
 }
 
 func (syncLogger *syncLogger) Close() {

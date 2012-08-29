@@ -38,8 +38,7 @@ const (
 type msgQueueItem struct {
 	level   LogLevel
 	context logContextInterface
-	format  string
-	params  []interface{}
+	message  *logMessage
 }
 
 // asyncLogger represents common data for all asynchronous loggers
@@ -66,10 +65,9 @@ func newAsyncLogger(config *logConfig) *asyncLogger {
 func (asnLogger *asyncLogger) innerLog(
 	level LogLevel,
 	context logContextInterface,
-	format string,
-	params []interface{}) {
+	message *logMessage) {
 
-	asnLogger.addMsgToQueue(level, context, format, params)
+	asnLogger.addMsgToQueue(level, context, message)
 }
 
 func (asnLogger *asyncLogger) Close() {
@@ -107,7 +105,7 @@ func (asnLogger *asyncLogger) processQueueElement() {
 	if asnLogger.msgQueue.Len() > 0 {
 		backElement := asnLogger.msgQueue.Front()
 		msg, _ := backElement.Value.(msgQueueItem)
-		asnLogger.processLogMsg(msg.level, msg.format, msg.params, msg.context)
+		asnLogger.processLogMsg(msg.level, msg.message, msg.context)
 		asnLogger.msgQueue.Remove(backElement)
 	}
 }
@@ -115,8 +113,7 @@ func (asnLogger *asyncLogger) processQueueElement() {
 func (asnLogger *asyncLogger) addMsgToQueue(
 	level LogLevel,
 	context logContextInterface,
-	format string,
-	params []interface{}) {
+	message *logMessage) {
 	asnLogger.queueMutex.Lock()
 	defer asnLogger.queueMutex.Unlock()
 
@@ -126,12 +123,11 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 			asnLogger.flushQueue()
 		}
 
-		param := params
-		queueItem := msgQueueItem{level, context, format, param}
+		queueItem := msgQueueItem{level, context, message}
 		asnLogger.msgQueue.PushBack(queueItem)
 		asnLogger.queueHasElements.Broadcast()
 	} else {
-		err := errors.New(fmt.Sprintf("Queue closed! Cannot process element: %d %s %v", level, format, params))
+		err := errors.New(fmt.Sprintf("Queue closed! Cannot process element: %d %#v", level, message))
 		reportInternalError(err)
 	}
 }
