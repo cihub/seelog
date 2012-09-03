@@ -122,8 +122,12 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 			fmt.Printf("Seelog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
 			asnLogger.flushQueue()
 		}
-
+		
 		queueItem := msgQueueItem{level, context, message}
+
+		asnLogger.queueHasElements.L.Lock()
+		defer asnLogger.queueHasElements.L.Unlock()
+
 		asnLogger.msgQueue.PushBack(queueItem)
 		asnLogger.queueHasElements.Broadcast()
 	} else {
