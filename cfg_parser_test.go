@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -27,8 +27,8 @@ package seelog
 import (
 	"testing"
 	//"reflect"
-	"strings"
 	"fmt"
+	"strings"
 )
 
 var parserTests []parserTest
@@ -94,7 +94,7 @@ func getParserTests() []parserTest {
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
-		
+
 		var (
 			senderAddress = "senderaddress"
 			senderNameId  = "sendername"
@@ -107,22 +107,22 @@ func getParserTests() []parserTest {
 			userNameId    = "username"
 			userPassId    = "password"
 		)
-		
+
 		testName = "Smtp writer"
-		testConfig = fmt.Sprintf("<seelog><outputs><smtp %s=\"%s\" %s=\"%s\" " +
-				" %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%s\">" + 
-				"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
-				senderAddress, senderAddress, senderNameId, senderNameId, hostNameId, hostNameId, 
-				hostPortId, hostPortStr,
-				userNameId, userNameId, userPassId, userPassId,
-				recipientId, addressId, addressId, recipientId, addressId, addressId, 
-				recipientId, addressId, addressId)
-				
+		testConfig = fmt.Sprintf("<seelog><outputs><smtp %s=\"%s\" %s=\"%s\" "+
+			" %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%s\">"+
+			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
+			senderAddress, senderAddress, senderNameId, senderNameId, hostNameId, hostNameId,
+			hostPortId, hostPortStr,
+			userNameId, userNameId, userPassId, userPassId,
+			recipientId, addressId, addressId, recipientId, addressId, addressId,
+			recipientId, addressId, addressId)
+
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testsmtpWriter, _ := newSmtpWriter(senderAddress, senderNameId, 
-			[]string {addressId, addressId, addressId}, hostNameId, hostPort, userNameId, userPassId)
+		testsmtpWriter, _ := newSmtpWriter(senderAddress, senderNameId,
+			[]string{addressId, addressId, addressId}, hostNameId, hostPort, userNameId, userPassId)
 		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testsmtpWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -393,19 +393,19 @@ func getParserTests() []parserTest {
 		testName = "Errors #11"
 		testConfig = `<seelog><output/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #12"
 		testConfig = `<seelog><outputs/><outputs/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #13"
 		testConfig = `<seelog><exceptions/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #14"
 		testConfig = `<seelog><formats/></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #15"
 		testConfig = `<seelog><outputs><splitter/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
@@ -413,11 +413,11 @@ func getParserTests() []parserTest {
 		testName = "Errors #16"
 		testConfig = `<seelog><outputs><filter/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #17"
 		testConfig = `<seelog><outputs><file path="log.log"><something/></file></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #18"
 		testConfig = `<seelog><outputs><buffered size="100500" flushperiod="100"/></outputs></seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
@@ -502,7 +502,7 @@ func getParserTests() []parserTest {
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
-		
+
 		testName = "Predefined formats redefine"
 		formatId = PredefinedPrefix + "xml-debug-short"
 		testConfig = `
@@ -539,7 +539,7 @@ func getParserTests() []parserTest {
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
-		
+
 		testName = "Conn writer 2"
 		testConfig = `
 <seelog type="sync">
@@ -555,7 +555,7 @@ func getParserTests() []parserTest {
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
-		
+
 		testName = "Errors #11"
 		testConfig = `
 <seelog type="sync"><exceptions>
@@ -650,7 +650,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #21"
 		testConfig = `
 <seelog>
@@ -661,7 +661,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #22"
 		testConfig = `
 <seelog type="sync">
@@ -673,7 +673,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #23"
 		testConfig = `
 <seelog type="sync">
@@ -685,7 +685,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #24"
 		testConfig = `
 <seelog type="sync">
@@ -700,7 +700,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #25"
 		testConfig = `
 <seelog type="sync">
@@ -715,7 +715,7 @@ func getParserTests() []parserTest {
 </seelog>
 `
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Errors #26"
 		testConfig = `
 <seelog type="sync">
@@ -724,7 +724,7 @@ func getParserTests() []parserTest {
 	</outputs>
 </seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true})
-		
+
 		testName = "Buffered writer same formatid override"
 		testConfig = `
 <seelog type="sync">
@@ -748,7 +748,6 @@ func getParserTests() []parserTest {
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
-		
 
 	}
 
@@ -765,11 +764,11 @@ func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 		return conf1 == nil
 	}
 	logConfig, ok := conf2.(*logConfig)
-	
+
 	if !ok {
 		return false
 	}
-	
+
 	return fmt.Sprintf("%s", conf1) == fmt.Sprintf("%s", logConfig)
 }
 
@@ -791,8 +790,8 @@ func TestParser(t *testing.T) {
 		}
 
 		if err == nil && !configsAreEqual(conf, test.expected) {
-			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n", 
-			test.testName, test.config, test.expected, conf)
+			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n",
+				test.testName, test.config, test.expected, conf)
 		}
 	}
 }

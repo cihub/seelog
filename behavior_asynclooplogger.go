@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -24,7 +24,6 @@
 
 package seelog
 
-
 // asyncLoopLogger represents asynchronous logger which processes the log queue in
 // a 'for' loop
 type asyncLoopLogger struct {
@@ -32,26 +31,26 @@ type asyncLoopLogger struct {
 }
 
 // newAsyncLoopLogger creates a new asynchronous loop logger
-func newAsyncLoopLogger(config *logConfig) (*asyncLoopLogger){
-	
+func newAsyncLoopLogger(config *logConfig) *asyncLoopLogger {
+
 	asnLoopLogger := new(asyncLoopLogger)
-	
+
 	asnLoopLogger.asyncLogger = *newAsyncLogger(config)
-	
+
 	go asnLoopLogger.processQueue()
-	
+
 	return asnLoopLogger
 }
 
 func (asnLoopLogger *asyncLoopLogger) processItem() (closed bool) {
 	asnLoopLogger.queueHasElements.L.Lock()
 	defer asnLoopLogger.queueHasElements.L.Unlock()
-	
+
 	for asnLoopLogger.msgQueue.Len() == 0 && !asnLoopLogger.closed {
-   		asnLoopLogger.queueHasElements.Wait()
+		asnLoopLogger.queueHasElements.Wait()
 	}
-		
-	if asnLoopLogger.closed{
+
+	if asnLoopLogger.closed {
 		return true
 	}
 

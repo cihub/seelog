@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,16 +25,16 @@
 package seelog
 
 import (
-	"testing"
-	"time"
 	"net"
 	"syscall"
+	"testing"
+	"time"
 )
 
 type testObj struct {
-	Num int
-	Str string
-	Val float32
+	Num  int
+	Str  string
+	Val  float32
 	Time time.Time
 }
 
@@ -42,8 +42,8 @@ var (
 	connWriterLog1 = "Testasasaafasf"
 	connWriterLog2 = "fgrehgsnkmrgergerg[234%:dfsads:2]"
 	connWriterLog3 = " 3242 3 24.df.we"
-	connWriterLog = connWriterLog1 + connWriterLog2 + connWriterLog3
-	obj = &testObj { 11, "sdfasd", 12.5, time.Now()  }
+	connWriterLog  = connWriterLog1 + connWriterLog2 + connWriterLog3
+	obj            = &testObj{11, "sdfasd", 12.5, time.Now()}
 )
 
 func TestConnWriter_ReconnectOnMessage(t *testing.T) {
@@ -52,18 +52,18 @@ func TestConnWriter_ReconnectOnMessage(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Expect(connWriterLog)
-	
-	writer :=  newConnWriter("tcp4", ":" + server.port, true)
+
+	writer := newConnWriter("tcp4", ":"+server.port, true)
 	defer writer.Close()
-	
+
 	_, err = writer.Write([]byte(connWriterLog))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Wait()
 	server.Close()
 }
@@ -74,31 +74,31 @@ func TestConnWriter_OneConnect(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Expect(connWriterLog)
-	
-	writer :=  newConnWriter("tcp4", ":" + server.port, false)
-		
+
+	writer := newConnWriter("tcp4", ":"+server.port, false)
+
 	_, err = writer.Write([]byte(connWriterLog1))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	_, err = writer.Write([]byte(connWriterLog2))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	_, err = writer.Write([]byte(connWriterLog3))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	writer.Close()
-	
+
 	server.Wait()
 	server.Close()
 }
@@ -109,58 +109,58 @@ func TestConnWriter_ReconnectOnMessage_WriteError(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Expect(connWriterLog)
-	
-	writer :=  newConnWriter("tcp4", ":" + server.port, true)
+
+	writer := newConnWriter("tcp4", ":"+server.port, true)
 	defer writer.Close()
-	
+
 	_, err = writer.Write([]byte(connWriterLog))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Wait()
 	server.Close()
-	
+
 	_, err = writer.Write([]byte(connWriterLog))
 	if err == nil {
 		t.Fatal("Write to closed server must return error")
 		return
 	}
-	
+
 	operr, ok := err.(*net.OpError)
 	if !ok {
 		t.Fatalf("Expected *net.OpError. Got: %v", err)
 		return
 	}
-	
+
 	errno, ok := operr.Err.(syscall.Errno)
 	if !ok {
 		t.Fatalf("Expected syscall.Errno. Got %v", operr)
 		return
 	}
-	
+
 	if errno != syscall.ECONNREFUSED {
 		t.Fatalf("Expected syscall.ECONNREFUSED. Got %v", errno)
 		return
 	}
-	
+
 	err = server.Start()
-		if err != nil {
+	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Expect(connWriterLog)
-	
+
 	_, err = writer.Write([]byte(connWriterLog))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	
+
 	server.Wait()
 	server.Close()
 }

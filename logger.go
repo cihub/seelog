@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -40,21 +40,21 @@ type LoggerInterface interface {
 	Warnf(format string, params ...interface{})
 	Errorf(format string, params ...interface{})
 	Criticalf(format string, params ...interface{})
-	
+
 	Trace(v ...interface{})
 	Debug(v ...interface{})
 	Info(v ...interface{})
 	Warn(v ...interface{})
 	Error(v ...interface{})
 	Critical(v ...interface{})
-	
+
 	traceWithCallDepth(callDepth int, message fmt.Stringer)
 	debugWithCallDepth(callDepth int, message fmt.Stringer)
 	infoWithCallDepth(callDepth int, message fmt.Stringer)
 	warnWithCallDepth(callDepth int, message fmt.Stringer)
 	errorWithCallDepth(callDepth int, message fmt.Stringer)
 	criticalWithCallDepth(callDepth int, message fmt.Stringer)
-	
+
 	Close()
 	Flush()
 	Closed() bool
@@ -66,28 +66,27 @@ type innerLoggerInterface interface {
 	Flush()
 }
 
-
 // [file path][func name][level] -> [allowed]
 type allowedContextCache map[string]map[string]map[LogLevel]bool
 
 // commonLogger contains all common data needed for logging and contains methods used to log messages.
 type commonLogger struct {
-	config *logConfig // Config used for logging
+	config       *logConfig          // Config used for logging
 	contextCache allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
-	closed bool // 'true' when all writers are closed, all data is flushed, logger is unusable.
-	unusedLevels []bool 
-	innerLogger innerLoggerInterface
+	closed       bool                // 'true' when all writers are closed, all data is flushed, logger is unusable.
+	unusedLevels []bool
+	innerLogger  innerLoggerInterface
 }
 
-func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) (*commonLogger) {
+func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) *commonLogger {
 	cLogger := new(commonLogger)
-	
+
 	cLogger.config = config
 	cLogger.contextCache = make(allowedContextCache)
 	cLogger.unusedLevels = make([]bool, Off)
 	cLogger.fillUnusedLevels()
 	cLogger.innerLogger = internalLogger
-	
+
 	return cLogger
 }
 
@@ -169,10 +168,10 @@ func (cLogger *commonLogger) Closed() bool {
 }
 
 func (cLogger *commonLogger) fillUnusedLevels() {
-	for i:= 0; i < len(cLogger.unusedLevels); i++ {
+	for i := 0; i < len(cLogger.unusedLevels); i++ {
 		cLogger.unusedLevels[i] = true
 	}
-	
+
 	cLogger.fillUnusedLevelsByContraint(cLogger.config.Constraints)
 
 	for _, exception := range cLogger.config.Exceptions {
@@ -181,7 +180,7 @@ func (cLogger *commonLogger) fillUnusedLevels() {
 }
 
 func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelConstraints) {
-	for i:= 0; i < len(cLogger.unusedLevels); i++ {
+	for i := 0; i < len(cLogger.unusedLevels); i++ {
 		if constraint.IsAllowed(LogLevel(i)) {
 			cLogger.unusedLevels[i] = false
 		}
@@ -192,20 +191,20 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 // This depth level is used in the runtime.Caller(...) call. See 
 // common_context.go -> specificContext, extractCallerInfo for details.
 func (cLogger *commonLogger) log(
-    level LogLevel, 
+	level LogLevel,
 	message fmt.Stringer,
 	stackCallDepth int) {
-	
+
 	if cLogger.Closed() {
 		return
 	}
-	
+
 	if cLogger.unusedLevels[level] {
 		return
 	}
-	
+
 	context, _ := specificContext(stackCallDepth)
-	
+
 	// Context errors are not reported because there are situations
 	// in which context errors are normal Seelog usage cases. For 
 	// example in executables with stripped symbols.
@@ -214,13 +213,12 @@ func (cLogger *commonLogger) log(
 		reportInternalError(err)
 		return
 	}*/
-	
+
 	cLogger.innerLogger.innerLog(level, context, message)
 }
 
-
 func (cLogger *commonLogger) processLogMsg(
-    level LogLevel, 
+	level LogLevel,
 	message fmt.Stringer,
 	context logContextInterface) {
 
@@ -235,29 +233,27 @@ func (cLogger *commonLogger) processLogMsg(
 	}
 }
 
-
 func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterface) bool {
 	funcMap, ok := cLogger.contextCache[context.FullPath()]
 	if !ok {
 		funcMap = make(map[string]map[LogLevel]bool, 0)
 		cLogger.contextCache[context.FullPath()] = funcMap
 	}
-	
+
 	levelMap, ok := funcMap[context.Func()]
 	if !ok {
 		levelMap = make(map[LogLevel]bool, 0)
 		funcMap[context.Func()] = levelMap
 	}
-	
+
 	isAllowValue, ok := levelMap[level]
 	if !ok {
 		isAllowValue = cLogger.config.IsAllowed(level, context)
 		levelMap[level] = isAllowValue
 	}
-	
+
 	return isAllowValue
 }
-
 
 type logMessage struct {
 	params []interface{}
@@ -270,18 +266,18 @@ type logFormattedMessage struct {
 
 func newLogMessage(params []interface{}) fmt.Stringer {
 	message := new(logMessage)
-	
+
 	message.params = params
-	
+
 	return message
 }
 
 func newLogFormattedMessage(format string, params []interface{}) *logFormattedMessage {
 	message := new(logFormattedMessage)
-	
+
 	message.params = params
 	message.format = format
-	
+
 	return message
 }
 

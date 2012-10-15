@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -28,8 +28,8 @@ package seelog
 import (
 	"errors"
 	"fmt"
-	"time"
 	"sync"
+	"time"
 )
 
 const (
@@ -46,7 +46,7 @@ var pkgOperationsMutex *sync.Mutex
 func init() {
 	pkgOperationsMutex = new(sync.Mutex)
 	var err error
-	
+
 	if Default == nil {
 		Default, err = LoggerFromConfigAsBytes([]byte("<seelog />"))
 	}
@@ -57,7 +57,7 @@ func init() {
 	if err != nil {
 		panic(fmt.Sprintf("Seelog couldn't start. Error: %s", err.Error()))
 	}
-	
+
 	Current = Default
 }
 
@@ -68,45 +68,45 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 		return newAsyncLoopLogger(config), nil
 	} else if config.LogType == asyncTimerloggerTypeFromString {
 		logData := config.LoggerData
-		
+
 		if logData == nil {
 			return nil, errors.New("Async timer data not set!")
 		}
-		
+
 		asyncInt, ok := logData.(asyncTimerLoggerData)
-		
+
 		if !ok {
 			return nil, errors.New("Invalid async timer data!")
 		}
-		
+
 		logger, err := newAsyncTimerLogger(config, time.Duration(asyncInt.AsyncInterval))
-		
+
 		if !ok {
 			return nil, err
 		}
-		
+
 		return logger, nil
 	} else if config.LogType == adaptiveLoggerTypeFromString {
 		logData := config.LoggerData
-		
+
 		if logData == nil {
 			return nil, errors.New("Adaptive logger parameters not set!")
 		}
-		
+
 		adaptData, ok := logData.(adaptiveLoggerData)
-		
+
 		if !ok {
 			return nil, errors.New("Invalid adaptive logger parameters!")
 		}
-		
+
 		logger, err := newAsyncAdaptiveLogger(config, time.Duration(adaptData.MinInterval),
-													  time.Duration(adaptData.MaxInterval),
-													  adaptData.CriticalMsgCount)
-		
+			time.Duration(adaptData.MaxInterval),
+			adaptData.CriticalMsgCount)
+
 		if !ok {
 			return nil, err
 		}
-		
+
 		return logger, nil
 	}
 	return nil, errors.New("Invalid config log type/data")
@@ -120,14 +120,14 @@ func UseLogger(logger LoggerInterface) error {
 
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	
+
 	oldLogger := Current
 	Current = logger
-	
+
 	if oldLogger != nil {
 		oldLogger.Flush()
 	}
-	
+
 	return nil
 }
 
@@ -139,7 +139,7 @@ func ReplaceLogger(logger LoggerInterface) error {
 
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	
+
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(err)
@@ -150,15 +150,13 @@ func ReplaceLogger(logger LoggerInterface) error {
 		Current.Flush()
 	} else if Current != nil && !Current.Closed() &&
 		Current != Disabled {
-			
+
 		Current.Flush()
 		Current.Close()
-	} 
-	
-	
-	
+	}
+
 	Current = logger
-	
+
 	return nil
 }
 

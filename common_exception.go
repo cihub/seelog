@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -26,9 +26,9 @@ package seelog
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
-	"fmt"
 )
 
 // Used in rules creation to validate input file and func filters

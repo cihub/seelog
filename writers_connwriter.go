@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -32,11 +32,11 @@ import (
 
 // connWriter is used to write to a stream-oriented network connection.
 type connWriter struct {
-	innerWriter io.WriteCloser
+	innerWriter    io.WriteCloser
 	reconnectOnMsg bool
-	recconect bool
-	net string
-	addr string
+	recconect      bool
+	net            string
+	addr           string
 }
 
 // Creates writer to the address addr on the network netName.
@@ -47,7 +47,7 @@ func newConnWriter(netName string, addr string, reconnectOnMsg bool) *connWriter
 	newWriter.net = netName
 	newWriter.addr = addr
 	newWriter.reconnectOnMsg = reconnectOnMsg
-	
+
 	return newWriter
 }
 
@@ -55,7 +55,7 @@ func (connWriter *connWriter) Close() error {
 	if connWriter.innerWriter == nil {
 		return nil
 	}
-	
+
 	return connWriter.innerWriter.Close()
 }
 
@@ -66,16 +66,16 @@ func (connWriter *connWriter) Write(bytes []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	
+
 	if connWriter.reconnectOnMsg {
 		defer connWriter.innerWriter.Close()
 	}
-	
+
 	n, err = connWriter.innerWriter.Write(bytes)
 	if err != nil {
 		connWriter.recconect = true
 	}
-	
+
 	return
 }
 
@@ -88,19 +88,19 @@ func (connWriter *connWriter) connect() error {
 		connWriter.innerWriter.Close()
 		connWriter.innerWriter = nil
 	}
-	
+
 	conn, err := net.Dial(connWriter.net, connWriter.addr)
 	if err != nil {
 		return err
 	}
-	
+
 	tcpConn, ok := conn.(*net.TCPConn)
 	if ok {
 		tcpConn.SetKeepAlive(true)
 	}
-	
+
 	connWriter.innerWriter = conn
-	
+
 	return nil
 }
 
@@ -109,10 +109,10 @@ func (connWriter *connWriter) neddedConnectOnMsg() bool {
 		connWriter.recconect = false
 		return true
 	}
-	
+
 	if connWriter.innerWriter == nil {
 		return true
 	}
-	
+
 	return connWriter.reconnectOnMsg
 }

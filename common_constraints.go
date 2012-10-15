@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -147,7 +147,6 @@ func (listConstr *listConstraints) AllowedLevels() map[LogLevel]bool {
 //=======================================================
 
 type offConstraints struct {
-
 }
 
 func newOffConstraints() (*offConstraints, error) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -31,34 +31,34 @@ import (
 func TestformattedWriter(t *testing.T) {
 	formatStr := "%Level %LEVEL %Msg"
 	message := "message"
-	var logLevel LogLevel =  TraceLvl
-	
+	var logLevel LogLevel = TraceLvl
+
 	bytesVerifier, err := newBytesVerifier(t)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	
+
 	formatter, err := newFormatter(formatStr)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	
+
 	writer, err := newFormattedWriter(bytesVerifier, formatter)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	
+
 	context, err := currentContext()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	
+
 	logMessage := formatter.Format(message, logLevel, context)
-	
+
 	bytesVerifier.ExpectBytes([]byte(logMessage))
 	writer.Write(message, logLevel, context)
 	bytesVerifier.MustNotExpect()

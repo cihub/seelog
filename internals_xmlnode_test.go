@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,8 +25,8 @@
 package seelog
 
 import (
-	"testing"
 	"strings"
+	"testing"
 	//"fmt"
 	"reflect"
 )
@@ -189,8 +189,8 @@ func TestXmlNode(t *testing.T) {
 		}
 
 		if err == nil && !reflect.DeepEqual(parsedXml, test.expected) {
-			t.Errorf("\n%s:\nXml input: %s\nExpected: %s. \nGot: %s\n", test.testName, 
-			test.inputXml, test.expected, parsedXml)
+			t.Errorf("\n%s:\nXml input: %s\nExpected: %s. \nGot: %s\n", test.testName,
+				test.inputXml, test.expected, parsedXml)
 		}
 	}
 }

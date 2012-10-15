@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,23 +25,23 @@
 package seelog
 
 import (
-	"testing"
-	"strconv"
 	"os"
+	"strconv"
+	"testing"
 )
 
 func Test_Adaptive(t *testing.T) {
 	switchToRealFSWrapper(t)
 	fileName := "log.log"
 	count := 100
-	
+
 	Current.Close()
 	err := os.Remove(fileName)
 	if err != nil && !os.IsNotExist(err) {
 		t.Error(err)
 		return
 	}
-	
+
 	testConfig := `
 <seelog type="adaptive" mininterval="1000" maxinterval="1000000" critmsgcount="100">
 	<outputs formatid="msg">
@@ -59,21 +59,19 @@ func Test_Adaptive(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	
-	
-	
+
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))
 	}
-	
+
 	Flush()
-	
+
 	gotCount, err := countSequencedRowsInFile(fileName)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	
+
 	if int64(count) != gotCount {
 		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
 		return

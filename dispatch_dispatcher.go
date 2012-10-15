@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -87,11 +87,11 @@ func createDispatcher(formatter *formatter, receivers []interface{}) (*dispatche
 }
 
 func (disp *dispatcher) Dispatch(
-		message string, 
-		level LogLevel, 
-		context logContextInterface, 
-		errorFunc func(err error)) {
-	
+	message string,
+	level LogLevel,
+	context logContextInterface,
+	errorFunc func(err error)) {
+
 	for _, writer := range disp.writers {
 		err := writer.Write(message, level, context)
 		if err != nil {
@@ -112,7 +112,7 @@ func (disp *dispatcher) Flush() {
 	}
 	for _, formatWriter := range disp.Writers() {
 		flusher, ok := formatWriter.Writer().(flusherInterface)
-		
+
 		if ok {
 			flusher.Flush()
 		}
@@ -136,7 +136,7 @@ func (disp *dispatcher) Close() error {
 		if ok {
 			flusher.Flush()
 		}
-		
+
 		closer, ok := formatWriter.Writer().(io.Closer)
 		if ok {
 			err := closer.Close()
@@ -145,7 +145,7 @@ func (disp *dispatcher) Close() error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 

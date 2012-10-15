@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -116,11 +116,11 @@ func (bufWriter *bufferedWriter) Write(bytes []byte) (n int, err error) {
 }
 
 func (bufWriter *bufferedWriter) Close() error {
-	closer, ok :=  bufWriter.innerWriter.(io.Closer)
+	closer, ok := bufWriter.innerWriter.(io.Closer)
 	if ok {
 		return closer.Close()
 	}
-	
+
 	return nil
 }
 

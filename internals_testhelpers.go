@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,25 +25,25 @@
 package seelog
 
 import (
-	"io"
-	"io/ioutil"
-	"fmt"
-	"strconv"
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"strconv"
 )
 
 func countSequencedRowsInFile(filePath string) (int64, error) {
 	bts, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		 return 0, err
+		return 0, err
 	}
-	
+
 	bufReader := bufio.NewReader(bytes.NewBuffer(bts))
-	
+
 	var gotCounter int64
-	for ;; {
+	for {
 		line, _, bufErr := bufReader.ReadLine()
 		if bufErr != nil && bufErr != io.EOF {
 			return 0, bufErr
@@ -58,13 +58,13 @@ func countSequencedRowsInFile(filePath string) (int64, error) {
 		if atoiErr != nil {
 			return 0, atoiErr
 		}
-		
+
 		if intVal != gotCounter {
 			return 0, errors.New(fmt.Sprintf("Wrong order: %d Expected: %d\n", intVal, gotCounter))
 		}
-				
-		gotCounter++		
+
+		gotCounter++
 	}
-	
+
 	return gotCounter, nil
 }

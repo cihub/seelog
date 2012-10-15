@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -42,7 +42,7 @@ func LoggerFromConfigAsFile(fileName string) (LoggerInterface, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return createLoggerFromConfig(conf)
 }
 
@@ -52,7 +52,7 @@ func LoggerFromConfigAsBytes(data []byte) (LoggerInterface, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return createLoggerFromConfig(conf)
 }
 
@@ -78,6 +78,6 @@ func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerIn
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return createLoggerFromConfig(conf)
 }

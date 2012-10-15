@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,9 +25,9 @@
 package seelog
 
 import (
-	"testing"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 const (

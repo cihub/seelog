@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -28,7 +28,6 @@ import "fmt"
 
 // consoleWriter is used to write to console
 type consoleWriter struct {
-
 }
 
 // Creates a new console writer. Returns error, if the console writer couldn't be created.

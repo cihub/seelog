@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,71 +25,71 @@
 package seelog
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net"
-	"testing"
 	"strconv"
-	"errors"
-	"time"
-	"fmt"
 	"sync"
+	"testing"
+	"time"
 )
 
 const (
 	portStart = 1200
-	portEnd = 1299
+	portEnd   = 1299
 )
 
 type tcpServer struct {
-	testEnv *testing.T
-	expect bool
+	testEnv      *testing.T
+	expect       bool
 	expectedText string
-	
+
 	serveConnLock *sync.Mutex
-	
+
 	//closeChan chan bool
-	closed bool
+	closed         bool
 	readallTimeout time.Duration
-	listener *net.TCPListener
-	port string
+	listener       *net.TCPListener
+	port           string
 }
 
 func startTcpServer(testEnv *testing.T) (*tcpServer, error) {
 	server := new(tcpServer)
-	
+
 	server.serveConnLock = &sync.Mutex{}
-	
+
 	//server.closeChan = make(chan bool, 0)
 	server.readallTimeout = 1 * time.Second
 	server.testEnv = testEnv
 	err := server.Start()
-	
+
 	return server, err
 }
 
 func (server *tcpServer) Start() error {
 	port := portStart
 	for {
-		tcpAddr, err := net.ResolveTCPAddr("tcp4", ":" + strconv.Itoa(port))
+		tcpAddr, err := net.ResolveTCPAddr("tcp4", ":"+strconv.Itoa(port))
 		if err != nil {
 			return err
 		}
-	
+
 		server.listener, err = net.ListenTCP("tcp", tcpAddr)
 		if err == nil {
 			break
 		}
-		
+
 		if port > portEnd {
 			return errors.New(fmt.Sprintf("Port number exceedes %v", portEnd))
 		}
-		
+
 		port++
 	}
-	
+
 	//fmt.Printf("PortNumber = %v\n", port)
 	server.port = strconv.Itoa(port)
-	
+
 	go func() {
 		for {
 			acceptNext := server.acceptCycle()
@@ -98,13 +98,13 @@ func (server *tcpServer) Start() error {
 			}
 		}
 	}()
-	
+
 	return nil
 }
 
 func (server *tcpServer) acceptCycle() (acceptNext bool) {
 	acceptNext = true
-	
+
 	conn, err := server.listener.Accept()
 	if err != nil {
 		if !server.closed {
@@ -117,7 +117,7 @@ func (server *tcpServer) acceptCycle() (acceptNext bool) {
 
 	server.serveConnLock.Lock()
 	defer server.serveConnLock.Unlock()
-	
+
 	if !server.expect {
 		server.testEnv.Fatal("Unexpected connection")
 		conn.Close()
@@ -128,48 +128,49 @@ func (server *tcpServer) acceptCycle() (acceptNext bool) {
 	inputText := ""
 	c := make(chan string, 0)
 	go server.readAll(c, conn)
-	
+
 	select {
-		case inputText = <- c:
-			{ }
-		case <-time.After(server.readallTimeout):
-			server.testEnv.Fatal("Timeout on readAll")
-			return
+	case inputText = <-c:
+		{
+		}
+	case <-time.After(server.readallTimeout):
+		server.testEnv.Fatal("Timeout on readAll")
+		return
 	}
-	
+
 	if server.expectedText != inputText {
 		server.testEnv.Fatalf("Incorrecet input. Expected: %v. Got: %v", server.expectedText, inputText)
 		conn.Close()
 		return
 	}
-	
+
 	conn.Close()
-	
+
 	return
 }
 
 func (server *tcpServer) readAll(c chan string, conn net.Conn) {
-		bytes, err := ioutil.ReadAll(conn)
-		if err != nil {
-			server.testEnv.Error(err)
-			return
-		}
-		
-		c <- string(bytes)
+	bytes, err := ioutil.ReadAll(conn)
+	if err != nil {
+		server.testEnv.Error(err)
+		return
+	}
+
+	c <- string(bytes)
 }
 
 func (server *tcpServer) Expect(text string) {
 	server.serveConnLock.Lock()
 	defer server.serveConnLock.Unlock()
-	
+
 	server.expect = true
 	server.expectedText = text
 }
 
 func (server *tcpServer) Wait() {
 	// Waits server.listener.Accept()
-	<- time.After(1 * time.Second)
-	
+	<-time.After(1 * time.Second)
+
 	server.serveConnLock.Lock()
 	defer server.serveConnLock.Unlock()
 }
@@ -177,7 +178,7 @@ func (server *tcpServer) Wait() {
 func (server *tcpServer) Close() {
 	server.serveConnLock.Lock()
 	defer server.serveConnLock.Unlock()
-	
+
 	server.closed = true
 	server.listener.Close()
 }

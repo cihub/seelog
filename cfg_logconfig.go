@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -39,10 +39,10 @@ const (
 )
 
 const (
-	syncloggerTypeFromStringStr = "sync"
-	AsyncloggerTypeFromStringStr = "asyncloop"
+	syncloggerTypeFromStringStr       = "sync"
+	AsyncloggerTypeFromStringStr      = "asyncloop"
 	asyncTimerloggerTypeFromStringStr = "asynctimer"
-	adaptiveLoggerTypeFromStringStr = "adaptive"
+	adaptiveLoggerTypeFromStringStr   = "adaptive"
 )
 
 // asyncTimerLoggerData represents specific data for async timer logger
@@ -52,16 +52,16 @@ type asyncTimerLoggerData struct {
 
 // adaptiveLoggerData represents specific data for adaptive timer logger
 type adaptiveLoggerData struct {
-	MinInterval 		uint32
-	MaxInterval 		uint32
-	CriticalMsgCount 	uint32
+	MinInterval      uint32
+	MaxInterval      uint32
+	CriticalMsgCount uint32
 }
 
 var loggerTypeToStringRepresentations = map[loggerTypeFromString]string{
-	syncloggerTypeFromString:    		syncloggerTypeFromStringStr,
-	asyncLooploggerTypeFromString:    AsyncloggerTypeFromStringStr,
-	asyncTimerloggerTypeFromString:   asyncTimerloggerTypeFromStringStr,
-	adaptiveLoggerTypeFromString:	  adaptiveLoggerTypeFromStringStr,
+	syncloggerTypeFromString:       syncloggerTypeFromStringStr,
+	asyncLooploggerTypeFromString:  AsyncloggerTypeFromStringStr,
+	asyncTimerloggerTypeFromString: asyncTimerloggerTypeFromStringStr,
+	adaptiveLoggerTypeFromString:   adaptiveLoggerTypeFromStringStr,
 }
 
 // loggerTypeFromStringFromString parses a string and returns a corresponding logger type, if sucessfull. 
@@ -78,16 +78,16 @@ func loggerTypeFromStringFromString(logTypeString string) (level loggerTypeFromS
 // logConfig stores logging configuration. Contains messages dispatcher, allowed log level rules 
 // (general constraints and exceptions), and messages formats (used by nodes of dispatcher tree)
 type logConfig struct {
-	Constraints    logLevelConstraints      // General log level rules (>min and <max, or set of allowed levels)
-	Exceptions     []*logLevelException     // Exceptions to general rules for specific files or funcs
-	RootDispatcher dispatcherInterface // Root of output tree
+	Constraints    logLevelConstraints  // General log level rules (>min and <max, or set of allowed levels)
+	Exceptions     []*logLevelException // Exceptions to general rules for specific files or funcs
+	RootDispatcher dispatcherInterface  // Root of output tree
 	LogType        loggerTypeFromString
 	LoggerData     interface{}
 }
 
 func newConfig(
-	constraints logLevelConstraints, 
-	exceptions []*logLevelException, 
+	constraints logLevelConstraints,
+	exceptions []*logLevelException,
 	rootDispatcher dispatcherInterface,
 	logType loggerTypeFromString,
 	logData interface{}) (*logConfig, error) {
@@ -97,14 +97,14 @@ func newConfig(
 	if rootDispatcher == nil {
 		return nil, errors.New("RootDispatcher can not be nil")
 	}
-	
+
 	config := new(logConfig)
 	config.Constraints = constraints
 	config.Exceptions = exceptions
 	config.RootDispatcher = rootDispatcher
 	config.LogType = logType
 	config.LoggerData = logData
-	
+
 	return config, nil
 }
 

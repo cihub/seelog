@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,8 +25,8 @@
 package seelog
 
 import (
-	"time"
 	"errors"
+	"time"
 )
 
 // asyncTimerLogger represents asynchronous logger which processes the log queue each
@@ -37,19 +37,19 @@ type asyncTimerLogger struct {
 }
 
 // newAsyncLoopLogger creates a new asynchronous loop logger
-func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger, error){
-	
+func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger, error) {
+
 	if interval <= 0 {
 		return nil, errors.New("Async logger interval should be > 0")
 	}
-	
+
 	asnTimerLogger := new(asyncTimerLogger)
-	
+
 	asnTimerLogger.asyncLogger = *newAsyncLogger(config)
 	asnTimerLogger.interval = interval
-	
+
 	go asnTimerLogger.processQueue()
-	
+
 	return asnTimerLogger, nil
 }
 
@@ -58,14 +58,14 @@ func (asnTimerLogger *asyncTimerLogger) processItem() (closed bool) {
 	defer asnTimerLogger.queueHasElements.L.Unlock()
 
 	for asnTimerLogger.msgQueue.Len() == 0 && !asnTimerLogger.closed {
-   		asnTimerLogger.queueHasElements.Wait()
+		asnTimerLogger.queueHasElements.Wait()
 	}
-	
-	if asnTimerLogger.closed{
+
+	if asnTimerLogger.closed {
 		return true
 	}
 
-    	asnTimerLogger.processQueueElement()
+	asnTimerLogger.processQueueElement()
 	return false
 }
 
@@ -75,7 +75,7 @@ func (asnTimerLogger *asyncTimerLogger) processQueue() {
 
 		if closed {
 			break
-		}		
+		}
 
 		<-time.After(asnTimerLogger.interval)
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -64,7 +64,7 @@ func rollingTypeFromString(rollingTypeStr string) (rollingType rollingTypes, fou
 // the files count exceed the specified limit
 type rollingFileWriter struct {
 	fileName    string
-	fileDir     string       // Rolling files folder
+	fileDir     string // Rolling files folder
 	filePath    string
 	rollingType rollingTypes // Rolling mode (Files roll by size/date/...)
 
@@ -306,7 +306,7 @@ func (rollfileWriter *rollingFileWriter) createFileAndFolderIfNeeded() error {
 }
 
 func (rollfileWriter *rollingFileWriter) String() string {
-	
+
 	rollingTypeStr, ok := rollingTypesStringRepresentation[rollfileWriter.rollingType]
 	if !ok {
 		rollingTypeStr = "UNKNOWN"

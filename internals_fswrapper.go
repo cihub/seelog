@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -46,17 +46,17 @@ func switchToFakeFSWrapper(t *testing.T) {
 	if isFakeFS {
 		return
 	}
-	
+
 	if fakeFSWrapper == nil {
 		newTestFSWrapper, err := newEmptyFSTestWrapper()
 
 		if err != nil {
 			t.Fatalf("Fatal error in test fs initialization: %s", err.Error())
 		}
-		
+
 		fakeFSWrapper = newTestFSWrapper
 	}
-	
+
 	fileSystemWrapper = fakeFSWrapper
 	isFakeFS = true
 }
@@ -65,13 +65,12 @@ func switchToRealFSWrapper(t *testing.T) {
 	if !isFakeFS {
 		return
 	}
-	
+
 	fileSystemWrapper = realFSWrapper
 	isFakeFS = false
 }
 
 type osWrapper struct {
-
 }
 
 func (_ *osWrapper) MkdirAll(folderPath string) error {
@@ -82,7 +81,7 @@ func (_ *osWrapper) MkdirAll(folderPath string) error {
 	return os.MkdirAll(folderPath, defaultDirectoryPermissions)
 }
 func (_ *osWrapper) Open(fileName string) (io.WriteCloser, error) {
-	return os.OpenFile(fileName, os.O_WRONLY | os.O_APPEND, defaultFilePermissions)
+	return os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 }
 func (_ *osWrapper) Create(fileName string) (io.WriteCloser, error) {
 	return os.Create(fileName)

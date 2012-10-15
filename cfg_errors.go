@@ -25,54 +25,46 @@
 package seelog
 
 import (
-	"os"
-	"strconv"
-	"testing"
+	"errors"
 )
 
-func Test_Sync(t *testing.T) {
-	switchToRealFSWrapper(t)
+var (
+	nodeMustHaveChildrenError   = errors.New("Node must have children")
+	nodeCannotHaveChildrenError = errors.New("Node cannot have children")
+)
 
-	fileName := "log.log"
-	count := 100
+// Base struct for custom errors.
+type baseError struct {
+	message string
+}
 
-	Current.Close()
-	err := os.Remove(fileName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Error(err)
-		return
-	}
+func (be baseError) Error() string {
+	return be.message
+}
 
-	testConfig := `
-<seelog type="sync">
-	<outputs formatid="msg">
-		<file path="` + fileName + `"/>
-	</outputs>
-	<formats>
-		<format id="msg" format="%Msg%n"/>
-	</formats>
-</seelog>`
+type unexpectedChildElementError struct {
+	baseError
+}
 
-	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err = ReplaceLogger(logger)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer Flush()
+func newUnexpectedChildElementError(msg string) *unexpectedChildElementError {
+	custmsg := "Unexpected child element: " + msg
+	return &unexpectedChildElementError{baseError{message: custmsg}}
+}
 
-	for i := 0; i < count; i++ {
-		Trace(strconv.Itoa(i))
-	}
+type missingArgumentError struct {
+	baseError
+}
 
-	gotCount, err := countSequencedRowsInFile(fileName)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+func newMissingArgumentError(nodeName, attrName string) *missingArgumentError {
+	custmsg := "Output '" + nodeName + "' has no '" + attrName + "' attribute"
+	return &missingArgumentError{baseError{message: custmsg}}
+}
 
-	if int64(count) != gotCount {
-		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
-		return
-	}
+type unexpectedAttributeError struct {
+	baseError
+}
+
+func newUnexpectedAttributeError(nodeName, attr string) *unexpectedAttributeError {
+	custmsg := nodeName + " has unexpected attribute: " + attr
+	return &unexpectedAttributeError{baseError{message: custmsg}}
 }

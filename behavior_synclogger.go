@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -31,23 +31,23 @@ import (
 // syncLogger performs logging in the same goroutine where 'Trace/Debug/...'
 // func was called
 type syncLogger struct {
-	commonLogger 
+	commonLogger
 }
 
 // newSyncLogger creates a new synchronous logger
-func newSyncLogger(config *logConfig) (*syncLogger){
+func newSyncLogger(config *logConfig) *syncLogger {
 	syncLogger := new(syncLogger)
-	
+
 	syncLogger.commonLogger = *newCommonLogger(config, syncLogger)
-	
+
 	return syncLogger
 }
 
 func (cLogger *syncLogger) innerLog(
-    level LogLevel, 
+	level LogLevel,
 	context logContextInterface,
 	message fmt.Stringer) {
-	
+
 	cLogger.processLogMsg(level, message, context)
 }
 

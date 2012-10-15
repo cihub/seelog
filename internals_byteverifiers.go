@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -119,7 +119,6 @@ func (verifier *bytesVerifier) Close() error {
 
 // nullWriter implements io.Writer inteface and does nothing, always returning a successful write result
 type nullWriter struct {
-
 }
 
 func (this *nullWriter) Write(bytes []byte) (n int, err error) {

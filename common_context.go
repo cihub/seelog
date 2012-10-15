@@ -1,4 +1,4 @@
-// Copyright (c) 2012 - Cloud Instruments Co. Ltd.
+// Copyright (c) 2012 - Cloud Instruments Co., Ltd.
 // 
 // All rights reserved.
 //
@@ -25,11 +25,11 @@
 package seelog
 
 import (
-	"os"
 	"errors"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
-	"path/filepath"
 	"time"
 )
 
@@ -49,7 +49,6 @@ func setWorkDir() {
 	workingDir = workDir + string(os.PathSeparator)
 }
 
-
 // Represents runtime caller context
 type logContextInterface interface {
 	Func() string
@@ -65,7 +64,7 @@ func currentContext() (logContextInterface, error) {
 	return specificContext(1)
 }
 
-func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string,err error) {
+func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string, err error) {
 	pc, fullPath, _, ok := runtime.Caller(skip)
 
 	if !ok {
@@ -74,11 +73,10 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 
 	//TODO:Currently fixes bug in weekly.2012-03-13+: Caller returns incorrect separators
 	//Delete later
-	
+
 	fullPath = strings.Replace(fullPath, "\\", string(os.PathSeparator), -1)
 	fullPath = strings.Replace(fullPath, "/", string(os.PathSeparator), -1)
 
-	
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
 	} else {
@@ -103,12 +101,12 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 // or names, but states that they can't be extracted.
 func specificContext(skip int) (logContextInterface, error) {
 	callTime := time.Now()
-	
+
 	if skip < 0 {
 		negativeStackFrameErr := errors.New("Can not skip negative stack frames")
 		return &errorContext{callTime, negativeStackFrameErr}, negativeStackFrameErr
 	}
-	
+
 	fullPath, shortPath, function, err := extractCallerInfo(skip + 2)
 	if err != nil {
 		return &errorContext{callTime, err}, err
@@ -122,8 +120,8 @@ type logContext struct {
 	funcName  string
 	shortPath string
 	fullPath  string
-	fileName string
-	callTime time.Time
+	fileName  string
+	callTime  time.Time
 }
 
 func (context *logContext) IsValid() bool {
@@ -147,20 +145,20 @@ func (context *logContext) FileName() string {
 }
 
 func (context *logContext) CallTime() time.Time {
-	return context.callTime;
+	return context.callTime
 }
 
 const (
-	errorContextFunc = "Func() error:"
+	errorContextFunc      = "Func() error:"
 	errorContextShortPath = "ShortPath() error:"
-	errorContextFullPath = "FullPath() error:"
-	errorContextFileName = "FileName() error:"
+	errorContextFullPath  = "FullPath() error:"
+	errorContextFileName  = "FileName() error:"
 )
 
 // Represents an error context
 type errorContext struct {
 	errorTime time.Time
-	err	error
+	err       error
 }
 
 func (errContext *errorContext) IsValid() bool {
@@ -184,5 +182,5 @@ func (errContext *errorContext) FileName() string {
 }
 
 func (errContext *errorContext) CallTime() time.Time {
-	return errContext.errorTime;
+	return errContext.errorTime
 }
