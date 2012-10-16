@@ -643,19 +643,19 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	if !ok {
 		return nil, newMissingArgumentError(node.name, SenderNameId)
 	}
-	// Process child subnodes.
-	recipientAddresses := make([]string, 0, len(node.children))
-	caCertificatePaths := make([]string, 0, len(node.children))
+	// Process child nodes scanning for recipient email addresses and/or CA certificate paths.
+	var recipientAddresses []string
+	var caCertificatePaths []string
 	for _, childNode := range node.children {
 		switch childNode.name {
-		// Extract recipient addresses from child nodes.
+		// Extract recipient address from child nodes.
 		case RecipientId:
 			address, ok := childNode.attributes[AddressId]
 			if !ok {
 				return nil, newMissingArgumentError(childNode.name, AddressId)
 			}
 			recipientAddresses = append(recipientAddresses, address)
-		// Extract CA certificate file paths from child nodes.
+		// Extract CA certificate file path from child nodes.
 		case CACertificatePathsId:
 			path, ok := childNode.attributes[FilePathId]
 			if !ok {
