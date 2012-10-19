@@ -25,10 +25,9 @@
 package seelog
 
 import (
-	"testing"
-	//"reflect"
 	"fmt"
 	"strings"
+	"testing"
 )
 
 var parserTests []parserTest
@@ -95,34 +94,48 @@ func getParserTests() []parserTest {
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
+		testName = "Smtp writer"
+
 		var (
-			senderAddress = "senderaddress"
-			senderNameId  = "sendername"
-			recipientId   = "recipient"
-			addressId     = "address"
-			hostNameId    = "hostname"
-			hostPortId    = "hostport"
-			hostPortStr   = "123"
-			hostPort      = 123
-			userNameId    = "username"
-			userPassId    = "password"
+			senderAddress    = "senderaddress"
+			senderName       = "sendername"
+			recipientAddress = "recipientaddress"
+			hostName         = "hostname"
+			hostPort         = "123"
+			userName         = "username"
+			userPass         = "password"
+			caCertPath       = "cacertpath"
 		)
 
-		testName = "Smtp writer"
 		testConfig = fmt.Sprintf("<seelog><outputs><smtp %s=\"%s\" %s=\"%s\" "+
 			" %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%s\">"+
-			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
-			senderAddress, senderAddress, senderNameId, senderNameId, hostNameId, hostNameId,
-			hostPortId, hostPortStr,
-			userNameId, userNameId, userPassId, userPassId,
-			recipientId, addressId, addressId, recipientId, addressId, addressId,
-			recipientId, addressId, addressId)
+			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
+			SenderAddressId, senderAddress,
+			SenderNameId, senderName,
+			HostNameId, hostName,
+			HostPortId, hostPort,
+			UserNameId, userName,
+			UserPassId, userPass,
+			RecipientId, AddressId, recipientAddress,
+			RecipientId, AddressId, recipientAddress,
+			RecipientId, AddressId, recipientAddress,
+			CACertificatePathsId, FilePathId, caCertPath,
+			CACertificatePathsId, FilePathId, caCertPath,
+		)
 
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testsmtpWriter, _ := newSmtpWriter(senderAddress, senderNameId,
-			[]string{addressId, addressId, addressId}, hostNameId, hostPort, userNameId, userPassId)
+		testsmtpWriter, _ := newSmtpWriter(
+			senderAddress,
+			senderName,
+			[]string{recipientAddress, recipientAddress, recipientAddress},
+			hostName,
+			hostPort,
+			userName,
+			userPass,
+			[]string{caCertPath, caCertPath},
+		)
 		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testsmtpWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -754,8 +767,7 @@ func getParserTests() []parserTest {
 	return parserTests
 }
 
-// We are waiting for structs equality (Planned in Go 1 release) and this func is a
-// temporary solution
+// Temporary solution: compare by string identity.
 func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 	if conf1 == nil {
 		return conf2 == nil
