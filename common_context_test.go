@@ -27,6 +27,7 @@ package seelog
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -64,8 +65,11 @@ func TestContext(t *testing.T) {
 		t.Fatalf("Expected: context != nil")
 	}
 
-	if context.Func() != nameFunc {
-		t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+	if nf := context.Func(); nf != nameFunc {
+		// Account for a case when the func full path is bigger than commonPrefix but includes it.
+		if !strings.HasSuffix(nf, nameFunc) {
+			t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+		}
 	}
 
 	if context.ShortPath() != shortPath {
@@ -96,8 +100,11 @@ func TestInnerContext(t *testing.T) {
 		t.Fatalf("Expected: context != nil")
 	}
 
-	if context.Func() != nameFunc {
-		t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+	if cf := context.Func(); cf != nameFunc {
+		// Account for a case when the func full path is bigger than commonPrefix but includes it.
+		if !strings.HasSuffix(cf, nameFunc) {
+			t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+		}
 	}
 
 	if context.ShortPath() != shortPath {
