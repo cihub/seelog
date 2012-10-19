@@ -25,22 +25,26 @@
 package seelog
 
 import (
-	"os"
 	"strconv"
 	"testing"
 )
 
 func Test_Asyncloop(t *testing.T) {
 	switchToRealFSWrapper(t)
-	fileName := "log.log"
+	fileName := "beh_test_asyncloop.log"
 	count := 100
 
 	Current.Close()
-	err := os.Remove(fileName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Error(err)
+
+	if e := tryRemoveFile(fileName); e != nil {
+		t.Error(e)
 		return
 	}
+	defer func() {
+		if e := tryRemoveFile(fileName); e != nil {
+			t.Error(e)
+		}
+	}()
 
 	testConfig := `
 <seelog type="asyncloop">
@@ -52,8 +56,8 @@ func Test_Asyncloop(t *testing.T) {
 	</formats>
 </seelog>`
 
-	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err = ReplaceLogger(logger)
+	logger, _ := LoggerFromConfigAsString(testConfig)
+	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
@@ -75,19 +79,26 @@ func Test_Asyncloop(t *testing.T) {
 		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
 		return
 	}
+
+	Current.Close()
 }
 
 func Test_AsyncloopOff(t *testing.T) {
 	switchToRealFSWrapper(t)
-	fileName := "log.log"
+	fileName := "beh_test_asyncloopoff.log"
 	count := 100
 
 	Current.Close()
-	err := os.Remove(fileName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Error(err)
+
+	if e := tryRemoveFile(fileName); e != nil {
+		t.Error(e)
 		return
 	}
+	defer func() {
+		if e := tryRemoveFile(fileName); e != nil {
+			t.Error(e)
+		}
+	}()
 
 	testConfig := `
 <seelog type="asyncloop" levels="off">
@@ -99,8 +110,8 @@ func Test_AsyncloopOff(t *testing.T) {
 	</formats>
 </seelog>`
 
-	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err = ReplaceLogger(logger)
+	logger, _ := LoggerFromConfigAsString(testConfig)
+	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
@@ -122,4 +133,6 @@ func Test_AsyncloopOff(t *testing.T) {
 		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", 0, gotCount)
 		return
 	}
+
+	Current.Close()
 }

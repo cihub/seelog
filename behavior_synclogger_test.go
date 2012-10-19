@@ -25,23 +25,26 @@
 package seelog
 
 import (
-	"os"
 	"strconv"
 	"testing"
 )
 
 func Test_Sync(t *testing.T) {
 	switchToRealFSWrapper(t)
-
-	fileName := "log.log"
+	fileName := "beh_test_sync.log"
 	count := 100
 
 	Current.Close()
-	err := os.Remove(fileName)
-	if err != nil && !os.IsNotExist(err) {
-		t.Error(err)
+
+	if e := tryRemoveFile(fileName); e != nil {
+		t.Error(e)
 		return
 	}
+	defer func() {
+		if e := tryRemoveFile(fileName); e != nil {
+			t.Error(e)
+		}
+	}()
 
 	testConfig := `
 <seelog type="sync">
@@ -53,13 +56,12 @@ func Test_Sync(t *testing.T) {
 	</formats>
 </seelog>`
 
-	logger, _ := LoggerFromConfigAsBytes([]byte(testConfig))
-	err = ReplaceLogger(logger)
+	logger, _ := LoggerFromConfigAsString(testConfig)
+	err := ReplaceLogger(logger)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer Flush()
 
 	for i := 0; i < count; i++ {
 		Trace(strconv.Itoa(i))
@@ -75,4 +77,6 @@ func Test_Sync(t *testing.T) {
 		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
 		return
 	}
+
+	Current.Close()
 }

@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"strconv"
 )
 
@@ -67,4 +68,13 @@ func countSequencedRowsInFile(filePath string) (int64, error) {
 	}
 
 	return gotCounter, nil
+}
+
+func tryRemoveFile(filePath string) (err error) {
+	err = os.Remove(filePath)
+	if os.IsNotExist(err) {
+		err = nil
+		return
+	}
+	return
 }
