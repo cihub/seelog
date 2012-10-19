@@ -403,7 +403,7 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 		return DefaultloggerTypeFromString, nil, nil
 	}
 
-	logType, found := loggerTypeFromStringFromString(logTypeStr)
+	logType, found := getLoggerTypeFromString(logTypeStr)
 
 	if !found {
 		return 0, nil, errors.New(fmt.Sprintf("Unknown logger type: %s", logTypeStr))

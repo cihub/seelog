@@ -64,8 +64,8 @@ var loggerTypeToStringRepresentations = map[loggerTypeFromString]string{
 	adaptiveLoggerTypeFromString:   adaptiveLoggerTypeFromStringStr,
 }
 
-// loggerTypeFromStringFromString parses a string and returns a corresponding logger type, if sucessfull. 
-func loggerTypeFromStringFromString(logTypeString string) (level loggerTypeFromString, found bool) {
+// getLoggerTypeFromString parses a string and returns a corresponding logger type, if successful. 
+func getLoggerTypeFromString(logTypeString string) (level loggerTypeFromString, found bool) {
 	for logType, logTypeStr := range loggerTypeToStringRepresentations {
 		if logTypeStr == logTypeString {
 			return logType, true
