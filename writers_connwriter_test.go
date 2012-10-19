@@ -38,6 +38,10 @@ type testObj struct {
 	Time time.Time
 }
 
+const (
+	testIPAddress = "localhost"
+)
+
 var (
 	connWriterLog1 = "Testasasaafasf"
 	connWriterLog2 = "fgrehgsnkmrgergerg[234%:dfsads:2]"
@@ -45,6 +49,10 @@ var (
 	connWriterLog  = connWriterLog1 + connWriterLog2 + connWriterLog3
 	obj            = &testObj{11, "sdfasd", 12.5, time.Now()}
 )
+
+func getTestTCPAddress(port string) string {
+	return testIPAddress + ":" + port
+}
 
 func TestConnWriter_ReconnectOnMessage(t *testing.T) {
 	server, err := startTcpServer(t)
@@ -55,7 +63,7 @@ func TestConnWriter_ReconnectOnMessage(t *testing.T) {
 
 	server.Expect(connWriterLog)
 
-	writer := newConnWriter("tcp4", ":"+server.port, true)
+	writer := newConnWriter("tcp4", getTestTCPAddress(server.port), true)
 	defer writer.Close()
 
 	_, err = writer.Write([]byte(connWriterLog))
@@ -77,7 +85,7 @@ func TestConnWriter_OneConnect(t *testing.T) {
 
 	server.Expect(connWriterLog)
 
-	writer := newConnWriter("tcp4", ":"+server.port, false)
+	writer := newConnWriter("tcp4", getTestTCPAddress(server.port), false)
 
 	_, err = writer.Write([]byte(connWriterLog1))
 	if err != nil {
@@ -112,7 +120,7 @@ func TestConnWriter_ReconnectOnMessage_WriteError(t *testing.T) {
 
 	server.Expect(connWriterLog)
 
-	writer := newConnWriter("tcp4", ":"+server.port, true)
+	writer := newConnWriter("tcp4", getTestTCPAddress(server.port), true)
 	defer writer.Close()
 
 	_, err = writer.Write([]byte(connWriterLog))
