@@ -39,7 +39,7 @@ type testObj struct {
 }
 
 const (
-	testIPAddress = "localhost"
+	testIPAddress = "127.0.0.1"
 )
 
 var (
@@ -62,7 +62,6 @@ func TestConnWriter_ReconnectOnMessage(t *testing.T) {
 	}
 
 	server.Expect(connWriterLog)
-
 	writer := newConnWriter("tcp4", getTestTCPAddress(server.port), true)
 	defer writer.Close()
 

@@ -785,11 +785,9 @@ func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 }
 
 func TestParser(t *testing.T) {
-
 	switchToFakeFSWrapper(t)
 
 	for _, test := range getParserTests() {
-
 		conf, err := configFromReader(strings.NewReader(test.config))
 
 		if (err != nil) != test.errorExpected {

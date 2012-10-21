@@ -62,9 +62,8 @@ func startTcpServer(testEnv *testing.T) (*tcpServer, error) {
 	//server.closeChan = make(chan bool, 0)
 	server.readallTimeout = 1 * time.Second
 	server.testEnv = testEnv
-	err := server.Start()
 
-	return server, err
+	return server, server.Start()
 }
 
 func (server *tcpServer) Start() error {
