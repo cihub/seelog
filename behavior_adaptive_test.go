@@ -30,7 +30,7 @@ import (
 )
 
 func Test_Adaptive(t *testing.T) {
-	switchToRealFSWrapper(t)
+	switchToRealFSWrapper()
 	fileName := "beh_test_adaptive.log"
 	count := 100
 
