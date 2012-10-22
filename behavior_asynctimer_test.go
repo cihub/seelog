@@ -30,7 +30,7 @@ import (
 )
 
 func Test_Asynctimer(t *testing.T) {
-	switchToRealFSWrapper(t)
+	switchToRealFSWrapper()
 	fileName := "beh_test_asynctimer.log"
 	count := 100
 
