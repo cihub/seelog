@@ -30,7 +30,7 @@ import (
 )
 
 func Test_Asyncloop(t *testing.T) {
-	switchToRealFSWrapper(t)
+	switchToRealFSWrapper()
 	fileName := "beh_test_asyncloop.log"
 	count := 100
 
@@ -84,7 +84,7 @@ func Test_Asyncloop(t *testing.T) {
 }
 
 func Test_AsyncloopOff(t *testing.T) {
-	switchToRealFSWrapper(t)
+	switchToRealFSWrapper()
 	fileName := "beh_test_asyncloopoff.log"
 	count := 100
 
