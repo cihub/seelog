@@ -29,7 +29,29 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"testing"
 )
+
+var fakeFSWrapper fileSystemWrapperInterface
+
+func switchToFakeFSWrapper(t *testing.T) {
+	if isFakeFS {
+		return
+	}
+
+	if fakeFSWrapper == nil {
+		newTestFSWrapper, err := newEmptyFSTestWrapper()
+
+		if err != nil {
+			t.Fatalf("Fatal error in test fs initialization: %s", err.Error())
+		}
+
+		fakeFSWrapper = newTestFSWrapper
+	}
+
+	fileSystemWrapper = fakeFSWrapper
+	isFakeFS = true
+}
 
 // filesSystemTestWrapper emulates some of the real filesystem functions. It stores lists of
 // files as if they were real files and emulate such operations as creation, folder creation, 

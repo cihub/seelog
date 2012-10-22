@@ -24,101 +24,56 @@
 
 package seelog
 
-// Real fileSystemWrapperInterface implementation that uses os package.
-
 import (
+	"errors"
 	"io"
-	"os"
-	"testing"
 )
 
-const (
-	defaultFilePermissions      = 0666
-	defaultDirectoryPermissions = 0767
-)
-
-var isFakeFS = false
-var realFSWrapper = new(osWrapper)
-var fakeFSWrapper fileSystemWrapperInterface
-var fileSystemWrapper fileSystemWrapperInterface = realFSWrapper
-
-func switchToFakeFSWrapper(t *testing.T) {
-	if isFakeFS {
-		return
-	}
-
-	if fakeFSWrapper == nil {
-		newTestFSWrapper, err := newEmptyFSTestWrapper()
-
-		if err != nil {
-			t.Fatalf("Fatal error in test fs initialization: %s", err.Error())
-		}
-
-		fakeFSWrapper = newTestFSWrapper
-	}
-
-	fileSystemWrapper = fakeFSWrapper
-	isFakeFS = true
+// fileSystemWrapperInterface is used for testing. When seelog is used in a real app, osWrapper uses standard os
+// funcs. When seelog is being tested, filesSystemTestWrapper emulates some of the os funcs. Both osWrapper and
+// filesSystemTestWrapper implement this interface.
+type fileSystemWrapperInterface interface {
+	MkdirAll(folderPath string) error
+	Open(fileName string) (io.WriteCloser, error)
+	Create(fileName string) (io.WriteCloser, error)
+	GetFileSize(fileName string) (int64, error)
+	GetFileNames(folderPath string) ([]string, error)
+	Rename(fileNameFrom string, fileNameTo string) error
+	Remove(fileName string) error
+	Exists(path string) bool
 }
 
-func switchToRealFSWrapper(t *testing.T) {
-	if !isFakeFS {
-		return
-	}
+var wrapperForTest fileSystemWrapperInterface
 
-	fileSystemWrapper = realFSWrapper
-	isFakeFS = false
+func setWrapperTestEnvironment(wrapper fileSystemWrapperInterface) {
+	wrapperForTest = wrapper
 }
 
-type osWrapper struct {
-}
-
-func (_ *osWrapper) MkdirAll(folderPath string) error {
-	if folderPath == "" {
-		return nil
-	}
-
-	return os.MkdirAll(folderPath, defaultDirectoryPermissions)
-}
-func (_ *osWrapper) Open(fileName string) (io.WriteCloser, error) {
-	return os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
-}
-func (_ *osWrapper) Create(fileName string) (io.WriteCloser, error) {
-	return os.Create(fileName)
-}
-func (_ *osWrapper) GetFileSize(fileName string) (int64, error) {
-	stat, err := os.Lstat(fileName)
+func removeAndCheck(fileName string) error {
+	err := wrapperForTest.Remove(fileName)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return stat.Size(), nil
+	if wrapperForTest.Exists(fileName) {
+		return errors.New("Must be deleted: " + fileName)
+	}
+
+	return nil
 }
-func (_ *osWrapper) GetFileNames(folderPath string) ([]string, error) {
-	if folderPath == "" {
-		folderPath = "."
-	}
 
-	folder, err := os.Open(folderPath)
+func createFile(fileName string) error {
+	file, err := wrapperForTest.Create(fileName)
 	if err != nil {
-		return make([]string, 0), err
+		return err
 	}
-	defer folder.Close()
 
-	files, err := folder.Readdirnames(-1)
+	err = file.Close()
 	if err != nil {
-		return make([]string, 0), err
+		return err
 	}
 
-	return files, nil
+	return nil
 }
-func (_ *osWrapper) Rename(fileNameFrom string, fileNameTo string) error {
-	return os.Rename(fileNameFrom, fileNameTo)
-}
-func (_ *osWrapper) Remove(fileName string) error {
-	return os.Remove(fileName)
-}
-func (_ *osWrapper) Exists(path string) bool {
-	_, err := os.Lstat(path)
-	return err == nil
-}
+
+
