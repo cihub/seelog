@@ -53,7 +53,7 @@ type smtpWriter struct {
 
 // newSmtpWriter returns a new SMTP-writer.
 func newSmtpWriter(senderAddress, senderName string, recipientAddresses []string, hostName, hostPort, userName, password string, caCertificatePaths []string) (writer *smtpWriter, err error) {
-	// THINK: Check PEM file paths here?
+	// TODO: Check PEM file paths here?
 	writer = &smtpWriter{
 		smtp.PlainAuth("", userName, password, hostName),
 		hostName,
