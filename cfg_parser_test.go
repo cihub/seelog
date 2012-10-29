@@ -95,7 +95,6 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Smtp writer"
-
 		var (
 			senderAddress    = "senderaddress"
 			senderName       = "sendername"
@@ -104,12 +103,13 @@ func getParserTests() []parserTest {
 			hostPort         = "123"
 			userName         = "username"
 			userPass         = "password"
-			caCertPath       = "cacertpath"
+			// caCertPath       = "/cacertdirpath/"
 		)
-
 		testConfig = fmt.Sprintf("<seelog><outputs><smtp %s=\"%s\" %s=\"%s\" "+
 			" %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%s\">"+
-			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
+			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/>"+
+			// "<%s %s=\"%s\"/><%s %s=\"%s\"/>"+
+			"</smtp></outputs></seelog>",
 			SenderAddressId, senderAddress,
 			SenderNameId, senderName,
 			HostNameId, hostName,
@@ -119,14 +119,14 @@ func getParserTests() []parserTest {
 			RecipientId, AddressId, recipientAddress,
 			RecipientId, AddressId, recipientAddress,
 			RecipientId, AddressId, recipientAddress,
-			CACertificatePathsId, FilePathId, caCertPath,
-			CACertificatePathsId, FilePathId, caCertPath,
+			// CACertDirPathsId, PathId, caCertPath,
+			// CACertDirPathsId, PathId, caCertPath,
 		)
 
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testsmtpWriter, _ := newSmtpWriter(
+		testSmtpWriter, _ := newSmtpWriter(
 			senderAddress,
 			senderName,
 			[]string{recipientAddress, recipientAddress, recipientAddress},
@@ -134,9 +134,10 @@ func getParserTests() []parserTest {
 			hostPort,
 			userName,
 			userPass,
-			[]string{caCertPath, caCertPath},
+			// []string{caCertPath, caCertPath},
+			nil,
 		)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testsmtpWriter})
+		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testSmtpWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})

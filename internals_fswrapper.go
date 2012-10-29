@@ -25,19 +25,19 @@
 package seelog
 
 import (
-	"errors"
 	"io"
 )
 
-// fileSystemWrapperInterface is used for testing. When seelog is used in a real app, osWrapper uses standard os
-// funcs. When seelog is being tested, filesSystemTestWrapper emulates some of the os funcs. Both osWrapper and
-// filesSystemTestWrapper implement this interface.
+// fileSystemWrapperInterface is designed to allow for flexible testing.
+// When seelog is used in a real app, realFSWrapper uses the standard os package funcs,
+// when tested - testFileSystemWrapper just emulates the respective os package funcs.
+// Both realFSWrapper and testFileSystemWrapper implement this interface.
 type fileSystemWrapperInterface interface {
 	MkdirAll(folderPath string) error
 	Open(fileName string) (io.WriteCloser, error)
 	Create(fileName string) (io.WriteCloser, error)
 	GetFileSize(fileName string) (int64, error)
-	GetFileNames(folderPath string) ([]string, error)
+	GetDirFileNames(dirPath string, nameIsFullPath bool) ([]string, error)
 	Rename(fileNameFrom string, fileNameTo string) error
 	Remove(fileName string) error
 	Exists(path string) bool
@@ -45,8 +45,8 @@ type fileSystemWrapperInterface interface {
 
 var wrapperForTest fileSystemWrapperInterface
 
-func setWrapperTestEnvironment(wrapper fileSystemWrapperInterface) {
-	wrapperForTest = wrapper
+func setWrapperTestEnvironment(fsWrapper fileSystemWrapperInterface) {
+	wrapperForTest = fsWrapper
 }
 
 func removeAndCheck(fileName string) error {
@@ -55,9 +55,9 @@ func removeAndCheck(fileName string) error {
 		return err
 	}
 
-	if wrapperForTest.Exists(fileName) {
-		return errors.New("Must be deleted: " + fileName)
-	}
+	// if wrapperForTest.Exists(fileName) {
+	// 	return errors.New("Must be deleted: " + fileName)
+	// }
 
 	return nil
 }
@@ -75,5 +75,3 @@ func createFile(fileName string) error {
 
 	return nil
 }
-
-

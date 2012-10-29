@@ -31,6 +31,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/smtp"
+	"path/filepath"
+	"strings"
 )
 
 const (
@@ -48,12 +50,28 @@ type smtpWriter struct {
 	senderAddress      string
 	senderName         string
 	recipientAddresses []string
-	caCertificatePaths []string
+	//caCertDirPaths []string
+	config *tls.Config
 }
 
-// newSmtpWriter returns a new SMTP-writer.
-func newSmtpWriter(senderAddress, senderName string, recipientAddresses []string, hostName, hostPort, userName, password string, caCertificatePaths []string) (writer *smtpWriter, err error) {
-	// TODO: Check PEM file paths here?
+// newSmtpWriter returns a new SMTP writer.
+func newSmtpWriter(
+	senderAddress, senderName string,
+	recipientAddresses []string,
+	hostName, hostPort, userName, password string,
+	caCertDirPaths []string,
+) (writer *smtpWriter, err error) {
+	var config *tls.Config
+	var e error
+	// Define TLS Config iff caCertDirPaths are given.
+	if caCertDirPaths != nil && len(caCertDirPaths) > 0 {
+		config, e = getTLSConfig(caCertDirPaths, hostName)
+		if e != nil {
+			writer = nil
+			err = e
+			return
+		}
+	}
 	writer = &smtpWriter{
 		smtp.PlainAuth("", userName, password, hostName),
 		hostName,
@@ -62,7 +80,7 @@ func newSmtpWriter(senderAddress, senderName string, recipientAddresses []string
 		senderAddress,
 		senderName,
 		recipientAddresses,
-		caCertificatePaths,
+		config,
 	}
 	return
 }
@@ -72,13 +90,22 @@ func prepareMessage(senderAddr, senderName, subject string, body []byte) []byte 
 	return append(h, body...)
 }
 
-// getTLSConfig gets paths of PEM files with certificates,
+// getTLSConfig gets paths of folders with X.509 CA PEM files,
 // host server name and tries to create an appropriate TLS.Config.
-func getTLSConfig(pemFilePaths []string, hostName string) (config *tls.Config, err error) {
-	if pemFilePaths == nil || len(pemFilePaths) == 0 {
-		err = errors.New("Invalid PEM file paths")
-		return
+func getTLSConfig(pemDirPaths []string, hostName string) (config *tls.Config, err error) {
+	var pemFilePaths []string
+	for _, pdp := range pemDirPaths {
+		filePaths, e := fileSystemWrapper.GetDirFileNames(pdp, true)
+		if e != nil {
+			return nil, e
+		}
+		for _, fp := range filePaths {
+			if strings.ToUpper(filepath.Ext(fp)) == ".PEM" {
+				pemFilePaths = append(pemFilePaths, fp)
+			}
+		}
 	}
+
 	pemEncodedContent := []byte{}
 	var (
 		e     error
@@ -154,26 +181,23 @@ func sendMailWithTLSConfig(config *tls.Config, addr string, a smtp.Auth, from st
 // to a post server, which sends it to the recipients.
 func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 	var err error
-	if smtpw.caCertificatePaths == nil {
+	msg := prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data)
+	if smtpw.config == nil {
 		err = smtp.SendMail(
 			smtpw.hostNameWithPort,
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data),
+			msg,
 		)
 	} else {
-		config, e := getTLSConfig(smtpw.caCertificatePaths, smtpw.hostName)
-		if e != nil {
-			return 0, e
-		}
 		err = sendMailWithTLSConfig(
-			config,
+			smtpw.config,
 			smtpw.hostNameWithPort,
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data),
+			msg,
 		)
 	}
 	if err != nil {
@@ -182,8 +206,9 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-// Close closes down SMTP-connection.
+// Close closes down SMTP connection.
 func (smtpWriter *smtpWriter) Close() error {
-	// Do nothing as Write method opens and closes connection automatically
+	// Do nothing as Write method opens and
+	// closes connection automatically.
 	return nil
 }

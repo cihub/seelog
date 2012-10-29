@@ -182,14 +182,12 @@ func (rollfileWriter *rollingFileWriter) getNextRollName() (string, error) {
 }
 
 func (rollfileWriter *rollingFileWriter) getRolls() (map[int]string, error) {
-	files, err := fileSystemWrapper.GetFileNames(rollfileWriter.fileDir)
-
+	files, err := fileSystemWrapper.GetDirFileNames(rollfileWriter.fileDir, false)
 	if err != nil {
 		return map[int]string{}, err
 	}
 
 	rolls := make(map[int]string, 0)
-
 	for _, file := range files {
 		if strings.HasPrefix(file, rollfileWriter.currentFileName) {
 			if len(rollfileWriter.currentFileName)+1 >= len(file) {

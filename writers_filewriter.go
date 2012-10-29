@@ -60,11 +60,9 @@ func (fileWriter *fileWriter) Write(bytes []byte) (n int, err error) {
 }
 
 func (fileWriter *fileWriter) createFile() error {
-
 	folder, _ := filepath.Split(fileWriter.fileName)
 
 	err := fileSystemWrapper.MkdirAll(folder)
-
 	if err != nil {
 		return err
 	}
@@ -84,6 +82,6 @@ func (fileWriter *fileWriter) createFile() error {
 	return nil
 }
 
-func (fileWriter *fileWriter) String() string {
-	return fmt.Sprintf("File writer: %s", fileWriter.fileName)
+func (fw *fileWriter) String() string {
+	return fmt.Sprintf("File writer: %s", fw.fileName)
 }

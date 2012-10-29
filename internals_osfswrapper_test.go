@@ -29,7 +29,7 @@ import (
 )
 
 func init() {
-	setWrapperTestEnvironment(new(osWrapper))
+	setWrapperTestEnvironment(new(realFSWrapper))
 }
 
 func TestFileSystemWrapper_MkdirAll(t *testing.T) {
@@ -48,7 +48,7 @@ func TestFileSystemWrapper_GetFileSize(t *testing.T) {
 	testFSWrapper_GetFileSize(t)
 }
 
-func TestFileSystemWrapper_GetFileNames(t *testing.T) {
+func TestFileSystemWrapper_GetDirFileNames(t *testing.T) {
 	testFSWrapper_GetFileNames(t)
 }
 

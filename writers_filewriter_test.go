@@ -100,7 +100,7 @@ func (this *fileWriterTester) test() {
 
 	for testNum, testCase := range this.testCases {
 		this.t.Logf("Start test  [%v]\n", testNum)
-		fileSystemWrapperTest, err := newFSTestWrapper(nil, writer, testCase.fileSize)
+		fileSystemWrapperTest, err := newTestFSWrapper(nil, writer, testCase.fileSize)
 		if err != nil {
 			this.t.Error(err)
 			return
@@ -143,7 +143,7 @@ func (this *fileWriterTester) performWrite(fileWriter io.Writer, writer *bytesVe
 	}
 }
 
-func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *filesSystemTestWrapper) {
+func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *testFileSystemWrapper) {
 	for _, mustExistsFile := range testCase.resFiles {
 		found := false
 		for _, existsFile := range fileSystemWrapperTest.Files() {
@@ -159,7 +159,7 @@ func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCa
 	}
 }
 
-func (this *fileWriterTester) checkJustRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *filesSystemTestWrapper) {
+func (this *fileWriterTester) checkJustRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *testFileSystemWrapper) {
 	for _, existsFile := range fileSystemWrapperTest.Files() {
 		found := false
 		for _, mustExistsFile := range testCase.resFiles {

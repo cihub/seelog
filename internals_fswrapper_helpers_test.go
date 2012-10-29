@@ -227,7 +227,7 @@ func testFSWrapper_GetFileNames(t *testing.T) {
 		}
 	}
 
-	filesFromWrapper, err := wrapperForTest.GetFileNames(folder)
+	filesFromWrapper, err := wrapperForTest.GetDirFileNames(folder, false)
 	if err != nil {
 		t.Error(err)
 		return

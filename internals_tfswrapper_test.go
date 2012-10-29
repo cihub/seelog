@@ -29,7 +29,7 @@ import (
 )
 
 func init() {
-	wrapper, err := newFSTestWrapper(nil, new(nullWriter), 5)
+	wrapper, err := newTestFSWrapper(nil, new(nullWriter), 5)
 	if err != nil {
 		panic(err)
 	}
