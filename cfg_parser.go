@@ -48,7 +48,7 @@ const (
 	FormatAttrId                    = "format"
 	FormatKeyAttrId                 = "id"
 	OutputFormatId                  = "formatid"
-	FilePathId                      = "path"
+	PathId                          = "path"
 	FileWriterId                    = "file"
 	SmtpWriterId                    = "smtp"
 	SenderAddressId                 = "senderaddress"
@@ -59,7 +59,7 @@ const (
 	HostPortId                      = "hostport"
 	UserNameId                      = "username"
 	UserPassId                      = "password"
-	CACertificatePathsId            = "cacertificatepaths"
+	CACertDirPathsId                = "cacertdirpaths"
 	SpliterDispatcherId             = "splitter"
 	ConsoleWriterId                 = "console"
 	FilterDispatcherId              = "filter"
@@ -594,7 +594,7 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 }
 
 func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, FilePathId)
+	err := checkUnexpectedAttribute(node, OutputFormatId, PathId)
 	if err != nil {
 		return nil, err
 	}
@@ -608,9 +608,9 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, err
 	}
 
-	path, isPath := node.attributes[FilePathId]
+	path, isPath := node.attributes[PathId]
 	if !isPath {
-		return nil, newMissingArgumentError(node.name, FilePathId)
+		return nil, newMissingArgumentError(node.name, PathId)
 	}
 
 	fileWriter, err := newFileWriter(path)
@@ -645,7 +645,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	}
 	// Process child nodes scanning for recipient email addresses and/or CA certificate paths.
 	var recipientAddresses []string
-	var caCertificatePaths []string
+	var caCertDirPaths []string
 	for _, childNode := range node.children {
 		switch childNode.name {
 		// Extract recipient address from child nodes.
@@ -655,13 +655,13 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 				return nil, newMissingArgumentError(childNode.name, AddressId)
 			}
 			recipientAddresses = append(recipientAddresses, address)
-		// Extract CA certificate file path from child nodes.
-		case CACertificatePathsId:
-			path, ok := childNode.attributes[FilePathId]
+		// Extract from child nodes directory paths with CA certificate files.
+		case CACertDirPathsId:
+			path, ok := childNode.attributes[PathId]
 			if !ok {
-				return nil, newMissingArgumentError(childNode.name, FilePathId)
+				return nil, newMissingArgumentError(childNode.name, PathId)
 			}
-			caCertificatePaths = append(caCertificatePaths, path)
+			caCertDirPaths = append(caCertDirPaths, path)
 		default:
 			return nil, newUnexpectedChildElementError(childNode.name)
 		}
@@ -694,7 +694,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		hostPort,
 		userName,
 		userPass,
-		caCertificatePaths,
+		caCertDirPaths,
 	)
 	if err != nil {
 		return nil, err

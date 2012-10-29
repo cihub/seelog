@@ -27,8 +27,10 @@ package seelog
 // Real fileSystemWrapperInterface implementation that uses os package.
 
 import (
+	"errors"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -37,36 +39,37 @@ const (
 )
 
 var isFakeFS = false
-var realFSWrapper = new(osWrapper)
-var fileSystemWrapper fileSystemWrapperInterface = realFSWrapper
-
+var rFSWrapper = new(realFSWrapper)
+var fileSystemWrapper fileSystemWrapperInterface = rFSWrapper
 
 func switchToRealFSWrapper() {
 	if !isFakeFS {
 		return
 	}
 
-	fileSystemWrapper = realFSWrapper
+	fileSystemWrapper = rFSWrapper
 	isFakeFS = false
 }
 
-type osWrapper struct {
-}
+type realFSWrapper struct{}
 
-func (_ *osWrapper) MkdirAll(folderPath string) error {
+func (_ *realFSWrapper) MkdirAll(folderPath string) error {
 	if folderPath == "" {
 		return nil
 	}
 
 	return os.MkdirAll(folderPath, defaultDirectoryPermissions)
 }
-func (_ *osWrapper) Open(fileName string) (io.WriteCloser, error) {
+
+func (_ *realFSWrapper) Open(fileName string) (io.WriteCloser, error) {
 	return os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 }
-func (_ *osWrapper) Create(fileName string) (io.WriteCloser, error) {
+
+func (_ *realFSWrapper) Create(fileName string) (io.WriteCloser, error) {
 	return os.Create(fileName)
 }
-func (_ *osWrapper) GetFileSize(fileName string) (int64, error) {
+
+func (_ *realFSWrapper) GetFileSize(fileName string) (int64, error) {
 	stat, err := os.Lstat(fileName)
 	if err != nil {
 		return 0, err
@@ -74,31 +77,104 @@ func (_ *osWrapper) GetFileSize(fileName string) (int64, error) {
 
 	return stat.Size(), nil
 }
-func (_ *osWrapper) GetFileNames(folderPath string) ([]string, error) {
-	if folderPath == "" {
-		folderPath = "."
-	}
 
-	folder, err := os.Open(folderPath)
-	if err != nil {
-		return make([]string, 0), err
-	}
-	defer folder.Close()
-
-	files, err := folder.Readdirnames(-1)
-	if err != nil {
-		return make([]string, 0), err
-	}
-
-	return files, nil
+var pathToNameTransformer filePathTransformer = func(filePath string) string {
+	return filepath.Base(filePath)
 }
-func (_ *osWrapper) Rename(fileNameFrom string, fileNameTo string) error {
+
+func (_ *realFSWrapper) GetDirFileNames(dirPath string, nameIsFullPath bool) ([]string, error) {
+	if dirPath == "" {
+		dirPath = "."
+	}
+
+	// folder, err := os.Open(dirPath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer folder.Close()
+
+	// files, err := folder.Readdirnames(-1)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return files, nil
+	if nameIsFullPath {
+		return getDirFilePaths(dirPath, nil, nil)
+	}
+	return getDirFilePaths(dirPath, nil, pathToNameTransformer)
+}
+
+// fileFilter accepts a file FileInfo and applies custom filtering rules.
+// Returns false if file with the given FileInfo must be ignored.
+type fileFilter func(os.FileInfo) bool
+
+// filePathTransformer accepts a file path string and transforms it
+// according to the custom rules.
+type filePathTransformer func(string) string
+
+func getDirFilePaths(dirPath string, fileFilter fileFilter, pathTransformer filePathTransformer) ([]string, error) {
+	dfi, err := os.Open(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	defer dfi.Close()
+	// Check if dirPath is really directory.
+	if s, e := dfi.Stat(); e != nil {
+		return nil, e
+	} else {
+		if !s.IsDir() {
+			return nil, errors.New("Input path must be directory.")
+		}
+	}
+	// Read chunck size.
+	rbs := 64
+	var fPaths []string
+	var fp string
+	var fis []os.FileInfo
+	var e error
+L:
+	for {
+		// Read directory entities by reasonable chuncks
+		// to prevent overflows on big number of files.
+		fis, e = dfi.Readdir(rbs)
+		switch e {
+		// It's OK: Do nothing, just continue the cycle.
+		case nil:
+		case io.EOF:
+			break L
+		// Something went wrong: Exit with an error.
+		default:
+			return nil, e
+		}
+		for _, fi := range fis {
+			// Ignore directories.
+			if !fi.IsDir() {
+				// Check filter condition.
+				if fileFilter != nil && !fileFilter(fi) {
+					continue
+				}
+				fp = filepath.Join(dirPath, fi.Name())
+				if pathTransformer == nil {
+					fPaths = append(fPaths, fp)
+				} else {
+					fPaths = append(fPaths, pathTransformer(fp))
+				}
+			}
+		}
+	}
+	return fPaths, nil
+}
+
+func (_ *realFSWrapper) Rename(fileNameFrom string, fileNameTo string) error {
 	return os.Rename(fileNameFrom, fileNameTo)
 }
-func (_ *osWrapper) Remove(fileName string) error {
+
+func (_ *realFSWrapper) Remove(fileName string) error {
 	return os.Remove(fileName)
 }
-func (_ *osWrapper) Exists(path string) bool {
+
+func (_ *realFSWrapper) Exists(path string) bool {
 	_, err := os.Lstat(path)
 	return err == nil
 }
