@@ -73,20 +73,16 @@ func (fileWriter *fileWriter) createFile() error {
 		}
 	}
 
-	var innerWriter io.WriteCloser
-
 	// If exists
 	_, err = os.Lstat(fileWriter.fileName)
 	if nil == err {
-		innerWriter, err = os.OpenFile(fileWriter.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
+		fileWriter.innerWriter, err = os.OpenFile(fileWriter.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 	} else {
-		innerWriter, err = os.Create(fileWriter.fileName)
+		fileWriter.innerWriter, err = os.Create(fileWriter.fileName)
 	}
 	if err != nil {
 		return err
 	}
-
-	fileWriter.innerWriter = innerWriter
 
 	return nil
 }
