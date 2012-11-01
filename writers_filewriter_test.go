@@ -46,7 +46,7 @@ func TestSimpleFileWriter(t *testing.T) {
 
 //===============================================================
 
-func simplefileWriterGetter(testCase *fileWriterTestCase) (io.Writer, error) {
+func simplefileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, error) {
 	return newFileWriter(testCase.fileName)
 }
 
@@ -80,11 +80,15 @@ var simplefileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
 
 type fileWriterTester struct {
 	testCases   []*fileWriterTestCase
-	writerGetter func(*fileWriterTestCase) (io.Writer, error)
+	writerGetter func(*fileWriterTestCase) (io.WriteCloser, error)
 	t           *testing.T
 }
 
-func newFileWriterTester(testCases []*fileWriterTestCase, writerGetter func(*fileWriterTestCase) (io.Writer, error), t *testing.T) *fileWriterTester {
+func newFileWriterTester(
+	testCases []*fileWriterTestCase, 
+	writerGetter func(*fileWriterTestCase) (io.WriteCloser, error), 
+	t *testing.T) *fileWriterTester {
+
 	return &fileWriterTester{testCases, writerGetter, t}
 }
 
@@ -158,21 +162,31 @@ func (this *fileWriterTester) testCase(testCase *fileWriterTestCase, testNum int
 				return
 			}
 		}
-		_, err = os.Create(filePath)
+		fi, err := os.Create(filePath)
+
+		if err != nil {
+			this.t.Error(err)
+			return
+		}
+
+		err = fi.Close()
+		
 		if err != nil {
 			this.t.Error(err)
 			return
 		}
 	}
 
-	fileWriter, err := this.writerGetter(testCase)
+	fwc, err := this.writerGetter(testCase)
 
 	if err != nil {
 		this.t.Error(err)
 		return
 	}
 
-	this.performWrite(fileWriter, testCase.writeCount)
+	defer fwc.Close()
+
+	this.performWrite(fwc, testCase.writeCount)
 
 	files, err := getWriterTestResultFiles()
 
@@ -183,6 +197,7 @@ func (this *fileWriterTester) testCase(testCase *fileWriterTestCase, testNum int
 
 	this.checkRequiredFilesExist(testCase, files)
 	this.checkJustRequiredFilesExist(testCase, files)
+
 }
 
 func (this *fileWriterTester) test() {

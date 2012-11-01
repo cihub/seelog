@@ -31,10 +31,23 @@ import (
 
 // fileWriterTestCase is declared in writers_filewriter_test.go
 
-func createRollingSizefileWriterTestCase(files []string, fileName string, fileSize int64, maxRolls int, writeCount int, resFiles []string) *fileWriterTestCase {
+func createRollingSizefileWriterTestCase(
+	files []string, 
+	fileName string, 
+	fileSize int64, 
+	maxRolls int, 
+	writeCount int, 
+	resFiles []string) *fileWriterTestCase {
+
 	return &fileWriterTestCase{files, fileName, Size, fileSize, maxRolls, "", writeCount, resFiles}
 }
-func createRollingDatefileWriterTestCase(files []string, fileName string, datePattern string, writeCount int, resFiles []string) *fileWriterTestCase {
+func createRollingDatefileWriterTestCase(
+	files []string, 
+	fileName string, 
+	datePattern string, 
+	writeCount int, 
+	resFiles []string) *fileWriterTestCase {
+	
 	return &fileWriterTestCase{files, fileName, Date, 0, 0, datePattern, writeCount, resFiles}
 }
 
@@ -45,7 +58,7 @@ func TestRollingFileWriter(t *testing.T) {
 
 //===============================================================
 
-func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.Writer, error) {
+func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, error) {
 	if testCase.rollingType == Size {
 		return newRollingFileWriterSize(testCase.fileName, testCase.fileSize, testCase.maxRolls)
 	} else if testCase.rollingType == Date {
