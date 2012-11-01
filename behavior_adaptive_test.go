@@ -27,10 +27,51 @@ package seelog
 import (
 	"strconv"
 	"testing"
+	"io/ioutil"
+	"bufio"
+	"bytes"
+	"io"
+	"errors"
+	"fmt"
 )
 
+func countSequencedRowsInFile(filePath string) (int64, error) {
+	bts, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return 0, err
+	}
+
+	bufReader := bufio.NewReader(bytes.NewBuffer(bts))
+
+	var gotCounter int64
+	for {
+		line, _, bufErr := bufReader.ReadLine()
+		if bufErr != nil && bufErr != io.EOF {
+			return 0, bufErr
+		}
+
+		lineString := string(line)
+		if lineString == "" {
+			break
+		}
+
+		intVal, atoiErr := strconv.ParseInt(lineString, 10, 64)
+		if atoiErr != nil {
+			return 0, atoiErr
+		}
+
+		if intVal != gotCounter {
+			return 0, errors.New(fmt.Sprintf("Wrong order: %d Expected: %d\n", intVal, gotCounter))
+		}
+
+		gotCounter++
+	}
+
+	return gotCounter, nil
+}
+
+
 func Test_Adaptive(t *testing.T) {
-	switchToRealFSWrapper()
 	fileName := "beh_test_adaptive.log"
 	count := 100
 

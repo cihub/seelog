@@ -43,13 +43,13 @@ func TestChunkWriteOnFilling(t *testing.T) {
 	bufferedWriter.Write(bytes)
 
 	// bufferedWriter writes another chunk not at once but in goroutine (with nondetermined delay)
-	// so we wait for a few seconds
-	writer.MustNotExpectWithDelay(0.1 * 1e9)
+	// so we wait some time
+	writer.MustNotExpectWithDelay(0.1 * 1e8)
 }
 
 func TestFlushByTimePeriod(t *testing.T) {
 	writer, _ := newBytesVerifier(t)
-	bufferedWriter, err := newBufferedWriter(writer, 1024, 100)
+	bufferedWriter, err := newBufferedWriter(writer, 1024, 10)
 
 	if err != nil {
 		t.Fatalf("Unexpected buffered writer creation error: %s", err.Error())
@@ -57,14 +57,11 @@ func TestFlushByTimePeriod(t *testing.T) {
 
 	bytes := []byte("Hello")
 
-	writer.ExpectBytes(bytes)
-	bufferedWriter.Write(bytes)
-	writer.MustNotExpectWithDelay(0.2 * 1e9)
-
-	// Added after bug with stopped timer
-	writer.ExpectBytes(bytes)
-	bufferedWriter.Write(bytes)
-	writer.MustNotExpectWithDelay(0.2 * 1e9)
+	for i := 0; i < 2; i++ {
+		writer.ExpectBytes(bytes)
+		bufferedWriter.Write(bytes)
+		writer.MustNotExpectWithDelay(0.2 * 1e8)
+	}
 }
 
 func TestBigMessageMustPassMemoryBuffer(t *testing.T) {
@@ -83,5 +80,5 @@ func TestBigMessageMustPassMemoryBuffer(t *testing.T) {
 
 	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-	writer.MustNotExpectWithDelay(0.1 * 1e9)
+	writer.MustNotExpectWithDelay(0.1 * 1e8)
 }
