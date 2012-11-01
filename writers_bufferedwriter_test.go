@@ -57,7 +57,7 @@ func TestFlushByTimePeriod(t *testing.T) {
 
 	bytes := []byte("Hello")
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		writer.ExpectBytes(bytes)
 		bufferedWriter.Write(bytes)
 		writer.MustNotExpectWithDelay(0.2 * 1e8)

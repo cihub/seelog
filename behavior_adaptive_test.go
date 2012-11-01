@@ -27,6 +27,12 @@ package seelog
 import (
 	"strconv"
 	"testing"
+	"io/ioutil"
+	"bufio"
+	"bytes"
+	"io"
+	"errors"
+	"fmt"
 )
 
 func countSequencedRowsInFile(filePath string) (int64, error) {
