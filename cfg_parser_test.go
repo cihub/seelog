@@ -25,8 +25,10 @@
 package seelog
 
 import (
+	"os"
 	"fmt"
 	"strings"
+	"path/filepath"
 	"testing"
 )
 
@@ -784,24 +786,54 @@ func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 	return fmt.Sprintf("%s", conf1) == fmt.Sprintf("%s", logConfig)
 }
 
+func isCfgTestFile(i os.FileInfo) bool {
+	return ".log" == filepath.Ext(i.Name())
+}
+
+func cleanupAfterCfgTest(t *testing.T) {
+	toDel, err := getDirFileNames(".", false, isCfgTestFile)
+
+	if nil != err {
+		t.Fatal("Cannot list files in test directory!")
+	}
+
+	for _, p := range toDel {
+		err = os.Remove(p)
+
+		if nil != err {
+			t.Errorf("Cannot remove file %s in test directory: %s", p, err.Error())
+		}
+	}
+}
+
+func parseTest(test parserTest, t *testing.T) {
+	conf, err := configFromReader(strings.NewReader(test.config))
+
+	if err != nil &&
+	   conf != nil &&
+	   conf.RootDispatcher != nil {
+		defer conf.RootDispatcher.Close()
+	}
+
+	if (err != nil) != test.errorExpected {
+		t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected error:%t. Got error: %t\n", test.testName,
+			test.config, test.errorExpected, (err != nil))
+		if err != nil {
+			t.Logf("%s\n", err.Error())
+		}
+		return
+	}
+
+	if err == nil && !configsAreEqual(conf, test.expected) {
+		t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n",
+			test.testName, test.config, test.expected, conf)
+	}
+}
+
 func TestParser(t *testing.T) {
-	switchToFakeFSWrapper(t)
+	defer cleanupAfterCfgTest(t)
 
 	for _, test := range getParserTests() {
-		conf, err := configFromReader(strings.NewReader(test.config))
-
-		if (err != nil) != test.errorExpected {
-			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected error:%t. Got error: %t\n", test.testName,
-				test.config, test.errorExpected, (err != nil))
-			if err != nil {
-				t.Logf("%s\n", err.Error())
-			}
-			continue
-		}
-
-		if err == nil && !configsAreEqual(conf, test.expected) {
-			t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n",
-				test.testName, test.config, test.expected, conf)
-		}
+		parseTest(test, t)
 	}
 }

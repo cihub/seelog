@@ -28,7 +28,7 @@ import (
 	"testing"
 )
 
-func TestfilterDispatcher_Passing(t *testing.T) {
+func TestfilterDispatcher_Pass(t *testing.T) {
 	writer, _ := newBytesVerifier(t)
 	filter, err := newFilterDispatcher(onlyMessageFormatForTest, []interface{}{writer}, TraceLvl)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestfilterDispatcher_Passing(t *testing.T) {
 	writer.MustNotExpect()
 }
 
-func TestfilterDispatcher_Denying(t *testing.T) {
+func TestfilterDispatcher_Deny(t *testing.T) {
 	writer, _ := newBytesVerifier(t)
 	filter, err := newFilterDispatcher(Defaultformatter, []interface{}{writer})
 	if err != nil {
