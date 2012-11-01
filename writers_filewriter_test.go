@@ -119,7 +119,7 @@ func cleanupWriterTest(t *testing.T) {
 }
 
 func getWriterTestResultFiles() ([]string, error) {
-	p := make([]string, 0)
+	var p []string
 
 	visit := func (path string, f os.FileInfo, err error) error {
 
@@ -209,7 +209,12 @@ func (this *fileWriterTester) test() {
 
 func (this *fileWriterTester) performWrite(fileWriter io.Writer, count int) {
 	for i := 0; i < count; i++ {
-		fileWriter.Write(bytesFileTest)
+		_, err := fileWriter.Write(bytesFileTest)
+
+		if err != nil {
+			this.t.Error(err)
+			return
+		}
 	}
 }
 

@@ -107,8 +107,6 @@ func newRollingFileWriterDate(filePath string, datePattern string) (*rollingFile
 	rollingFile.filePath = filePath
 	rollingFile.fileDir, rollingFile.fileName = filepath.Split(filePath)
 
-
-
 	return rollingFile, nil
 }
 
@@ -143,9 +141,6 @@ func (rollfileWriter *rollingFileWriter) createFile() error {
 	}
 
 	if rollfileWriter.rollingType == Size {
-		if rollfileWriter.innerWriter != nil {
-			rollfileWriter.innerWriter.Close()
-		}
 
 		nextRollName, err := rollfileWriter.getNextRollName()
 		if err != nil {
@@ -256,26 +251,6 @@ func (rollfileWriter *rollingFileWriter) sortRollsByIndex(rolls map[int]string) 
 	return sortedRolls
 }
 
-func (rollfileWriter *rollingFileWriter) Close() error {
-	return rollfileWriter.innerWriter.Close()
-}
-
-func (rollfileWriter *rollingFileWriter) Write(bytes []byte) (n int, err error) {
-	if rollfileWriter.isTimeToCreateFile() {
-		err := rollfileWriter.createFile()
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	if rollfileWriter.innerWriter != nil {
-		rollfileWriter.currentFileSize += int64(len(bytes))
-		return rollfileWriter.innerWriter.Write(bytes)
-	}
-
-	return 0, nil
-}
-
 func (rollfileWriter *rollingFileWriter) createFileAndFolderIfNeeded() error {
 	var err error
 
@@ -288,18 +263,20 @@ func (rollfileWriter *rollingFileWriter) createFileAndFolderIfNeeded() error {
 	}
 
 	if rollfileWriter.innerWriter != nil {
-		rollfileWriter.innerWriter.Close()
+		err = rollfileWriter.innerWriter.Close()
+
+		if err != nil {
+			return err
+		}
 	}
 
 	fileName := rollfileWriter.getFileName()
 	filePath := filepath.Join(rollfileWriter.fileDir, fileName)
 
-	var innerWriter io.WriteCloser
-
 	// If exists
 	stat, err := os.Lstat(filePath)
 	if err == nil {
-		innerWriter, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
+		rollfileWriter.innerWriter, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 
 		stat, err = os.Lstat(filePath)
 		if err != nil {
@@ -308,7 +285,7 @@ func (rollfileWriter *rollingFileWriter) createFileAndFolderIfNeeded() error {
 
 		rollfileWriter.currentFileSize = stat.Size()
 	} else {
-		innerWriter, err = os.Create(filePath)
+		rollfileWriter.innerWriter, err = os.Create(filePath)
 		rollfileWriter.currentFileSize = 0
 	}
 	if err != nil {
@@ -316,7 +293,6 @@ func (rollfileWriter *rollingFileWriter) createFileAndFolderIfNeeded() error {
 	}
 
 	rollfileWriter.currentFileName = fileName
-	rollfileWriter.innerWriter = innerWriter
 
 	return nil
 }
@@ -337,4 +313,24 @@ func (rollfileWriter *rollingFileWriter) String() string {
 	}
 
 	return s
+}
+
+func (rollfileWriter *rollingFileWriter) Close() error {
+	return rollfileWriter.innerWriter.Close()
+}
+
+func (rollfileWriter *rollingFileWriter) Write(bytes []byte) (n int, err error) {
+	if rollfileWriter.isTimeToCreateFile() {
+		err := rollfileWriter.createFile()
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	if rollfileWriter.innerWriter != nil {
+		rollfileWriter.currentFileSize += int64(len(bytes))
+		return rollfileWriter.innerWriter.Write(bytes)
+	}
+
+	return 0, nil
 }
