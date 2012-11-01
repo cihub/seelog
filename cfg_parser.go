@@ -189,6 +189,12 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 
 	dispatcher, err := getOutputsTree(config, formats)
 	if err != nil {
+		// If we open several files, but then fail to parse the config, we should close
+		// those files before reporting that config is invalid.
+		if dispatcher != nil {
+			dispatcher.Close()
+		}
+
 		return nil, err
 	}
 

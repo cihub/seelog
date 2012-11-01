@@ -26,6 +26,8 @@ package seelog
 
 import (
 	"io"
+	"os"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -38,7 +40,8 @@ const (
 var bytesFileTest = []byte(strings.Repeat("A", WriteMessageLen))
 
 func TestSimpleFileWriter(t *testing.T) {
-	newfileWriterTester(simplefileWriterTests, simplefileWriterGetter, t).test()
+	t.Logf("Starting file writer tests")
+	newFileWriterTester(simplefileWriterTests, simplefileWriterGetter, t).test()
 }
 
 //===============================================================
@@ -66,111 +69,179 @@ type fileWriterTestCase struct {
 func createSimplefileWriterTestCase(fileName string, writeCount int) *fileWriterTestCase {
 	return &fileWriterTestCase{[]string{}, fileName, Size, 0, 0, "", writeCount, []string{fileName}}
 }
-func createRollingSizefileWriterTestCase(files []string, fileName string, fileSize int64, maxRolls int, writeCount int, resFiles []string) *fileWriterTestCase {
-	return &fileWriterTestCase{files, fileName, Size, fileSize, maxRolls, "", writeCount, resFiles}
-}
-func createRollingDatefileWriterTestCase(files []string, fileName string, datePattern string, writeCount int, resFiles []string) *fileWriterTestCase {
-	return &fileWriterTestCase{files, fileName, Date, 0, 0, datePattern, writeCount, resFiles}
-}
 
 var simplefileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
-	createSimplefileWriterTestCase("log.txt", 1),
-	createSimplefileWriterTestCase("log.txt", 50),
-	createSimplefileWriterTestCase(filepath.Join("dir", "log.txt"), 1),
+	createSimplefileWriterTestCase("log.testlog", 1),
+	createSimplefileWriterTestCase("log.testlog", 50),
+	createSimplefileWriterTestCase(filepath.Join("dir", "log.testlog"), 50),
 }
 
 //===============================================================
 
 type fileWriterTester struct {
 	testCases   []*fileWriterTestCase
-	writerGeter func(*fileWriterTestCase) (io.Writer, error)
+	writerGetter func(*fileWriterTestCase) (io.Writer, error)
 	t           *testing.T
 }
 
-func newfileWriterTester(testCases []*fileWriterTestCase, writerGeter func(*fileWriterTestCase) (io.Writer, error), t *testing.T) *fileWriterTester {
-	return &fileWriterTester{testCases, writerGeter, t}
+func newFileWriterTester(testCases []*fileWriterTestCase, writerGetter func(*fileWriterTestCase) (io.Writer, error), t *testing.T) *fileWriterTester {
+	return &fileWriterTester{testCases, writerGetter, t}
 }
 
-func (this *fileWriterTester) test() {
-	writer, err := newBytesVerifier(this.t)
+func isWriterTestFile(f os.FileInfo) bool {
+	return strings.Contains(f.Name(), ".testlog")
+}
+
+func cleanupWriterTest(t *testing.T) {
+	toDel, err := getDirFileNames(".", false, isWriterTestFile)
+
+	if nil != err {
+		t.Fatal("Cannot list files in test directory!")
+	}
+
+	for _, p := range toDel {
+		err = os.Remove(p)
+
+		if nil != err {
+			t.Errorf("Cannot remove file %s in test directory: %s", p, err.Error())
+		}
+	}
+
+	err = os.RemoveAll("dir")
+
+	if nil != err {
+		t.Errorf("Cannot remove temp test directory: %s", err.Error())
+	}
+}
+
+func getWriterTestResultFiles() ([]string, error) {
+	p := make([]string, 0)
+
+	visit := func (path string, f os.FileInfo, err error) error {
+
+		if !f.IsDir() && isWriterTestFile(f) {
+  			abs, err := filepath.Abs(path)
+
+  			if err != nil {
+				return fmt.Errorf("filepath.Abs failed for %s", path)
+			}
+
+  			p = append(p, abs)
+  		}
+
+  		return nil
+	} 
+
+	err := filepath.Walk(".", visit)
+
+	if nil != err {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+func (this *fileWriterTester) testCase(testCase *fileWriterTestCase, testNum int) {
+	defer cleanupWriterTest(this.t)
+
+	this.t.Logf("Start test  [%v]\n", testNum)
+
+	for _, filePath := range testCase.files {
+		dir, _ := filepath.Split(filePath)
+
+		var err error
+
+		if 0 != len(dir) {
+			err = os.MkdirAll(dir, defaultDirectoryPermissions)
+			if err != nil {
+				this.t.Error(err)
+				return
+			}
+		}
+		_, err = os.Create(filePath)
+		if err != nil {
+			this.t.Error(err)
+			return
+		}
+	}
+
+	fileWriter, err := this.writerGetter(testCase)
+
 	if err != nil {
 		this.t.Error(err)
 		return
 	}
 
-	for testNum, testCase := range this.testCases {
-		this.t.Logf("Start test  [%v]\n", testNum)
-		fileSystemWrapperTest, err := newFSTestWrapper(nil, writer, testCase.fileSize)
-		if err != nil {
-			this.t.Error(err)
-			return
-		}
+	this.performWrite(fileWriter, testCase.writeCount)
 
-		for _, filePath := range testCase.files {
-			dir, _ := filepath.Split(filePath)
-			err := fileSystemWrapperTest.MkdirAll(dir)
-			if err != nil {
-				this.t.Error(err)
-				return
-			}
+	files, err := getWriterTestResultFiles()
 
-			_, err = fileSystemWrapperTest.Create(filePath)
-			if err != nil {
-				this.t.Error(err)
-				return
-			}
-		}
+	if err != nil {
+		this.t.Error(err)
+		return
+	}
 
-		fileSystemWrapper = fileSystemWrapperTest
+	this.checkRequiredFilesExist(testCase, files)
+	this.checkJustRequiredFilesExist(testCase, files)
+}
 
-		fileWriter, err := this.writerGeter(testCase)
-		if err != nil {
-			this.t.Error(err)
-			return
-		}
-
-		this.performWrite(fileWriter, writer, testCase.writeCount)
-		this.checkRequiredFilesExist(testCase, fileSystemWrapperTest)
-		this.checkJustRequiredFilesExist(testCase, fileSystemWrapperTest)
+func (this *fileWriterTester) test() {
+	for i, tc := range this.testCases {
+		cleanupWriterTest(this.t)
+		this.testCase(tc, i)
 	}
 }
 
-func (this *fileWriterTester) performWrite(fileWriter io.Writer, writer *bytesVerifier, count int) {
+func (this *fileWriterTester) performWrite(fileWriter io.Writer, count int) {
 	for i := 0; i < count; i++ {
-		writer.ExpectBytes(bytesFileTest)
 		fileWriter.Write(bytesFileTest)
-		writer.MustNotExpect()
 	}
 }
 
-func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *filesSystemTestWrapper) {
-	for _, mustExistsFile := range testCase.resFiles {
+func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, files []string) {
+	for _, expected := range testCase.resFiles {
+
 		found := false
-		for _, existsFile := range fileSystemWrapperTest.Files() {
-			if mustExistsFile == existsFile {
-				found = true
-				break
+		exAbs, err := filepath.Abs(expected)
+
+		if err != nil {
+			this.t.Errorf("filepath.Abs failed for %s", expected)
+		} else {
+			for _, f := range files {
+
+				if exAbs == f {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				this.t.Errorf("Expected file: %v doesn't exist\n", expected)
+			}
+		}
+
+		
+	}
+}
+
+func (this *fileWriterTester) checkJustRequiredFilesExist(testCase *fileWriterTestCase, files []string) {
+	for _, f := range files {
+		found := false
+		for _, expected := range testCase.resFiles {
+
+			exAbs, err := filepath.Abs(expected)
+			if err != nil {
+				this.t.Errorf("filepath.Abs failed for %s", expected)
+			} else {
+				if exAbs == f {
+					found = true
+					break
+				}
 			}
 		}
 
 		if !found {
-			this.t.Errorf("Expected file: %v doesn't' exist", mustExistsFile)
-		}
-	}
-}
-
-func (this *fileWriterTester) checkJustRequiredFilesExist(testCase *fileWriterTestCase, fileSystemWrapperTest *filesSystemTestWrapper) {
-	for _, existsFile := range fileSystemWrapperTest.Files() {
-		found := false
-		for _, mustExistsFile := range testCase.resFiles {
-			if mustExistsFile == existsFile {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			this.t.Errorf("Unexpected file: %v", existsFile)
+			this.t.Errorf("Unexpected file: %v", f)
 		}
 	}
 }

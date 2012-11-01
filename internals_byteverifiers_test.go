@@ -91,7 +91,7 @@ func (verifier *bytesVerifier) ExpectBytes(bytes []byte) {
 
 func (verifier *bytesVerifier) MustNotExpect() {
 	if verifier.waitingForInput {
-		errorText := "Writer must not expect: "
+		errorText := "Unexpected input: "
 
 		if verifier.expectedBytes != nil {
 			errorText += "len = " + strconv.Itoa(len(verifier.expectedBytes))

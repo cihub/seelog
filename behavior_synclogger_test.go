@@ -30,7 +30,6 @@ import (
 )
 
 func Test_Sync(t *testing.T) {
-	switchToRealFSWrapper()
 	fileName := "beh_test_sync.log"
 	count := 100
 

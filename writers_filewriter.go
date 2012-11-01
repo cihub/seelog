@@ -27,6 +27,7 @@ package seelog
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 )
 
@@ -62,18 +63,24 @@ func (fileWriter *fileWriter) Write(bytes []byte) (n int, err error) {
 func (fileWriter *fileWriter) createFile() error {
 
 	folder, _ := filepath.Split(fileWriter.fileName)
+	var err error
 
-	err := fileSystemWrapper.MkdirAll(folder)
+	if 0 != len(folder) {
+		err = os.MkdirAll(folder, defaultDirectoryPermissions)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	var innerWriter io.WriteCloser
-	if fileSystemWrapper.Exists(fileWriter.fileName) {
-		innerWriter, err = fileSystemWrapper.Open(fileWriter.fileName)
+
+	// If exists
+	_, err = os.Lstat(fileWriter.fileName)
+	if nil == err {
+		innerWriter, err = os.OpenFile(fileWriter.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 	} else {
-		innerWriter, err = fileSystemWrapper.Create(fileWriter.fileName)
+		innerWriter, err = os.Create(fileWriter.fileName)
 	}
 	if err != nil {
 		return err

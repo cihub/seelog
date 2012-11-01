@@ -80,7 +80,7 @@ func (server *tcpServer) Start() error {
 		}
 
 		if port > portEnd {
-			return errors.New(fmt.Sprintf("Port number exceedes %v", portEnd))
+			return errors.New(fmt.Sprintf("Port number exceeds %v", portEnd))
 		}
 
 		port++
@@ -138,7 +138,7 @@ func (server *tcpServer) acceptCycle() (acceptNext bool) {
 	}
 
 	if server.expectedText != inputText {
-		server.testEnv.Fatalf("Incorrecet input. Expected: %v. Got: %v", server.expectedText, inputText)
+		server.testEnv.Fatalf("Incorrect input. Expected: %v. Got: %v", server.expectedText, inputText)
 		conn.Close()
 		return
 	}
@@ -168,7 +168,7 @@ func (server *tcpServer) Expect(text string) {
 
 func (server *tcpServer) Wait() {
 	// Waits server.listener.Accept()
-	<-time.After(1 * time.Second)
+	<-time.After(100 * time.Microsecond)
 
 	server.serveConnLock.Lock()
 	defer server.serveConnLock.Unlock()
