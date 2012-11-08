@@ -39,7 +39,7 @@ func createRollingSizefileWriterTestCase(
 	writeCount int, 
 	resFiles []string) *fileWriterTestCase {
 
-	return &fileWriterTestCase{files, fileName, Size, fileSize, maxRolls, "", writeCount, resFiles}
+	return &fileWriterTestCase{files, fileName, RollingTypeSize, fileSize, maxRolls, "", writeCount, resFiles}
 }
 func createRollingDatefileWriterTestCase(
 	files []string, 
@@ -48,7 +48,7 @@ func createRollingDatefileWriterTestCase(
 	writeCount int, 
 	resFiles []string) *fileWriterTestCase {
 	
-	return &fileWriterTestCase{files, fileName, Date, 0, 0, datePattern, writeCount, resFiles}
+	return &fileWriterTestCase{files, fileName, RollingTypeDate, 0, 0, datePattern, writeCount, resFiles}
 }
 
 func TestRollingFileWriter(t *testing.T) {
@@ -59,10 +59,10 @@ func TestRollingFileWriter(t *testing.T) {
 //===============================================================
 
 func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, error) {
-	if testCase.rollingType == Size {
-		return newRollingFileWriterSize(testCase.fileName, testCase.fileSize, testCase.maxRolls)
-	} else if testCase.rollingType == Date {
-		return newRollingFileWriterDate(testCase.fileName, testCase.datePattern)
+	if testCase.rollingType == RollingTypeSize {
+		return newRollingFileWriterSize(testCase.fileName, RollingArchiveNone, "", testCase.fileSize, testCase.maxRolls)
+	} else if testCase.rollingType == RollingTypeDate {
+		return newRollingFileWriterDate(testCase.fileName, RollingArchiveNone, "", testCase.datePattern)
 	}
 
 	panic("Incorrect rollingType")
