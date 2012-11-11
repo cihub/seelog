@@ -67,7 +67,7 @@ type fileWriterTestCase struct {
 }
 
 func createSimplefileWriterTestCase(fileName string, writeCount int) *fileWriterTestCase {
-	return &fileWriterTestCase{[]string{}, fileName, RollingTypeSize, 0, 0, "", writeCount, []string{fileName}}
+	return &fileWriterTestCase{[]string{}, fileName, rollingTypeSize, 0, 0, "", writeCount, []string{fileName}}
 }
 
 var simplefileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{

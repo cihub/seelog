@@ -70,7 +70,7 @@ const (
 	RollingFileMaxSizeAttr          = "maxsize"
 	RollingFileMaxRollsAttr         = "maxrolls"
 	RollingFileDataPatternAttr      = "datepattern"
-	RollingFileArchiveAttr          = "archive"
+	RollingFileArchiveAttr          = "archivetype"
 	RollingFileArchivePathAttr      = "archivepath"
 	bufferedWriterId                = "buffered"
 	BufferedSizeAttr                = "size"
@@ -805,7 +805,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	var rArchiveType rollingArchiveTypes 
 	var rArchivePath string
 	if !archiveAttrExists {
-		rArchiveType = RollingArchiveNone
+		rArchiveType = rollingArchiveNone
 		rArchivePath = ""
 	} else {
 		rArchiveType, ok = rollingArchiveTypeFromString(rollingArchiveStr)
@@ -813,7 +813,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, errors.New("Unknown rolling archive type: " + rollingArchiveStr)
 		}
 
-		if rArchiveType == RollingArchiveNone {
+		if rArchiveType == rollingArchiveNone {
 			rArchivePath = ""
 		} else {
 			rArchivePath, ok = node.attributes[RollingFileArchivePathAttr]
@@ -827,7 +827,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		}
 	}
 
-	if rollingType == RollingTypeSize {
+	if rollingType == rollingTypeSize {
 		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr,
 									    RollingFileMaxSizeAttr, RollingFileMaxRollsAttr, RollingFileArchiveAttr,
 									    RollingFileArchivePathAttr)
@@ -862,7 +862,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 		return newFormattedWriter(rollingWriter, currentFormat)
 
-	} else if rollingType == RollingTypeDate {
+	} else if rollingType == rollingTypeDate {
 		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr, 
 										RollingFileDataPatternAttr, RollingFileArchiveAttr,
 										RollingFileArchivePathAttr)

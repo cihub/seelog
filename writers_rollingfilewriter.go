@@ -43,13 +43,13 @@ import (
 type rollingTypes uint8
 
 const (
-	RollingTypeSize = iota
-	RollingTypeDate
+	rollingTypeSize = iota
+	rollingTypeDate
 )
 
 var rollingTypesStringRepresentation = map[rollingTypes]string{
-	RollingTypeSize: "size",
-	RollingTypeDate: "date",
+	rollingTypeSize: "size",
+	rollingTypeDate: "date",
 }
 
 func rollingTypeFromString(rollingTypeStr string) (rollingType rollingTypes, found bool) {
@@ -66,13 +66,13 @@ func rollingTypeFromString(rollingTypeStr string) (rollingType rollingTypes, fou
 type rollingArchiveTypes uint8
 
 const (
-	RollingArchiveNone = iota
-	RollingArchiveZip
+	rollingArchiveNone = iota
+	rollingArchiveZip
 )
 
 var rollingArchiveTypesStringRepresentation = map[rollingArchiveTypes]string{
-	RollingArchiveNone: "none",
-	RollingArchiveZip:  "zip",
+	rollingArchiveNone: "none",
+	rollingArchiveZip:  "zip",
 }
 
 func rollingArchiveTypeFromString(rollingArchiveTypeStr string) (rollingArchiveType rollingArchiveTypes, found bool) {
@@ -87,7 +87,7 @@ func rollingArchiveTypeFromString(rollingArchiveTypeStr string) (rollingArchiveT
 
 // Default names for different archivation types
 var rollingArchiveTypesDefaultNames = map[rollingArchiveTypes]string{
-	RollingArchiveZip:  "log.zip",
+	rollingArchiveZip:  "log.zip",
 }
 
 // rollingFileWriter writes received messages to a file, until date changes
@@ -133,7 +133,7 @@ func newRollingFileWriterSize(
 	rollingFile := new(rollingFileWriter)
 
 	rollingFile.archiveType = arch
-	rollingFile.rollingType = RollingTypeSize
+	rollingFile.rollingType = rollingTypeSize
 	rollingFile.maxFileSize = maxFileSize
 	rollingFile.maxRolls = maxRolls
 	rollingFile.filePath = filePath
@@ -153,7 +153,7 @@ func newRollingFileWriterDate(
 	rollingFile := new(rollingFileWriter)
 
 	rollingFile.archiveType = arch
-	rollingFile.rollingType = RollingTypeDate
+	rollingFile.rollingType = rollingTypeDate
 	rollingFile.datePattern = datePattern
 	rollingFile.filePath = filePath
 	rollingFile.fileDir, rollingFile.fileName = filepath.Split(filePath)
@@ -163,9 +163,9 @@ func newRollingFileWriterDate(
 }
 
 func (rollfileWriter *rollingFileWriter) getFileName() string {
-	if rollfileWriter.rollingType == RollingTypeSize {
+	if rollfileWriter.rollingType == rollingTypeSize {
 		return rollfileWriter.fileName
-	} else if rollfileWriter.rollingType == RollingTypeDate {
+	} else if rollfileWriter.rollingType == rollingTypeDate {
 		return time.Now().Format(rollfileWriter.datePattern) + " " + rollfileWriter.fileName
 	}
 
@@ -177,9 +177,9 @@ func (rollfileWriter *rollingFileWriter) isTimeToCreateFile() bool {
 		return true
 	}
 
-	if rollfileWriter.rollingType == RollingTypeSize {
+	if rollfileWriter.rollingType == rollingTypeSize {
 		return rollfileWriter.currentFileSize >= rollfileWriter.maxFileSize
-	} else if rollfileWriter.rollingType == RollingTypeDate {
+	} else if rollfileWriter.rollingType == rollingTypeDate {
 		fileName := rollfileWriter.getFileName()
 		return rollfileWriter.currentFileName != fileName
 	}
@@ -192,7 +192,7 @@ func (rollfileWriter *rollingFileWriter) createFile() error {
 		return rollfileWriter.createFileAndFolderIfNeeded()
 	}
 
-	if rollfileWriter.rollingType == RollingTypeSize {
+	if rollfileWriter.rollingType == rollingTypeSize {
 
 		nextRollName, err := rollfileWriter.getNextRollName()
 		if err != nil {
@@ -210,7 +210,7 @@ func (rollfileWriter *rollingFileWriter) createFile() error {
 		rollfileWriter.deleteOldRolls()
 
 		return rollfileWriter.createFileAndFolderIfNeeded()
-	} else if rollfileWriter.rollingType == RollingTypeDate {
+	} else if rollfileWriter.rollingType == rollingTypeDate {
 		return rollfileWriter.createFileAndFolderIfNeeded()
 	}
 
@@ -285,10 +285,13 @@ func unzip(archiveName string) (map[string][]byte, error) {
 	    }
 
 	    bts, err := ioutil.ReadAll(rc)
-	    rc.Close()
+	    rcErr := rc.Close()
 
 	    if err != nil {
 	        return nil, err
+	    }
+	    if rcErr != nil {
+	        return nil, rcErr
 	    }
 
 	    files[f.Name] = bts
@@ -349,7 +352,7 @@ func (rollfileWriter *rollingFileWriter) deleteOldRolls() error {
 	sortedRolls := rollfileWriter.sortRollsByIndex(rolls)
 
 	switch rollfileWriter.archiveType {
-	case RollingArchiveZip:
+	case rollingArchiveZip:
 		var files map[string][]byte
 
 		// If archive exists
@@ -362,7 +365,7 @@ func (rollfileWriter *rollingFileWriter) deleteOldRolls() error {
 			}
 
 			// Remove the original file
-			err = os.Remove(rollfileWriter.archivePath)
+			err = tryRemoveFile(rollfileWriter.archivePath)
 			if err != nil {
 				return err
 			}
@@ -391,7 +394,7 @@ func (rollfileWriter *rollingFileWriter) deleteOldRolls() error {
 	// In all cases (archive files or not) the files should be deleted.
 	for i := 0; i < rollsToDelete; i++ {
 		rollPath := filepath.Join(rollfileWriter.fileDir, sortedRolls[i])			
-		err := os.Remove(rollPath)
+		err := tryRemoveFile(rollPath)
 		if err != nil {
 			return err
 		}
@@ -478,9 +481,9 @@ func (rollfileWriter *rollingFileWriter) String() string {
 		rollingArchiveTypeStr,
 		rollfileWriter.archivePath)
 
-	if rollfileWriter.rollingType == RollingTypeSize {
+	if rollfileWriter.rollingType == rollingTypeSize {
 		s += fmt.Sprintf("maxFileSize: %v, maxRolls: %v", rollfileWriter.maxFileSize, rollfileWriter.maxRolls)
-	} else if rollfileWriter.rollingType == RollingTypeDate {
+	} else if rollfileWriter.rollingType == rollingTypeDate {
 		s += fmt.Sprintf("datePattern: %v", rollfileWriter.datePattern)
 	}
 
