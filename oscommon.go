@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,14 +24,14 @@
 package seelog
 
 import (
-    "os"
-    "path/filepath"
-    "io/ioutil"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 const (
-    defaultFilePermissions      = 0666
-    defaultDirectoryPermissions = 0767
+	defaultFilePermissions      = 0666
+	defaultDirectoryPermissions = 0767
 )
 
 // fileFilter accepts a file FileInfo and applies custom filtering rules.
@@ -42,60 +42,74 @@ type fileFilter func(os.FileInfo) bool
 // according to the custom rules.
 type filePathTransformer func(string) string
 
-
 var pathToNameTransformer filePathTransformer = func(filePath string) string {
-    return filepath.Base(filePath)
+	return filepath.Base(filePath)
 }
 
 func getDirFileNames(dirPath string, nameIsFullPath bool, filter fileFilter) ([]string, error) {
-    if 0 == len(dirPath) {
-        dirPath = "."
-    }
+	if 0 == len(dirPath) {
+		dirPath = "."
+	}
 
-    // return files, nil
-    if nameIsFullPath {
-        return getDirFilePaths(dirPath, filter, nil)
-    }
-    return getDirFilePaths(dirPath, filter, pathToNameTransformer)
+	// return files, nil
+	if nameIsFullPath {
+		return getDirFilePaths(dirPath, filter, nil)
+	}
+	return getDirFilePaths(dirPath, filter, pathToNameTransformer)
 }
+
 func getDirFilePaths(
-    path string, 
-    fileFilter fileFilter, 
-    pathTransformer filePathTransformer) ([]string, error) {
+	path string,
+	fileFilter fileFilter,
+	pathTransformer filePathTransformer) ([]string, error) {
 
-    fis, err := ioutil.ReadDir(path)
+	fis, err := ioutil.ReadDir(path)
 
-    if nil != err { 
-        return nil, err 
-    }
+	if nil != err {
+		return nil, err
+	}
 
-    fPaths := make([]string, 0)
+	fPaths := make([]string, 0)
 
-    for _, fi := range fis {
-        // Ignore directories.
-        if !fi.IsDir() {
-            // Check filter condition.
-            if fileFilter != nil && !fileFilter(fi) {
-                continue
-            }
+	for _, fi := range fis {
+		// Ignore directories.
+		if !fi.IsDir() {
+			// Check filter condition.
+			if fileFilter != nil && !fileFilter(fi) {
+				continue
+			}
 
-            if pathTransformer == nil {
-                fPaths = append(fPaths, fi.Name())
-            } else {
-                fPaths = append(fPaths, pathTransformer(fi.Name()))
-            }
-        }
-    }
-    
-    return fPaths, nil
+			if pathTransformer == nil {
+				fPaths = append(fPaths, fi.Name())
+			} else {
+				fPaths = append(fPaths, pathTransformer(fi.Name()))
+			}
+		}
+	}
+
+	return fPaths, nil
 }
 
-func tryRemoveFile(filePath string) (error) {
-    err := os.Remove(filePath)
+func tryRemoveFile(filePath string) error {
+	err := os.Remove(filePath)
+	if os.IsNotExist(err) {
+		return nil
+	}
 
-    if os.IsNotExist(err) {
-        return nil
-    }
+	return err
+}
 
-    return err
+// FileExists return flag whether a given file exists
+// and operation error if an unclassified failure occurs.
+func fileExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+
+	return true, nil
 }
