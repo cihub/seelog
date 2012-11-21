@@ -34,10 +34,10 @@ import (
 )
 
 const (
-	WriteMessageLen = 10
+	messageLen = 10
 )
 
-var bytesFileTest = []byte(strings.Repeat("A", WriteMessageLen))
+var bytesFileTest = []byte(strings.Repeat("A", messageLen))
 
 func TestSimpleFileWriter(t *testing.T) {
 	t.Logf("Starting file writer tests")
@@ -51,16 +51,16 @@ func simplefileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, error
 }
 
 //===============================================================
-
+// ???
 type fileWriterTestCase struct {
-	files []string
+	files       []string
 	fileName    string
 	rollingType rollingTypes
 	fileSize    int64
 	maxRolls    int
 	datePattern string
-	writeCount int
-	resFiles []string
+	writeCount  int
+	resFiles    []string
 }
 
 func createSimplefileWriterTestCase(fileName string, writeCount int) *fileWriterTestCase {
@@ -95,7 +95,6 @@ func isWriterTestFile(f os.FileInfo) bool {
 
 func cleanupWriterTest(t *testing.T) {
 	toDel, err := getDirFileNames(".", false, isWriterTestFile)
-
 	if nil != err {
 		t.Fatal("Cannot list files in test directory!")
 	}
@@ -152,15 +151,14 @@ func (this *fileWriterTester) testCase(testCase *fileWriterTestCase, testNum int
 				return
 			}
 		}
-		fi, err := os.Create(filePath)
 
+		fi, err := os.Create(filePath)
 		if err != nil {
 			this.t.Error(err)
 			return
 		}
 
 		err = fi.Close()
-
 		if err != nil {
 			this.t.Error(err)
 			return
@@ -168,18 +166,15 @@ func (this *fileWriterTester) testCase(testCase *fileWriterTestCase, testNum int
 	}
 
 	fwc, err := this.writerGetter(testCase)
-
 	if err != nil {
 		this.t.Error(err)
 		return
 	}
-
 	defer fwc.Close()
 
 	this.performWrite(fwc, testCase.writeCount)
 
 	files, err := getWriterTestResultFiles()
-
 	if err != nil {
 		this.t.Error(err)
 		return
@@ -210,25 +205,27 @@ func (this *fileWriterTester) performWrite(fileWriter io.Writer, count int) {
 
 func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, files []string) {
 	for _, expected := range testCase.resFiles {
-
 		found := false
 		exAbs, err := filepath.Abs(expected)
-
 		if err != nil {
 			this.t.Errorf("filepath.Abs failed for %s", expected)
-		} else {
-			for _, f := range files {
-				if exAbs == f {
+			continue
+		}
+		for _, f := range files {
+			if af, e := filepath.Abs(f); e == nil {
+				this.t.Log(af)
+				if exAbs == af {
 					found = true
 					break
 				}
-			}
-
-			if !found {
-				this.t.Errorf("Expected file: %v doesn't exist\n", expected)
+			} else {
+				this.t.Errorf("filepath.Abs failed for %s", f)
 			}
 		}
 
+		if !found {
+			this.t.Errorf("Expected file: %v doesn't exist. Got %s\n", expected, exAbs)
+		}
 	}
 }
 

@@ -32,7 +32,7 @@ import (
 
 // fileWriterTestCase is declared in writers_filewriter_test.go
 
-func createRollingSizefileWriterTestCase(
+func createRollingSizeFileWriterTestCase(
 	files []string,
 	fileName string,
 	fileSize int64,
@@ -42,18 +42,19 @@ func createRollingSizefileWriterTestCase(
 
 	return &fileWriterTestCase{files, fileName, rollingTypeSize, fileSize, maxRolls, "", writeCount, resFiles}
 }
-func createRollingDatefileWriterTestCase(
-	files []string,
-	fileName string,
-	datePattern string,
-	writeCount int,
-	resFiles []string) *fileWriterTestCase {
 
-	return &fileWriterTestCase{files, fileName, rollingTypeDate, 0, 0, datePattern, writeCount, resFiles}
-}
+// func createRollingDatefileWriterTestCase(
+// 	files []string,
+// 	fileName string,
+// 	datePattern string,
+// 	writeCount int,
+// 	resFiles []string) *fileWriterTestCase {
+
+// 	return &fileWriterTestCase{files, fileName, rollingTypeDate, 0, 0, datePattern, writeCount, resFiles}
+// }
 
 // TODO: Enable when other errors are fixed.
-func testRollingFileWriter(t *testing.T) {
+func TestRollingFileWriter(t *testing.T) {
 	t.Logf("Starting rolling file writer tests")
 	newFileWriterTester(rollingfileWriterTests, rollingFileWriterGetter, t).test()
 }
@@ -73,30 +74,48 @@ func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, erro
 //===============================================================
 
 var rollingfileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
-	createRollingSizefileWriterTestCase([]string{}, "log.testlog", 10, 10, 1, []string{"log.testlog"}),
-	createRollingSizefileWriterTestCase([]string{}, "log.testlog", 10, 10, 2, []string{"log.testlog", "log.testlog.1"}),
-	createRollingSizefileWriterTestCase([]string{"log.testlog.1"}, "log.testlog", 10, 10, 2, []string{"log.testlog", "log.testlog.1", "log.testlog.2"}),
-	createRollingSizefileWriterTestCase([]string{"log.testlog.1"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.2"}),
-	createRollingSizefileWriterTestCase([]string{}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.1"}),
-	createRollingSizefileWriterTestCase([]string{"log.testlog.9"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.10"}),
-	createRollingSizefileWriterTestCase([]string{"log.testlog.a", "log.testlog.1b"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.1", "log.testlog.a", "log.testlog.1b"}),
+	createRollingSizeFileWriterTestCase([]string{}, "log.testlog", 10, 10, 1, []string{"log.testlog"}),
+	createRollingSizeFileWriterTestCase([]string{}, "log.testlog", 10, 10, 2, []string{"log_1.testlog", "log_2.testlog"}),
 
-	createRollingSizefileWriterTestCase([]string{}, `dir/log.testlog`, 10, 10, 1, []string{`dir/log.testlog`}),
-	createRollingSizefileWriterTestCase([]string{}, `dir/log.testlog`, 10, 10, 2, []string{`dir/log.testlog`, `dir/log.testlog.1`}),
-	createRollingSizefileWriterTestCase([]string{`dir/dir/log.testlog.1`}, `dir/dir/log.testlog`, 10, 10, 2, []string{`dir/dir/log.testlog`, `dir/dir/log.testlog.1`, `dir/dir/log.testlog.2`}),
-	createRollingSizefileWriterTestCase([]string{`dir/dir/dir/log.testlog.1`}, `dir/dir/dir/log.testlog`, 10, 1, 2, []string{`dir/dir/dir/log.testlog`, `dir/dir/dir/log.testlog.2`}),
-	createRollingSizefileWriterTestCase([]string{}, `./log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.1`}),
-	createRollingSizefileWriterTestCase([]string{`././././log.testlog.9`}, `log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.10`}),
-	createRollingSizefileWriterTestCase([]string{"dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}, "dir/dir/log.testlog", 10, 1, 2, []string{"dir/dir/log.testlog", "dir/dir/log.testlog.1", "dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}),
+	// createRollingSizeFileWriterTestCase([]string{"log.testlog.1"}, "log.testlog", 10, 10, 2, []string{"log.testlog", "log.testlog.1", "log.testlog.2"}),
 
-	createRollingSizefileWriterTestCase([]string{}, `././dir/log.testlog`, 10, 10, 1, []string{`dir/log.testlog`}),
-	createRollingSizefileWriterTestCase([]string{}, `././dir/log.testlog`, 10, 10, 2, []string{`dir/log.testlog`, `dir/log.testlog.1`}),
-	createRollingSizefileWriterTestCase([]string{`././dir/dir/log.testlog.1`}, `dir/dir/log.testlog`, 10, 10, 2, []string{`dir/dir/log.testlog`, `dir/dir/log.testlog.1`, `dir/dir/log.testlog.2`}),
-	createRollingSizefileWriterTestCase([]string{`././dir/dir/dir/log.testlog.1`}, `dir/dir/dir/log.testlog`, 10, 1, 2, []string{`dir/dir/dir/log.testlog`, `dir/dir/dir/log.testlog.2`}),
-	createRollingSizefileWriterTestCase([]string{}, `././log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.1`}),
-	createRollingSizefileWriterTestCase([]string{`././././log.testlog.9`}, `log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.10`}),
-	createRollingSizefileWriterTestCase([]string{"././dir/dir/log.testlog.a", "././dir/dir/log.testlog.1b"}, "dir/dir/log.testlog", 10, 1, 2, []string{"dir/dir/log.testlog", "dir/dir/log.testlog.1", "dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}),
+	// createRollingSizeFileWriterTestCase([]string{"log.testlog.1"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.2"}),
 
+	// createRollingSizeFileWriterTestCase([]string{}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.1"}),
+
+	// createRollingSizeFileWriterTestCase([]string{"log.testlog.9"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.10"}),
+
+	// createRollingSizeFileWriterTestCase([]string{"log.testlog.a", "log.testlog.1b"}, "log.testlog", 10, 1, 2, []string{"log.testlog", "log.testlog.1", "log.testlog.a", "log.testlog.1b"}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `dir/log.testlog`, 10, 10, 1, []string{`dir/log.testlog`}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `dir/log.testlog`, 10, 10, 2, []string{`dir/log.testlog`, `dir/log.testlog.1`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`dir/dir/log.testlog.1`}, `dir/dir/log.testlog`, 10, 10, 2, []string{`dir/dir/log.testlog`, `dir/dir/log.testlog.1`, `dir/dir/log.testlog.2`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`dir/dir/dir/log.testlog.1`}, `dir/dir/dir/log.testlog`, 10, 1, 2, []string{`dir/dir/dir/log.testlog`, `dir/dir/dir/log.testlog.2`}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `./log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.1`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`././././log.testlog.9`}, `log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.10`}),
+
+	// createRollingSizeFileWriterTestCase([]string{"dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}, "dir/dir/log.testlog", 10, 1, 2, []string{"dir/dir/log.testlog", "dir/dir/log.testlog.1", "dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `././dir/log.testlog`, 10, 10, 1, []string{`dir/log.testlog`}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `././dir/log.testlog`, 10, 10, 2, []string{`dir/log.testlog`, `dir/log.testlog.1`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`././dir/dir/log.testlog.1`}, `dir/dir/log.testlog`, 10, 10, 2, []string{`dir/dir/log.testlog`, `dir/dir/log.testlog.1`, `dir/dir/log.testlog.2`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`././dir/dir/dir/log.testlog.1`}, `dir/dir/dir/log.testlog`, 10, 1, 2, []string{`dir/dir/dir/log.testlog`, `dir/dir/dir/log.testlog.2`}),
+
+	// createRollingSizeFileWriterTestCase([]string{}, `././log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.1`}),
+
+	// createRollingSizeFileWriterTestCase([]string{`././././log.testlog.9`}, `log.testlog`, 10, 1, 2, []string{`log.testlog`, `log.testlog.10`}),
+
+	// createRollingSizeFileWriterTestCase([]string{"././dir/dir/log.testlog.a", "././dir/dir/log.testlog.1b"}, "dir/dir/log.testlog", 10, 1, 2, []string{"dir/dir/log.testlog", "dir/dir/log.testlog.1", "dir/dir/log.testlog.a", "dir/dir/log.testlog.1b"}),
+
+	// ====================
 	//createRollingDatefileWriterTestCase([]string{}, "log.txt", "02.01.2006", 1, []string{}),
 	//createRollingDatefileWriterTestCase([]string{}, "log.txt", "02.01.2006.000000", 2, []string{}),
 }

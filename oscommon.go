@@ -51,26 +51,20 @@ func getDirFileNames(dirPath string, nameIsFullPath bool, filter fileFilter) ([]
 		dirPath = "."
 	}
 
-	// return files, nil
 	if nameIsFullPath {
 		return getDirFilePaths(dirPath, filter, nil)
 	}
+
 	return getDirFilePaths(dirPath, filter, pathToNameTransformer)
 }
 
-func getDirFilePaths(
-	path string,
-	fileFilter fileFilter,
-	pathTransformer filePathTransformer) ([]string, error) {
-
+func getDirFilePaths(path string, fileFilter fileFilter, pathTransformer filePathTransformer) ([]string, error) {
 	fis, err := ioutil.ReadDir(path)
-
 	if nil != err {
 		return nil, err
 	}
 
-	fPaths := make([]string, 0)
-
+	var fPaths []string
 	for _, fi := range fis {
 		// Ignore directories.
 		if !fi.IsDir() {
@@ -90,6 +84,8 @@ func getDirFilePaths(
 	return fPaths, nil
 }
 
+// tryRemoveFile gives a try removing the file
+// only ignoring an error when the file does not exist.
 func tryRemoveFile(filePath string) error {
 	err := os.Remove(filePath)
 	if os.IsNotExist(err) {
@@ -99,7 +95,7 @@ func tryRemoveFile(filePath string) error {
 	return err
 }
 
-// FileExists return flag whether a given file exists
+// fileExists return flag whether a given file exists
 // and operation error if an unclassified failure occurs.
 func fileExists(path string) (bool, error) {
 	_, err := os.Stat(path)

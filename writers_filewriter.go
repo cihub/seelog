@@ -29,7 +29,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	// "runtime"
 )
 
 // fileWriter is used to write to a file.
@@ -42,10 +41,6 @@ type fileWriter struct {
 func newFileWriter(fileName string) (writer *fileWriter, err error) {
 	newWriter := new(fileWriter)
 	newWriter.fileName = fileName
-
-	// if err := newWriter.createFile(); err != nil {
-	// 	return nil, err
-	// }
 
 	return newWriter, nil
 }
