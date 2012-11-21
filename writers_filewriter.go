@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,46 +40,47 @@ type fileWriter struct {
 // Creates a new file and a corresponding writer. Returns error, if the file couldn't be created.
 func newFileWriter(fileName string) (writer *fileWriter, err error) {
 	newWriter := new(fileWriter)
-
 	newWriter.fileName = fileName
-
-	fileErr := newWriter.createFile()
-	if fileErr != nil {
-		return nil, fileErr
-	}
 
 	return newWriter, nil
 }
 
-func (fileWriter *fileWriter) Close() error {
-	return fileWriter.innerWriter.Close()
+func (fw *fileWriter) Close() error {
+	if fw.innerWriter != nil {
+		return fw.innerWriter.Close()
+	}
+	return nil
 }
 
 // Create folder and file on WriteLog/Write first call
-func (fileWriter *fileWriter) Write(bytes []byte) (n int, err error) {
-	return fileWriter.innerWriter.Write(bytes)
+func (fw *fileWriter) Write(bytes []byte) (n int, err error) {
+	if fw.innerWriter == nil {
+		if err := fw.createFile(); err != nil {
+			return 0, err
+		}
+	}
+	return fw.innerWriter.Write(bytes)
 }
 
-func (fileWriter *fileWriter) createFile() error {
-
-	folder, _ := filepath.Split(fileWriter.fileName)
+func (fw *fileWriter) createFile() error {
+	folder, _ := filepath.Split(fw.fileName)
 	var err error
 
 	if 0 != len(folder) {
 		err = os.MkdirAll(folder, defaultDirectoryPermissions)
-
 		if err != nil {
 			return err
 		}
 	}
 
 	// If exists
-	_, err = os.Lstat(fileWriter.fileName)
+	_, err = os.Lstat(fw.fileName)
 	if nil == err {
-		fileWriter.innerWriter, err = os.OpenFile(fileWriter.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
+		fw.innerWriter, err = os.OpenFile(fw.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 	} else {
-		fileWriter.innerWriter, err = os.Create(fileWriter.fileName)
+		fw.innerWriter, err = os.Create(fw.fileName)
 	}
+
 	if err != nil {
 		return err
 	}
@@ -87,6 +88,6 @@ func (fileWriter *fileWriter) createFile() error {
 	return nil
 }
 
-func (fileWriter *fileWriter) String() string {
-	return fmt.Sprintf("File writer: %s", fileWriter.fileName)
+func (fw *fileWriter) String() string {
+	return fmt.Sprintf("File writer: %s", fw.fileName)
 }

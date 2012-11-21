@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -145,7 +145,7 @@ func fillPredefinedFormats() error {
 	return nil
 }
 
-// configFromReader parses data from a given reader. 
+// configFromReader parses data from a given reader.
 // Returns parsed config which can be used to create logger in case no errors occured.
 // Returns error if format is incorrect or anything happened.
 func configFromReader(reader io.Reader) (*logConfig, error) {
@@ -802,7 +802,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 	rollingArchiveStr, archiveAttrExists := node.attributes[RollingFileArchiveAttr]
 
-	var rArchiveType rollingArchiveTypes 
+	var rArchiveType rollingArchiveTypes
 	var rArchivePath string
 	if !archiveAttrExists {
 		rArchiveType = rollingArchiveNone
@@ -820,8 +820,8 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			if !ok {
 				rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
 				if !ok {
-					return nil, fmt.Errorf("Cannot get default filename for archive type = %v", 
-										   rArchiveType)
+					return nil, fmt.Errorf("Cannot get default filename for archive type = %v",
+						rArchiveType)
 				}
 			}
 		}
@@ -829,8 +829,8 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 	if rollingType == rollingTypeSize {
 		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr,
-									    RollingFileMaxSizeAttr, RollingFileMaxRollsAttr, RollingFileArchiveAttr,
-									    RollingFileArchivePathAttr)
+			RollingFileMaxSizeAttr, RollingFileMaxRollsAttr, RollingFileArchiveAttr,
+			RollingFileArchivePathAttr)
 		if err != nil {
 			return nil, err
 		}
@@ -863,9 +863,9 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		return newFormattedWriter(rollingWriter, currentFormat)
 
 	} else if rollingType == rollingTypeDate {
-		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr, 
-										RollingFileDataPatternAttr, RollingFileArchiveAttr,
-										RollingFileArchivePathAttr)
+		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr,
+			RollingFileDataPatternAttr, RollingFileArchiveAttr,
+			RollingFileArchivePathAttr)
 		if err != nil {
 			return nil, err
 		}

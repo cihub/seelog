@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -92,11 +92,6 @@ func Test_AsyncloopOff(t *testing.T) {
 		t.Error(e)
 		return
 	}
-	defer func() {
-		if e := tryRemoveFile(fileName); e != nil {
-			t.Error(e)
-		}
-	}()
 
 	testConfig := `
 <seelog type="asyncloop" levels="off">
@@ -121,15 +116,17 @@ func Test_AsyncloopOff(t *testing.T) {
 
 	Flush()
 
-	gotCount, err := countSequencedRowsInFile(fileName)
+	ex, err := fileExists(fileName)
 	if err != nil {
 		t.Error(err)
-		return
 	}
-
-	if gotCount != 0 {
-		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", 0, gotCount)
-		return
+	if ex {
+		t.Errorf("Logger at level OFF is not expected to create log file at all.")
+		defer func() {
+			if e := tryRemoveFile(fileName); e != nil {
+				t.Error(e)
+			}
+		}()
 	}
 
 	Current.Close()
