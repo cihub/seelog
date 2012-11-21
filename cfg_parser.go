@@ -115,17 +115,17 @@ func init() {
 
 func fillPredefinedFormats() error {
 	predefinedFormatsWithoutPrefix := map[string]string{
-		"xml-debug":       `<time>%Ns</time><lev>%Lev</lev><msg>%Msg</msg><path>%RelFile</path><func>%Func</func>`,
+		"xml-debug":       `<time>%Ns</time><lev>%Lev</lev><msg>%Msg</msg><path>%RelFile</path><func>%Func</func><line>%Line</line>`,
 		"xml-debug-short": `<t>%Ns</t><l>%l</l><m>%Msg</m><p>%RelFile</p><f>%Func</f>`,
 		"xml":             `<time>%Ns</time><lev>%Lev</lev><msg>%Msg</msg>`,
 		"xml-short":       `<t>%Ns</t><l>%l</l><m>%Msg</m>`,
 
-		"json-debug":       `{"time":%Ns,"lev":"%Lev","msg":"%Msg","path":"%RelFile","func":"%Func"}`,
+		"json-debug":       `{"time":%Ns,"lev":"%Lev","msg":"%Msg","path":"%RelFile","func":"%Func","line":"%Line"}`,
 		"json-debug-short": `{"t":%Ns,"l":"%Lev","m":"%Msg","p":"%RelFile","f":"%Func"}`,
 		"json":             `{"time":%Ns,"lev":"%Lev","msg":"%Msg"}`,
 		"json-short":       `{"t":%Ns,"l":"%Lev","m":"%Msg"}`,
 
-		"debug":       `[%LEVEL] %RelFile:%Func %Date %Time %Msg%n`,
+		"debug":       `[%LEVEL] %RelFile:%Func.%Line %Date %Time %Msg%n`,
 		"debug-short": `[%LEVEL] %Date %Time %Msg%n`,
 		"fast":        `%Ns %l %Msg%n`,
 	}
