@@ -67,6 +67,7 @@ var verbFuncs = map[string]verbFunc{
 	"File":     verbFile,
 	"RelFile":  verbRelFile,
 	"Func":     verbFunction,
+	"Line":     verbLine,
 	"Time":     verbTime,
 	"Ns":       verbNs,
 	"n":        verbn,
@@ -329,6 +330,10 @@ func verbRelFile(message string, level LogLevel, context logContextInterface) in
 
 func verbFunction(message string, level LogLevel, context logContextInterface) interface{} {
 	return context.Func()
+}
+
+func verbLine(message string, level LogLevel, context logContextInterface) interface{} {
+	return context.Line()
 }
 
 func verbTime(message string, level LogLevel, context logContextInterface) interface{} {

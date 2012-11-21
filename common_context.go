@@ -52,6 +52,7 @@ func setWorkDir() {
 // Represents runtime caller context
 type logContextInterface interface {
 	Func() string
+	Line() int
 	ShortPath() string
 	FullPath() string
 	FileName() string
@@ -64,11 +65,11 @@ func currentContext() (logContextInterface, error) {
 	return specificContext(1)
 }
 
-func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string, err error) {
-	pc, fullPath, _, ok := runtime.Caller(skip)
+func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string, lineNumber int, err error) {
+	pc, fullPath, line, ok := runtime.Caller(skip)
 
 	if !ok {
-		return "", "", "", errors.New("Error during runtime.Caller")
+		return "", "", "", 0, errors.New("Error during runtime.Caller")
 	}
 
 	//TODO:Currently fixes bug in weekly.2012-03-13+: Caller returns incorrect separators
@@ -91,7 +92,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 		functionName = funName
 	}
 
-	return fullPath, shortPath, functionName, nil
+	return fullPath, shortPath, functionName, line, nil
 }
 
 // Returns context of the function with placed "skip" stack frames of the caller
@@ -107,17 +108,18 @@ func specificContext(skip int) (logContextInterface, error) {
 		return &errorContext{callTime, negativeStackFrameErr}, negativeStackFrameErr
 	}
 
-	fullPath, shortPath, function, err := extractCallerInfo(skip + 2)
+	fullPath, shortPath, function, line, err := extractCallerInfo(skip + 2)
 	if err != nil {
 		return &errorContext{callTime, err}, err
 	}
 	_, fileName := filepath.Split(fullPath)
-	return &logContext{function, shortPath, fullPath, fileName, callTime}, nil
+	return &logContext{function, line, shortPath, fullPath, fileName, callTime}, nil
 }
 
 // Represents a normal runtime caller context
 type logContext struct {
 	funcName  string
+	line      int
 	shortPath string
 	fullPath  string
 	fileName  string
@@ -130,6 +132,10 @@ func (context *logContext) IsValid() bool {
 
 func (context *logContext) Func() string {
 	return context.funcName
+}
+
+func (context *logContext) Line() int {
+	return context.line
 }
 
 func (context *logContext) ShortPath() string {
@@ -163,6 +169,10 @@ type errorContext struct {
 
 func (errContext *errorContext) IsValid() bool {
 	return false
+}
+
+func (errContext *errorContext) Line() int {
+	return -1
 }
 
 func (errContext *errorContext) Func() string {
