@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,12 +25,12 @@
 package seelog
 
 import (
+	"archive/zip"
+	"bytes"
 	"errors"
 	"fmt"
-	"archive/zip"
-	"io/ioutil"
-	"bytes"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -87,12 +87,12 @@ func rollingArchiveTypeFromString(rollingArchiveTypeStr string) (rollingArchiveT
 
 // Default names for different archivation types
 var rollingArchiveTypesDefaultNames = map[rollingArchiveTypes]string{
-	rollingArchiveZip:  "log.zip",
+	rollingArchiveZip: "log.zip",
 }
 
 // rollingFileWriter writes received messages to a file, until date changes
-// or file exceeds a specified limit. After that the current log file is renamed 
-// and writer starts to log into a new file. You can set a limit for such renamed 
+// or file exceeds a specified limit. After that the current log file is renamed
+// and writer starts to log into a new file. You can set a limit for such renamed
 // files count, if you want, and then the rolling writer would delete older ones when
 // the files count exceed the specified limit
 type rollingFileWriter struct {
@@ -116,10 +116,10 @@ type rollingFileWriter struct {
 
 // newRollingFileWriterSize initializes a rolling writer with a 'Size' rolling mode
 func newRollingFileWriterSize(
-	filePath string, 
-	arch rollingArchiveTypes, 
+	filePath string,
+	arch rollingArchiveTypes,
 	archPath string,
-	maxFileSize int64, 
+	maxFileSize int64,
 	maxRolls int) (*rollingFileWriter, error) {
 
 	if maxFileSize <= 0 {
@@ -145,8 +145,8 @@ func newRollingFileWriterSize(
 
 // newRollingFileWriterSize initializes a rolling writer with a 'Date' rolling mode
 func newRollingFileWriterDate(
-	filePath string, 
-	arch rollingArchiveTypes, 
+	filePath string,
+	arch rollingArchiveTypes,
 	archPath string,
 	datePattern string) (*rollingFileWriter, error) {
 
@@ -233,8 +233,6 @@ func (rollfileWriter *rollingFileWriter) getNextRollName() (string, error) {
 	return rollfileWriter.currentFileName + "." + strconv.Itoa(nextIndex), nil
 }
 
-
-
 func (rollfileWriter *rollingFileWriter) getRolls() (map[int]string, error) {
 	files, err := getDirFileNames(rollfileWriter.fileDir, false, nil)
 
@@ -246,11 +244,11 @@ func (rollfileWriter *rollingFileWriter) getRolls() (map[int]string, error) {
 
 	for _, file := range files {
 		if strings.HasPrefix(file, rollfileWriter.currentFileName) {
-			if len(rollfileWriter.currentFileName) + 1 >= len(file) {
+			if len(rollfileWriter.currentFileName)+1 >= len(file) {
 				continue
 			}
 
-			fileIndex := file[len(rollfileWriter.currentFileName) + 1 :]
+			fileIndex := file[len(rollfileWriter.currentFileName)+1:]
 			index, err := strconv.Atoi(fileIndex)
 			if err != nil {
 				continue
@@ -268,7 +266,7 @@ func unzip(archiveName string) (map[string][]byte, error) {
 	// Open a zip archive for reading.
 	r, err := zip.OpenReader(archiveName)
 	if err != nil {
-	    return nil, err
+		return nil, err
 	}
 	defer r.Close()
 
@@ -279,23 +277,23 @@ func unzip(archiveName string) (map[string][]byte, error) {
 	// Iterate through the files in the archive,
 	// printing some of their contents.
 	for _, f := range r.File {
-	    rc, err := f.Open()
-	    if err != nil {
-	        return nil, err
-	    }
+		rc, err := f.Open()
+		if err != nil {
+			return nil, err
+		}
 
-	    bts, err := ioutil.ReadAll(rc)
-	    rcErr := rc.Close()
+		bts, err := ioutil.ReadAll(rc)
+		rcErr := rc.Close()
 
-	    if err != nil {
-	        return nil, err
-	    }
-	    if rcErr != nil {
-	        return nil, rcErr
-	    }
+		if err != nil {
+			return nil, err
+		}
+		if rcErr != nil {
+			return nil, rcErr
+		}
 
-	    files[f.Name] = bts
-	}	
+		files[f.Name] = bts
+	}
 
 	return files, nil
 }
@@ -310,20 +308,20 @@ func createZip(archiveName string, files map[string][]byte) error {
 
 	// Write files
 	for fpath, fcont := range files {
-	    f, err := w.Create(fpath)
-	    if err != nil {
-	        return err
-	    }
-	    _, err = f.Write([]byte(fcont))
-	    if err != nil {
-	        return err
-	    }
+		f, err := w.Create(fpath)
+		if err != nil {
+			return err
+		}
+		_, err = f.Write([]byte(fcont))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Make sure to check the error on Close.
 	err := w.Close()
 	if err != nil {
-	    return err
+		return err
 	}
 
 	err = ioutil.WriteFile(archiveName, buf.Bytes(), defaultFilePermissions)
@@ -375,7 +373,7 @@ func (rollfileWriter *rollingFileWriter) deleteOldRolls() error {
 
 		// Add files to the existing files map, filled above
 		for i := 0; i < rollsToDelete; i++ {
-			rollPath := filepath.Join(rollfileWriter.fileDir, sortedRolls[i])			
+			rollPath := filepath.Join(rollfileWriter.fileDir, sortedRolls[i])
 			bts, err := ioutil.ReadFile(rollPath)
 			if err != nil {
 				return err
@@ -393,7 +391,7 @@ func (rollfileWriter *rollingFileWriter) deleteOldRolls() error {
 
 	// In all cases (archive files or not) the files should be deleted.
 	for i := 0; i < rollsToDelete; i++ {
-		rollPath := filepath.Join(rollfileWriter.fileDir, sortedRolls[i])			
+		rollPath := filepath.Join(rollfileWriter.fileDir, sortedRolls[i])
 		err := tryRemoveFile(rollPath)
 		if err != nil {
 			return err
@@ -475,8 +473,8 @@ func (rollfileWriter *rollingFileWriter) String() string {
 		rollingArchiveTypeStr = "UNKNOWN"
 	}
 
-	s := fmt.Sprintf("Rolling file writer: filename: %s type: %s archive: %s archivefile: %s", 
-		rollfileWriter.fileName, 
+	s := fmt.Sprintf("Rolling file writer: filename: %s type: %s archive: %s archivefile: %s",
+		rollfileWriter.fileName,
 		rollingTypeStr,
 		rollingArchiveTypeStr,
 		rollfileWriter.archivePath)
@@ -491,7 +489,10 @@ func (rollfileWriter *rollingFileWriter) String() string {
 }
 
 func (rollfileWriter *rollingFileWriter) Close() error {
-	return rollfileWriter.innerWriter.Close()
+	if rollfileWriter.innerWriter != nil {
+		return rollfileWriter.innerWriter.Close()
+	}
+	return nil
 }
 
 func (rollfileWriter *rollingFileWriter) Write(bytes []byte) (n int, err error) {

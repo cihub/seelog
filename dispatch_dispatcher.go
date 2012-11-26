@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,7 +36,7 @@ import (
 // an immediate cleanup of all data that is stored in the receivers
 type dispatcherInterface interface {
 	flusherInterface
-	closerInterface
+	io.Closer
 	Dispatch(message string, level LogLevel, context logContextInterface, errorFunc func(err error))
 }
 
@@ -46,14 +46,14 @@ type dispatcher struct {
 	dispatchers []dispatcherInterface
 }
 
-// Creates a dispatcher which dispatches data to a list of receivers. 
+// Creates a dispatcher which dispatches data to a list of receivers.
 // Each receiver should be either a Dispatcher or io.Writer, otherwise an error will be returned
 func createDispatcher(formatter *formatter, receivers []interface{}) (*dispatcher, error) {
 	if formatter == nil {
-		return nil, errors.New("formatter can not be nil")
+		return nil, errors.New("formatter cannot be nil")
 	}
 	if receivers == nil || len(receivers) == 0 {
-		return nil, errors.New("Receivers can not be nil or empty")
+		return nil, errors.New("Receivers cannot be nil or empty")
 	}
 
 	disp := &dispatcher{formatter, make([]*formattedWriter, 0), make([]dispatcherInterface, 0)}
@@ -110,9 +110,9 @@ func (disp *dispatcher) Flush() {
 	for _, disp := range disp.Dispatchers() {
 		disp.Flush()
 	}
+
 	for _, formatWriter := range disp.Writers() {
 		flusher, ok := formatWriter.Writer().(flusherInterface)
-
 		if ok {
 			flusher.Flush()
 		}
@@ -131,6 +131,7 @@ func (disp *dispatcher) Close() error {
 			return err
 		}
 	}
+
 	for _, formatWriter := range disp.Writers() {
 		flusher, ok := formatWriter.Writer().(flusherInterface)
 		if ok {
