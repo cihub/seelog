@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -95,48 +95,34 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Smtp writer"
-
-		var (
-			senderAddress    = "senderaddress"
-			senderName       = "sendername"
-			recipientAddress = "recipientaddress"
-			hostName         = "hostname"
-			hostPort         = "123"
-			userName         = "username"
-			userPass         = "password"
-			caCertPath       = "cacertpath"
-		)
-
-		testConfig = fmt.Sprintf("<seelog><outputs><smtp %s=\"%s\" %s=\"%s\" "+
-			" %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%s\">"+
-			"<%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/><%s %s=\"%s\"/></smtp></outputs></seelog>",
-			SenderAddressId, senderAddress,
-			SenderNameId, senderName,
-			HostNameId, hostName,
-			HostPortId, hostPort,
-			UserNameId, userName,
-			UserPassId, userPass,
-			RecipientId, AddressId, recipientAddress,
-			RecipientId, AddressId, recipientAddress,
-			RecipientId, AddressId, recipientAddress,
-			CACertificatePathsId, FilePathId, caCertPath,
-			CACertificatePathsId, FilePathId, caCertPath,
-		)
+		testConfig = `
+<seelog>
+	<outputs>
+		<smtp senderaddress="sa" sendername="sn"  hostname="hn" hostport="123" username="un" password="up">
+			<recipient address="ra1"/>
+			<recipient address="ra2"/>
+			<recipient address="ra3"/>
+			<cacertdirpath path="cacdp1"/>
+			<cacertdirpath path="cacdp2"/>
+		</smtp>
+	</outputs>
+</seelog>
+		`
 
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testsmtpWriter, _ := newSmtpWriter(
-			senderAddress,
-			senderName,
-			[]string{recipientAddress, recipientAddress, recipientAddress},
-			hostName,
-			hostPort,
-			userName,
-			userPass,
-			[]string{caCertPath, caCertPath},
+		testSmtpWriter := newSmtpWriter(
+			"sa",
+			"sn",
+			[]string{"ra1", "ra2", "ra3"},
+			"hn",
+			"123",
+			"un",
+			"up",
+			[]string{"cacdp1", "cacdp2"},
 		)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testsmtpWriter})
+		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testSmtpWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})

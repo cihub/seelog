@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,7 +40,6 @@ var isFakeFS = false
 var realFSWrapper = new(osWrapper)
 var fileSystemWrapper fileSystemWrapperInterface = realFSWrapper
 
-
 func switchToRealFSWrapper() {
 	if !isFakeFS {
 		return
@@ -60,12 +59,15 @@ func (_ *osWrapper) MkdirAll(folderPath string) error {
 
 	return os.MkdirAll(folderPath, defaultDirectoryPermissions)
 }
+
 func (_ *osWrapper) Open(fileName string) (io.WriteCloser, error) {
 	return os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
 }
+
 func (_ *osWrapper) Create(fileName string) (io.WriteCloser, error) {
 	return os.Create(fileName)
 }
+
 func (_ *osWrapper) GetFileSize(fileName string) (int64, error) {
 	stat, err := os.Lstat(fileName)
 	if err != nil {
@@ -92,12 +94,15 @@ func (_ *osWrapper) GetFileNames(folderPath string) ([]string, error) {
 
 	return files, nil
 }
+
 func (_ *osWrapper) Rename(fileNameFrom string, fileNameTo string) error {
 	return os.Rename(fileNameFrom, fileNameTo)
 }
+
 func (_ *osWrapper) Remove(fileName string) error {
 	return os.Remove(fileName)
 }
+
 func (_ *osWrapper) Exists(path string) bool {
 	_, err := os.Lstat(path)
 	return err == nil
