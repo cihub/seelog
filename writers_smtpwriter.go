@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/smtp"
+	"path/filepath"
 )
 
 const (
@@ -48,23 +49,21 @@ type smtpWriter struct {
 	senderAddress      string
 	senderName         string
 	recipientAddresses []string
-	caCertificatePaths []string
+	caCertDirPaths     []string
 }
 
 // newSmtpWriter returns a new SMTP-writer.
-func newSmtpWriter(senderAddress, senderName string, recipientAddresses []string, hostName, hostPort, userName, password string, caCertificatePaths []string) (writer *smtpWriter, err error) {
-	// TODO: Check PEM file paths here?
-	writer = &smtpWriter{
-		smtp.PlainAuth("", userName, password, hostName),
-		hostName,
-		hostPort,
-		fmt.Sprintf("%s:%s", hostName, hostPort),
-		senderAddress,
-		senderName,
-		recipientAddresses,
-		caCertificatePaths,
+func newSmtpWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string) *smtpWriter {
+	return &smtpWriter{
+		auth:               smtp.PlainAuth("", un, pwd, hn),
+		hostName:           hn,
+		hostPort:           hp,
+		hostNameWithPort:   fmt.Sprintf("%s:%s", hn, hp),
+		senderAddress:      sa,
+		senderName:         sn,
+		recipientAddresses: ras,
+		caCertDirPaths:     cacdps,
 	}
-	return
 }
 
 func prepareMessage(senderAddr, senderName, subject string, body []byte) []byte {
@@ -74,8 +73,8 @@ func prepareMessage(senderAddr, senderName, subject string, body []byte) []byte 
 
 // getTLSConfig gets paths of PEM files with certificates,
 // host server name and tries to create an appropriate TLS.Config.
-func getTLSConfig(pemFilePaths []string, hostName string) (config *tls.Config, err error) {
-	if pemFilePaths == nil || len(pemFilePaths) == 0 {
+func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config, err error) {
+	if pemFileDirPaths == nil || len(pemFileDirPaths) == 0 {
 		err = errors.New("Invalid PEM file paths")
 		return
 	}
@@ -84,15 +83,30 @@ func getTLSConfig(pemFilePaths []string, hostName string) (config *tls.Config, e
 		e     error
 		bytes []byte
 	)
-	// Put together all the PEM files to decode them as a whole byte slice.
-	for _, pfp := range pemFilePaths {
-		if bytes, e = ioutil.ReadFile(pfp); e == nil {
-			pemEncodedContent = append(pemEncodedContent, bytes...)
-		} else {
-			err = fmt.Errorf("Cannot read file: %s", pfp)
-			return
+	// Create a file-filter-by-extension, set aside non-pem files.
+	pemFilePathFilter := func(fp string) bool {
+		if filepath.Ext(fp) == ".pem" {
+			return true
+		}
+		return false
+	}
+
+	for _, pemFileDirPath := range pemFileDirPaths {
+		pemFilePaths, err := getDirFilePaths(pemFileDirPath, pemFilePathFilter)
+		if err != nil {
+			return nil, err
+		}
+
+		// Put together all the PEM files to decode them as a whole byte slice.
+		for _, pfp := range pemFilePaths {
+			if bytes, e = ioutil.ReadFile(pfp); e == nil {
+				pemEncodedContent = append(pemEncodedContent, bytes...)
+			} else {
+				return nil, fmt.Errorf("Cannot read file: %s: %s", pfp, e.Error())
+			}
 		}
 	}
+
 	config = &tls.Config{RootCAs: x509.NewCertPool(), ServerName: hostName}
 	isAppended := config.RootCAs.AppendCertsFromPEM(pemEncodedContent)
 	if !isAppended {
@@ -154,7 +168,7 @@ func sendMailWithTLSConfig(config *tls.Config, addr string, a smtp.Auth, from st
 // to a post server, which sends it to the recipients.
 func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 	var err error
-	if smtpw.caCertificatePaths == nil {
+	if smtpw.caCertDirPaths == nil {
 		err = smtp.SendMail(
 			smtpw.hostNameWithPort,
 			smtpw.auth,
@@ -163,7 +177,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 			prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data),
 		)
 	} else {
-		config, e := getTLSConfig(smtpw.caCertificatePaths, smtpw.hostName)
+		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.hostName)
 		if e != nil {
 			return 0, e
 		}
