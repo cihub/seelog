@@ -33,15 +33,6 @@ var (
 	nodeCannotHaveChildrenError = errors.New("Node cannot have children")
 )
 
-// Base struct for custom errors.
-type baseError struct {
-	message string
-}
-
-func (be baseError) Error() string {
-	return be.message
-}
-
 type unexpectedChildElementError struct {
 	baseError
 }

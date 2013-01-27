@@ -33,6 +33,7 @@ import (
 	"time"
 )
 
+// Names of elements of seelog config.
 const (
 	SeelogConfigId                  = "seelog"
 	OutputsId                       = "outputs"
@@ -48,7 +49,7 @@ const (
 	FormatAttrId                    = "format"
 	FormatKeyAttrId                 = "id"
 	OutputFormatId                  = "formatid"
-	FilePathId                      = "path"
+	PathId                          = "path"
 	FileWriterId                    = "file"
 	SmtpWriterId                    = "smtp"
 	SenderAddressId                 = "senderaddress"
@@ -59,7 +60,7 @@ const (
 	HostPortId                      = "hostport"
 	UserNameId                      = "username"
 	UserPassId                      = "password"
-	CACertificatePathsId            = "cacertificatepaths"
+	CACertDirPathId                 = "cacertdirpath"
 	SpliterDispatcherId             = "splitter"
 	ConsoleWriterId                 = "console"
 	FilterDispatcherId              = "filter"
@@ -107,7 +108,6 @@ func init() {
 	}
 
 	err := fillPredefinedFormats()
-
 	if err != nil {
 		panic(fmt.Sprintf("Seelog couldn't start: predefined formats creation failed. Error: %s", err.Error()))
 	}
@@ -133,7 +133,6 @@ func fillPredefinedFormats() error {
 	predefinedFormats = make(map[string]*formatter)
 
 	for formatKey, format := range predefinedFormatsWithoutPrefix {
-
 		formatter, err := newFormatter(format)
 		if err != nil {
 			return err
@@ -158,9 +157,17 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr,
-		AsyncLoggerIntervalAttr, AdaptLoggerMinIntervalAttr, AdaptLoggerMaxIntervalAttr,
-		AdaptLoggerCriticalMsgCountAttr)
+	err = checkUnexpectedAttribute(
+		config,
+		MinLevelId,
+		MaxLevelId,
+		LevelsId,
+		LoggerTypeFromStringAttr,
+		AsyncLoggerIntervalAttr,
+		AdaptLoggerMinIntervalAttr,
+		AdaptLoggerMaxIntervalAttr,
+		AdaptLoggerCriticalMsgCountAttr,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -602,7 +609,7 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 }
 
 func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, FilePathId)
+	err := checkUnexpectedAttribute(node, OutputFormatId, PathId)
 	if err != nil {
 		return nil, err
 	}
@@ -616,9 +623,9 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, err
 	}
 
-	path, isPath := node.attributes[FilePathId]
+	path, isPath := node.attributes[PathId]
 	if !isPath {
-		return nil, newMissingArgumentError(node.name, FilePathId)
+		return nil, newMissingArgumentError(node.name, PathId)
 	}
 
 	fileWriter, err := newFileWriter(path)
@@ -653,7 +660,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	}
 	// Process child nodes scanning for recipient email addresses and/or CA certificate paths.
 	var recipientAddresses []string
-	var caCertificatePaths []string
+	var caCertDirPaths []string
 	for _, childNode := range node.children {
 		switch childNode.name {
 		// Extract recipient address from child nodes.
@@ -664,12 +671,12 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 			}
 			recipientAddresses = append(recipientAddresses, address)
 		// Extract CA certificate file path from child nodes.
-		case CACertificatePathsId:
-			path, ok := childNode.attributes[FilePathId]
+		case CACertDirPathId:
+			path, ok := childNode.attributes[PathId]
 			if !ok {
-				return nil, newMissingArgumentError(childNode.name, FilePathId)
+				return nil, newMissingArgumentError(childNode.name, PathId)
 			}
-			caCertificatePaths = append(caCertificatePaths, path)
+			caCertDirPaths = append(caCertDirPaths, path)
 		default:
 			return nil, newUnexpectedChildElementError(childNode.name)
 		}
@@ -678,23 +685,28 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	if !ok {
 		return nil, newMissingArgumentError(node.name, HostNameId)
 	}
+
 	hostPort, ok := node.attributes[HostPortId]
 	if !ok {
 		return nil, newMissingArgumentError(node.name, HostPortId)
 	}
+
 	// Check if the string can really be converted into int.
 	if _, err := strconv.Atoi(hostPort); err != nil {
 		return nil, errors.New("Invalid host port number")
 	}
+
 	userName, ok := node.attributes[UserNameId]
 	if !ok {
 		return nil, newMissingArgumentError(node.name, UserNameId)
 	}
+
 	userPass, ok := node.attributes[UserPassId]
 	if !ok {
 		return nil, newMissingArgumentError(node.name, UserPassId)
 	}
-	smtpWriter, err := newSmtpWriter(
+
+	smtpWriter := newSmtpWriter(
 		senderAddress,
 		senderName,
 		recipientAddresses,
@@ -702,11 +714,9 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		hostPort,
 		userName,
 		userPass,
-		caCertificatePaths,
+		caCertDirPaths,
 	)
-	if err != nil {
-		return nil, err
-	}
+
 	return newFormattedWriter(smtpWriter, currentFormat)
 }
 
