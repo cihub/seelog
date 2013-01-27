@@ -33,6 +33,7 @@ import (
 	"time"
 )
 
+// Names of elements of seelog config.
 const (
 	SeelogConfigId                  = "seelog"
 	OutputsId                       = "outputs"
@@ -105,7 +106,6 @@ func init() {
 	}
 
 	err := fillPredefinedFormats()
-
 	if err != nil {
 		panic(fmt.Sprintf("Seelog couldn't start: predefined formats creation failed. Error: %s", err.Error()))
 	}
@@ -131,7 +131,6 @@ func fillPredefinedFormats() error {
 	predefinedFormats = make(map[string]*formatter)
 
 	for formatKey, format := range predefinedFormatsWithoutPrefix {
-
 		formatter, err := newFormatter(format)
 		if err != nil {
 			return err
@@ -156,9 +155,17 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
 	}
 
-	err = checkUnexpectedAttribute(config, MinLevelId, MaxLevelId, LevelsId, LoggerTypeFromStringAttr,
-		AsyncLoggerIntervalAttr, AdaptLoggerMinIntervalAttr, AdaptLoggerMaxIntervalAttr,
-		AdaptLoggerCriticalMsgCountAttr)
+	err = checkUnexpectedAttribute(
+		config,
+		MinLevelId,
+		MaxLevelId,
+		LevelsId,
+		LoggerTypeFromStringAttr,
+		AsyncLoggerIntervalAttr,
+		AdaptLoggerMinIntervalAttr,
+		AdaptLoggerMaxIntervalAttr,
+		AdaptLoggerCriticalMsgCountAttr,
+	)
 	if err != nil {
 		return nil, err
 	}

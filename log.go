@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,6 +50,7 @@ func init() {
 	if Default == nil {
 		Default, err = LoggerFromConfigAsBytes([]byte("<seelog />"))
 	}
+
 	if Disabled == nil {
 		Disabled, err = LoggerFromConfigAsBytes([]byte("<seelog levels=\"off\"/>"))
 	}
@@ -68,19 +69,16 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 		return newAsyncLoopLogger(config), nil
 	} else if config.LogType == asyncTimerloggerTypeFromString {
 		logData := config.LoggerData
-
 		if logData == nil {
 			return nil, errors.New("Async timer data not set!")
 		}
 
 		asyncInt, ok := logData.(asyncTimerLoggerData)
-
 		if !ok {
 			return nil, errors.New("Invalid async timer data!")
 		}
 
 		logger, err := newAsyncTimerLogger(config, time.Duration(asyncInt.AsyncInterval))
-
 		if !ok {
 			return nil, err
 		}
@@ -88,22 +86,22 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 		return logger, nil
 	} else if config.LogType == adaptiveLoggerTypeFromString {
 		logData := config.LoggerData
-
 		if logData == nil {
 			return nil, errors.New("Adaptive logger parameters not set!")
 		}
 
 		adaptData, ok := logData.(adaptiveLoggerData)
-
 		if !ok {
 			return nil, errors.New("Invalid adaptive logger parameters!")
 		}
 
-		logger, err := newAsyncAdaptiveLogger(config, time.Duration(adaptData.MinInterval),
+		logger, err := newAsyncAdaptiveLogger(
+			config,
+			time.Duration(adaptData.MinInterval),
 			time.Duration(adaptData.MaxInterval),
-			adaptData.CriticalMsgCount)
-
-		if !ok {
+			adaptData.CriticalMsgCount,
+		)
+		if !err {
 			return nil, err
 		}
 
@@ -112,7 +110,7 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 	return nil, errors.New("Invalid config log type/data")
 }
 
-// UseConfig uses the given logger for all Trace/Debug/... funcs.
+// UseLogger uses the given logger for all Trace/Debug/... funcs.
 func UseLogger(logger LoggerInterface) error {
 	if logger == nil {
 		return errors.New("Logger can not be nil")
@@ -131,7 +129,8 @@ func UseLogger(logger LoggerInterface) error {
 	return nil
 }
 
-// Acts as UseLogger but the logger that was previously used would be disposed (except Default and Disabled loggers).
+// ReplaceLogger acts as UseLogger but the logger that was previously
+// used would be disposed (except Default and Disabled loggers).
 func ReplaceLogger(logger LoggerInterface) error {
 	if logger == nil {
 		return errors.New("Logger can not be nil")
@@ -148,9 +147,7 @@ func ReplaceLogger(logger LoggerInterface) error {
 
 	if Current == Default {
 		Current.Flush()
-	} else if Current != nil && !Current.Closed() &&
-		Current != Disabled {
-
+	} else if Current != nil && !Current.Closed() && Current != Disabled {
 		Current.Flush()
 		Current.Close()
 	}
@@ -160,21 +157,24 @@ func ReplaceLogger(logger LoggerInterface) error {
 	return nil
 }
 
-// Tracef formats message according to format specifier and writes to default logger with log level = Trace
+// Tracef formats message according to format specifier
+// and writes to default logger with log level = Trace.
 func Tracef(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
 	Current.traceWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
-// Debugf formats message according to format specifier and writes to default logger with log level = Debug
+// Debugf formats message according to format specifier
+// and writes to default logger with log level = Debug.
 func Debugf(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
 	Current.debugWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
-// Infof formats message according to format specifier and writes to default logger with log level = Info
+// Infof formats message according to format specifier
+// and writes to default logger with log level = Info.
 func Infof(format string, params ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
