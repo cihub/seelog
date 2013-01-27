@@ -89,12 +89,12 @@ func newFileWriterTester(
 	return &fileWriterTester{testCases, writerGetter, t}
 }
 
-func isWriterTestFile(f os.FileInfo) bool {
-	return strings.Contains(f.Name(), ".testlog")
+func isWriterTestFile(fn string) bool {
+	return strings.Contains(fn, ".testlog")
 }
 
 func cleanupWriterTest(t *testing.T) {
-	toDel, err := getDirFileNames(".", false, isWriterTestFile)
+	toDel, err := getDirFilePaths(".", isWriterTestFile, true)
 	if nil != err {
 		t.Fatal("Cannot list files in test directory!")
 	}
@@ -114,7 +114,7 @@ func getWriterTestResultFiles() ([]string, error) {
 	var p []string
 
 	visit := func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() && isWriterTestFile(f) {
+		if !f.IsDir() && isWriterTestFile(path) {
 			abs, err := filepath.Abs(path)
 			if err != nil {
 				return fmt.Errorf("filepath.Abs failed for %s", path)
@@ -204,13 +204,15 @@ func (this *fileWriterTester) performWrite(fileWriter io.Writer, count int) {
 }
 
 func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCase, files []string) {
+	var found bool
 	for _, expected := range testCase.resFiles {
-		found := false
+		found = false
 		exAbs, err := filepath.Abs(expected)
 		if err != nil {
 			this.t.Errorf("filepath.Abs failed for %s", expected)
 			continue
 		}
+
 		for _, f := range files {
 			if af, e := filepath.Abs(f); e == nil {
 				this.t.Log(af)

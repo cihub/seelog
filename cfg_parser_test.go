@@ -26,7 +26,7 @@ package seelog
 
 import (
 	"fmt"
-	"os"
+	//"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -853,12 +853,12 @@ func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 	return fmt.Sprintf("%s", conf1) == fmt.Sprintf("%s", conf2) //logConfig)
 }
 
-func testLogFileFilter(i os.FileInfo) bool {
-	return ".log" == filepath.Ext(i.Name())
+func testLogFileFilter(fn string) bool {
+	return ".log" == filepath.Ext(fn)
 }
 
 func cleanupAfterCfgTest(t *testing.T) {
-	toDel, err := getDirFileNames(".", false, testLogFileFilter)
+	toDel, err := getDirFilePaths(".", testLogFileFilter, true)
 	if nil != err {
 		t.Fatal("Cannot list files in test directory!")
 	}

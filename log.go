@@ -101,7 +101,7 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 			time.Duration(adaptData.MaxInterval),
 			adaptData.CriticalMsgCount,
 		)
-		if !err {
+		if err != nil {
 			return nil, err
 		}
 

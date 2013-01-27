@@ -8,6 +8,17 @@ import (
 	"sync"
 )
 
+// File and directory permitions.
+const (
+	defaultFilePermissions      = 0666
+	defaultDirectoryPermissions = 0767
+)
+
+const (
+	// Max number of directories can be read asynchronously.
+	maxDirNumberReadAsync = 1e3
+)
+
 type cannotOpenFileError struct {
 	baseError
 }
@@ -24,11 +35,11 @@ func newNotDirectoryError(dname string) *notDirectoryError {
 	return &notDirectoryError{baseError{message: dname + " is not directory"}}
 }
 
-// fileFilter is a filtering creterion function for '*os.File'.
+// fileFilter is a filtering criteria function for '*os.File'.
 // Must return 'false' to set aside the given file.
 type fileFilter func(os.FileInfo, *os.File) bool
 
-// filePathFilter is a filtering creterion function for a file path.
+// filePathFilter is a filtering creteria function for file path.
 // Must return 'false' to set aside the given file.
 type filePathFilter func(filePath string) bool
 
@@ -65,7 +76,7 @@ func getSubdirNames(dirPath string) ([]string, error) {
 	return subDirs, nil
 }
 
-// GetSubdirAbsPaths recursively visit all the subdirectories
+// getSubdirAbsPaths recursively visit all the subdirectories
 // starting from the given directory and returns absolute paths for them.
 func getAllSubdirAbsPaths(dirPath string) (res []string, err error) {
 	dps, err := getSubdirAbsPaths(dirPath)
@@ -77,7 +88,6 @@ func getAllSubdirAbsPaths(dirPath string) (res []string, err error) {
 	for _, dp := range dps {
 		sdps, err := getAllSubdirAbsPaths(dp)
 		if err != nil {
-			// res = []string{}
 			return []string{}, err
 		}
 		res = append(res, sdps...)
@@ -85,7 +95,7 @@ func getAllSubdirAbsPaths(dirPath string) (res []string, err error) {
 	return
 }
 
-// GetSubdirAbsPaths supplies absolute paths for all subdirectiries in a given directory.
+// getSubdirAbsPaths supplies absolute paths for all subdirectiries in a given directory.
 // Input: (I1) dirPath - absolute path of a directory in question.
 // Out: (O1) - slice of subdir asbolute paths; (O2) - error of the operation.
 // Remark: If error (O2) is non-nil then (O1) is nil and vice versa.
@@ -101,9 +111,7 @@ func getSubdirAbsPaths(dirPath string) ([]string, error) {
 	return rsdns, nil
 }
 
-// GetOpenFilesInDir supplies a slice of os.File pointers to files located in the directory.
-// Input: ...
-// Output: ...
+// getOpenFilesInDir supplies a slice of os.File pointers to files located in the directory.
 // Remark: Ignores files for which fileFilter returns false
 func getOpenFilesInDir(dirPath string, fFilter fileFilter) ([]*os.File, error) {
 	dfi, err := os.Open(dirPath)
@@ -156,14 +164,24 @@ L:
 
 // getDirFilePaths return full paths of the files located in the directory.
 // Remark: Ignores files for which fileFilter returns false.
-func getDirFilePaths(dirPath string, fpFilter filePathFilter) ([]string, error) {
+func getDirFilePaths(dirPath string, fpFilter filePathFilter, pathIsName bool) ([]string, error) {
 	dfi, err := os.Open(dirPath)
 	if err != nil {
 		return nil, newCannotOpenFileError("Cannot open directory " + dirPath)
 	}
 	defer dfi.Close()
-	// THINK: Maybe check if dirPath is really directory.
 
+	var absDirPath string
+	if !filepath.IsAbs(dirPath) {
+		absDirPath, err = filepath.Abs(dirPath)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot get absolute path of directory: %s", err.Error())
+		}
+	} else {
+		absDirPath = dirPath
+	}
+
+	// TODO: check if dirPath is really directory.
 	// Size of read buffer (i.e. chunk of items read at a time).
 	rbs := 2 << 5
 	filePaths := []string{}
@@ -188,8 +206,12 @@ L:
 		for _, fi := range fis {
 			// NB: Should work on every Windows and non-Windows OS.
 			if fi.Mode().IsRegular() {
-				// Build full path of a file.
-				fp = filepath.Join(dirPath, fi.Name())
+				if pathIsName {
+					fp = fi.Name()
+				} else {
+					// Build full path of a file.
+					fp = filepath.Join(absDirPath, fi.Name())
+				}
 				// Check filter condition.
 				if fpFilter != nil && !fpFilter(fp) {
 					continue
@@ -200,11 +222,6 @@ L:
 	}
 	return filePaths, nil
 }
-
-const (
-	// Max number of directories can be read asynchronously.
-	maxDirNumberReadAsync = 1e3
-)
 
 // getOpenFilesByDirectoryAsync runs async reading directories 'dirPaths' and inserts pairs
 // in map 'filesInDirMap': Key - directory name, value - *os.File slice.
@@ -297,6 +314,8 @@ func createDirectory(dirPath string) error {
 	return os.MkdirAll(dPath, os.ModeDir)
 }
 
+// tryRemoveFile gives a try removing the file
+// only ignoring an error when the file does not exist.
 func tryRemoveFile(filePath string) (err error) {
 	err = os.Remove(filePath)
 	if os.IsNotExist(err) {

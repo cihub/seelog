@@ -92,7 +92,7 @@ func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config
 	}
 
 	for _, pemFileDirPath := range pemFileDirPaths {
-		pemFilePaths, err := getDirFilePaths(pemFileDirPath, pemFilePathFilter)
+		pemFilePaths, err := getDirFilePaths(pemFileDirPath, pemFilePathFilter, false)
 		if err != nil {
 			return nil, err
 		}
