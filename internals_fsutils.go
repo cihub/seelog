@@ -8,20 +8,20 @@ import (
 	"sync"
 )
 
-type CannotOpenFileError struct {
+type cannotOpenFileError struct {
 	baseError
 }
 
-func newCannotOpenFileError(fname string) *CannotOpenFileError {
-	return &CannotOpenFileError{baseError{message: "Cannot open file: " + fname}}
+func newCannotOpenFileError(fname string) *cannotOpenFileError {
+	return &cannotOpenFileError{baseError{message: "Cannot open file: " + fname}}
 }
 
-type NotDirectoryError struct {
+type notDirectoryError struct {
 	baseError
 }
 
-func newNotDirectoryError(dname string) *NotDirectoryError {
-	return &NotDirectoryError{baseError{message: dname + " is not directory"}}
+func newNotDirectoryError(dname string) *notDirectoryError {
+	return &notDirectoryError{baseError{message: dname + " is not directory"}}
 }
 
 // fileFilter is a filtering creterion function for '*os.File'.
@@ -206,9 +206,9 @@ const (
 	maxDirNumberReadAsync = 1e3
 )
 
-// getFilesByDirectoryAsync runs async reading directories 'dirPaths' and inserts pairs
+// getOpenFilesByDirectoryAsync runs async reading directories 'dirPaths' and inserts pairs
 // in map 'filesInDirMap': Key - directory name, value - *os.File slice.
-func getFilesByDirectoryAsync(
+func getOpenFilesByDirectoryAsync(
 	dirPaths []string,
 	fFilter fileFilter,
 	filesInDirMap map[string][]*os.File,
