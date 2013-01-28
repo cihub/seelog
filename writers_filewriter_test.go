@@ -226,7 +226,7 @@ func (this *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTestCa
 		}
 
 		if !found {
-			this.t.Errorf("Expected file: %v doesn't exist. Got %s\n", expected, exAbs)
+			this.t.Errorf("Expected file: %s doesn't exist. Got %v\n", exAbs, files)
 		}
 	}
 }
