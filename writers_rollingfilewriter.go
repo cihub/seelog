@@ -234,7 +234,15 @@ func (rollfileWriter *rollingFileWriter) getNextRollName() (string, error) {
 }
 
 func (rollfileWriter *rollingFileWriter) getRolls() (map[int]string, error) {
-	files, err := getDirFilePaths(rollfileWriter.fileDir, nil, true)
+	var dir string
+
+	if len(rollfileWriter.fileDir) == 0 {
+		dir = "."
+	} else {
+		dir = rollfileWriter.fileDir
+	}
+
+	files, err := getDirFilePaths(dir, nil, true)
 
 	if err != nil {
 		return map[int]string{}, err
