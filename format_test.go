@@ -150,8 +150,8 @@ func TestFormats(t *testing.T) {
 		msg := form.Format(test.input, test.inputLogLevel, context)
 
 		if err == nil && msg != test.expectedOutput {
-			t.Errorf("Input: %s \nInput LL: %s\n* Expected: %s \n* Got: %s\n", test.input,
-				test.inputLogLevel, test.expectedOutput, msg)
+			t.Errorf("Format: %s \nInput: %s \nInput LL: %s\n* Expected: %s \n* Got: %s\n", 
+				test.formatString, test.input,	test.inputLogLevel, test.expectedOutput, msg)
 		}
 	}
 }
