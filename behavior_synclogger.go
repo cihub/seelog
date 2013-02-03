@@ -52,9 +52,13 @@ func (cLogger *syncLogger) innerLog(
 }
 
 func (syncLogger *syncLogger) Close() {
-	syncLogger.config.RootDispatcher.Close()
+	if !syncLogger.closed {
+		syncLogger.config.RootDispatcher.Close()
+	}
 }
 
 func (syncLogger *syncLogger) Flush() {
-	syncLogger.config.RootDispatcher.Flush()
+	if !syncLogger.closed {
+		syncLogger.config.RootDispatcher.Flush()
+	}
 }

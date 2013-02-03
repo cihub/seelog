@@ -50,7 +50,7 @@ func TestfilterDispatcher_Pass(t *testing.T) {
 
 func TestfilterDispatcher_Deny(t *testing.T) {
 	writer, _ := newBytesVerifier(t)
-	filter, err := newFilterDispatcher(Defaultformatter, []interface{}{writer})
+	filter, err := newFilterDispatcher(defaultformatter, []interface{}{writer})
 	if err != nil {
 		t.Error(err)
 		return

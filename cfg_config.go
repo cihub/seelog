@@ -69,7 +69,7 @@ func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerIn
 		return nil, err
 	}
 
-	dispatcher, err := newSplitDispatcher(Defaultformatter, []interface{}{output})
+	dispatcher, err := newSplitDispatcher(defaultformatter, []interface{}{output})
 	if err != nil {
 		return nil, err
 	}

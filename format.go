@@ -34,22 +34,29 @@ import (
 	"unicode/utf8"
 )
 
+// VerbSymbol is a special symbol used in config files to mark special format aliases.
 const (
 	VerbSymbol         = '%'
-	VerbSymbolString   = "%"
-	VerbParameterStart = '('
-	VerbParameterEnd   = ')'
+)
+const (
+	verbSymbolString   = "%"
+	verbParameterStart = '('
+	verbParameterEnd   = ')'
+)
+
+// These are the time and date formats that are used when %Date or %Time format aliases are used.
+const (
 	DateDefaultFormat  = "2006-01-02"
 	TimeFormat         = "15:04:05"
 )
 
-var Defaultformatter *formatter
+var defaultformatter *formatter
 
 func init() {
 	var err error
-	Defaultformatter, err = newFormatter("%Ns [%Level] %Msg%n")
+	defaultformatter, err = newFormatter("%Ns [%Level] %Msg%n")
 	if err != nil {
-		fmt.Println("Error during Defaultformatter creation: " + err.Error())
+		fmt.Println("Error during defaultformatter creation: " + err.Error())
 	}
 }
 
@@ -112,12 +119,12 @@ func (formatter *formatter) buildVerbFuncs() error {
 
 		isEndOfStr := i == len(formatter.fmtStringOriginal)-1
 		if isEndOfStr {
-			return errors.New(fmt.Sprintf("Format error: %v - last symbol", VerbSymbolString))
+			return errors.New(fmt.Sprintf("Format error: %v - last symbol", verbSymbolString))
 		}
 
 		isDoubledVerbSymbol := formatter.fmtStringOriginal[i+1] == VerbSymbol
 		if isDoubledVerbSymbol {
-			fmtString += VerbSymbolString
+			fmtString += verbSymbolString
 			i++
 			continue
 		}
@@ -139,7 +146,7 @@ func (formatter *formatter) buildVerbFuncs() error {
 func (formatter *formatter) extractVerbFunc(index int) (verbFunc, int, error) {
 	letterSequence := formatter.extractLetterSequence(index)
 	if len(letterSequence) == 0 {
-		return nil, 0, errors.New(fmt.Sprintf("Format error: lack of verb after %v. At %v", VerbSymbolString, index))
+		return nil, 0, errors.New(fmt.Sprintf("Format error: lack of verb after %v. At %v", verbSymbolString, index))
 	}
 
 	function, verbLength, ok := formatter.findVerbFunc(letterSequence)
@@ -212,11 +219,11 @@ func (formatter *formatter) findVerbFuncParametrized(letters string, lettersStar
 }
 
 func (formatter *formatter) findparameter(startIndex int) (string, int, bool) {
-	if len(formatter.fmtStringOriginal) == startIndex || formatter.fmtStringOriginal[startIndex] != VerbParameterStart {
+	if len(formatter.fmtStringOriginal) == startIndex || formatter.fmtStringOriginal[startIndex] != verbParameterStart {
 		return "", 0, false
 	}
 
-	endIndex := strings.Index(formatter.fmtStringOriginal[startIndex:], string(VerbParameterEnd)) + startIndex
+	endIndex := strings.Index(formatter.fmtStringOriginal[startIndex:], string(verbParameterEnd)) + startIndex
 	if endIndex == -1 {
 		return "", 0, false
 	}

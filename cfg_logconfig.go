@@ -35,12 +35,12 @@ const (
 	asyncLooploggerTypeFromString
 	asyncTimerloggerTypeFromString
 	adaptiveLoggerTypeFromString
-	DefaultloggerTypeFromString = asyncLooploggerTypeFromString
+	defaultloggerTypeFromString = asyncLooploggerTypeFromString
 )
 
 const (
 	syncloggerTypeFromStringStr       = "sync"
-	AsyncloggerTypeFromStringStr      = "asyncloop"
+	asyncloggerTypeFromStringStr      = "asyncloop"
 	asyncTimerloggerTypeFromStringStr = "asynctimer"
 	adaptiveLoggerTypeFromStringStr   = "adaptive"
 )
@@ -59,7 +59,7 @@ type adaptiveLoggerData struct {
 
 var loggerTypeToStringRepresentations = map[loggerTypeFromString]string{
 	syncloggerTypeFromString:       syncloggerTypeFromStringStr,
-	asyncLooploggerTypeFromString:  AsyncloggerTypeFromStringStr,
+	asyncLooploggerTypeFromString:  asyncloggerTypeFromStringStr,
 	asyncTimerloggerTypeFromString: asyncTimerloggerTypeFromStringStr,
 	adaptiveLoggerTypeFromString:   adaptiveLoggerTypeFromStringStr,
 }

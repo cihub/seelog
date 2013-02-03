@@ -22,7 +22,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Package seelog implements logging functionality with flexible dispatching, filtering, and formatting.
 package seelog
 
 import (
@@ -37,8 +36,13 @@ const (
 	loggerFuncCallDepth = 3
 )
 
+// Current is the logger used in all package level convenience funcs like 'Trace', 'Debug', 'Flush', etc.
 var Current LoggerInterface
+
+// Default logger that is created from an empty config: "<seelog/>". It is not closed by a ReplaceLogger call.
 var Default LoggerInterface
+
+// Disabled logger that doesn't produce any output in any circumstances. It is neither closed nor flushed by a ReplaceLogger call.
 var Disabled LoggerInterface
 
 var pkgOperationsMutex *sync.Mutex
@@ -110,7 +114,23 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 	return nil, errors.New("Invalid config log type/data")
 }
 
-// UseLogger uses the given logger for all Trace/Debug/... funcs.
+// UseLogger sets the 'Current' package level logger variable to the specified value. 
+// This variable is used in all Trace/Debug/... package level convenience funcs.
+// 
+// Example: 
+//
+// after calling 
+//     seelog.UseLogger(somelogger)
+// the following:
+//     seelog.Debug("abc")
+// will be equal to
+//     somelogger.Debug("abc")
+//
+// IMPORTANT: UseLogger do NOT close the previous logger (only flushes it). So if
+// you constantly use it to replace loggers and don't close them in other code, you'll
+// end up having memory leaks.
+//
+// To safely replace loggers, use ReplaceLogger.
 func UseLogger(logger LoggerInterface) error {
 	if logger == nil {
 		return errors.New("Logger can not be nil")
@@ -130,7 +150,24 @@ func UseLogger(logger LoggerInterface) error {
 }
 
 // ReplaceLogger acts as UseLogger but the logger that was previously
-// used would be disposed (except Default and Disabled loggers).
+// used is disposed (except Default and Disabled loggers).
+//
+// Example:
+//     import log "github.com/cihub/seelog"
+//     
+//     func main() {
+//         logger, err := log.LoggerFromConfigAsFile("seelog.xml")
+//     
+//         if err != nil {
+//             panic(err)
+//         }
+//     
+//         log.ReplaceLogger(logger)
+//         defer log.Flush()
+//     
+//         log.Trace("test") 
+//         log.Debugf("var = %s", "abc")
+//     }
 func ReplaceLogger(logger LoggerInterface) error {
 	if logger == nil {
 		return errors.New("Logger can not be nil")
@@ -244,8 +281,13 @@ func Critical(v ...interface{}) {
 	Current.criticalWithCallDepth(staticFuncCallDepth, newLogMessage(v))
 }
 
-// Flush performs all cleanup, flushes all queued messages, etc. Call this method when your app
-// is going to shut down not to lose any log messages.
+// Flush immediately processes all currently queued messages and all currently buffered messages.
+// It is a blocking call which returns only after the queue is empty and all the buffers are empty. 
+//
+// If Flush is called for a synchronous logger (type='sync'), it only flushes buffers (e.g. '<buffered>' receivers)
+// , because there is no queue.
+//
+// Call this method when your app is going to shut down not to lose any log messages.
 func Flush() {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
