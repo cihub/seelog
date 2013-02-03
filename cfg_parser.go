@@ -415,7 +415,7 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 	logTypeStr, loggerTypeExists := config.attributes[LoggerTypeFromStringAttr]
 
 	if !loggerTypeExists {
-		return DefaultloggerTypeFromString, nil, nil
+		return defaultloggerTypeFromString, nil, nil
 	}
 
 	logType, found := getLoggerTypeFromString(logTypeStr)
@@ -489,7 +489,7 @@ func getOutputsTree(config *xmlNode, formats map[string]*formatter) (dispatcherI
 			return nil, err
 		}
 
-		formatter, err := getCurrentFormat(outputsNode, Defaultformatter, formats)
+		formatter, err := getCurrentFormat(outputsNode, defaultformatter, formats)
 		if err != nil {
 			return nil, err
 		}
@@ -509,7 +509,7 @@ func getOutputsTree(config *xmlNode, formats map[string]*formatter) (dispatcherI
 	if err != nil {
 		return nil, err
 	}
-	return newSplitDispatcher(Defaultformatter, []interface{}{console})
+	return newSplitDispatcher(defaultformatter, []interface{}{console})
 }
 
 func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (*formatter, error) {
