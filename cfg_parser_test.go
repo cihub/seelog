@@ -68,7 +68,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testfileWriter, _ := newFileWriter(testLogFileName)
-		testHeadSplitter, _ := newSplitDispatcher(Defaultformatter, []interface{}{testfileWriter})
+		testHeadSplitter, _ := newSplitDispatcher(defaultformatter, []interface{}{testfileWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -88,8 +88,8 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testfileWriter, _ = newFileWriter(testLogFileName)
-		testFilter, _ := newFilterDispatcher(Defaultformatter, []interface{}{testfileWriter}, DebugLvl, InfoLvl, CriticalLvl)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testFilter})
+		testFilter, _ := newFilterDispatcher(defaultformatter, []interface{}{testfileWriter}, DebugLvl, InfoLvl, CriticalLvl)
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testFilter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -106,7 +106,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ := newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -139,7 +139,7 @@ func getParserTests() []parserTest {
 			"up",
 			[]string{"cacdp1", "cacdp2"},
 		)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testSmtpWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSmtpWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -152,7 +152,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -165,7 +165,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -178,7 +178,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncTimerloggerTypeFromString
 		testExpected.LoggerData = asyncTimerLoggerData{101}
 		testExpected.RootDispatcher = testHeadSplitter
@@ -197,7 +197,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ := newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testrollingFileWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -214,7 +214,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "log.zip", 100, 5)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testrollingFileWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -231,7 +231,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test.zip", 100, 5)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testrollingFileWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -248,7 +248,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testrollingFileWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -265,7 +265,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ = newRollingFileWriterDate(testLogFileName, rollingArchiveNone, "", "2006-01-02T15:04:05Z07:00")
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testrollingFileWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -285,7 +285,7 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testrollingFileWriter, _ = newRollingFileWriterDate(testLogFileName, rollingArchiveNone, "", "2006-01-02T15:04:05Z07:00")
 		testbufferedWriter, _ := newBufferedWriter(testrollingFileWriter, 100500, 100)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testbufferedWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testbufferedWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -310,9 +310,9 @@ func getParserTests() []parserTest {
 		testExpected.Exceptions = nil
 		testfileWriter1, _ := newFileWriter(testLogFileName2)
 		testfileWriter2, _ := newFileWriter(testLogFileName3)
-		testInnerSplitter, _ := newSplitDispatcher(Defaultformatter, []interface{}{testfileWriter1, testfileWriter2})
+		testInnerSplitter, _ := newSplitDispatcher(defaultformatter, []interface{}{testfileWriter1, testfileWriter2})
 		testfileWriter, _ = newFileWriter(testLogFileName1)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testfileWriter, testInnerSplitter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testfileWriter, testInnerSplitter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -373,7 +373,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(WarnLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -384,7 +384,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, TraceLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -395,7 +395,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(InfoLvl, ErrorLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -406,7 +406,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newOffConstraints()
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -422,7 +422,7 @@ func getParserTests() []parserTest {
 			DebugLvl, InfoLvl, CriticalLvl})
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -519,7 +519,7 @@ func getParserTests() []parserTest {
 		exception, _ := newLogLevelException("Test*", "someFile.go", listConstraint)
 		testExpected.Exceptions = []*logLevelException{exception}
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -539,7 +539,7 @@ func getParserTests() []parserTest {
 		exception, _ = newLogLevelException("*", "testfile.go", minMaxConstraint)
 		testExpected.Exceptions = []*logLevelException{exception}
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -558,7 +558,7 @@ func getParserTests() []parserTest {
 		exception, _ = newLogLevelException("*", "testfile.go", minMaxConstraint)
 		testExpected.Exceptions = []*logLevelException{exception}
 		testconsoleWriter, _ = newConsoleWriter()
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testconsoleWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -614,7 +614,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testConnWriter := newConnWriter("tcp", ":8888", false)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testConnWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testConnWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -630,7 +630,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testConnWriter = newConnWriter("tcp", ":8888", true)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{testConnWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testConnWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -826,7 +826,7 @@ func getParserTests() []parserTest {
 		testbufferedWriter, _ = newBufferedWriter(testrollingFileWriter, 100500, 100)
 		testFormat, _ = newFormatter("%Level %Msg %File 123")
 		formattedWriter, _ = newFormattedWriter(testbufferedWriter, testFormat)
-		testHeadSplitter, _ = newSplitDispatcher(Defaultformatter, []interface{}{formattedWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{formattedWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})

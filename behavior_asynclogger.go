@@ -31,6 +31,7 @@ import (
 	"errors"
 )
 
+// MaxQueueSize is the critical number of messages in the queue that result in an immediate flush.
 const (
 	MaxQueueSize = 10000
 )
