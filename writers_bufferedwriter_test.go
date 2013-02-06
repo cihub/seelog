@@ -41,10 +41,6 @@ func TestChunkWriteOnFilling(t *testing.T) {
 	bufferedWriter.Write(bytes)
 	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-
-	// bufferedWriter writes another chunk not at once but in goroutine (with nondetermined delay)
-	// so we wait some time
-	writer.MustNotExpectWithDelay(0.1 * 1e8)
 }
 
 func TestFlushByTimePeriod(t *testing.T) {
@@ -60,7 +56,6 @@ func TestFlushByTimePeriod(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		writer.ExpectBytes(bytes)
 		bufferedWriter.Write(bytes)
-		writer.MustNotExpectWithDelay(0.2 * 1e8)
 	}
 }
 
@@ -80,5 +75,4 @@ func TestBigMessageMustPassMemoryBuffer(t *testing.T) {
 
 	writer.ExpectBytes(bytes)
 	bufferedWriter.Write(bytes)
-	writer.MustNotExpectWithDelay(0.1 * 1e8)
 }

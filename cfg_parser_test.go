@@ -564,7 +564,7 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
 
 		testName = "Predefined formats"
-		formatId := PredefinedPrefix + "xml-debug-short"
+		formatId := predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
 			<outputs formatid="` + formatId + `">
@@ -583,7 +583,7 @@ func getParserTests() []parserTest {
 
 		testName = "Predefined formats redefine"
 		testLogFileName = getTestFileName(testName, "")
-		formatId = PredefinedPrefix + "xml-debug-short"
+		formatId = predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
 			<outputs formatid="` + formatId + `">

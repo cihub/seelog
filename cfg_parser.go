@@ -35,57 +35,57 @@ import (
 
 // Names of elements of seelog config.
 const (
-	SeelogConfigId                  = "seelog"
-	OutputsId                       = "outputs"
-	FormatsId                       = "formats"
-	MinLevelId                      = "minlevel"
-	MaxLevelId                      = "maxlevel"
-	LevelsId                        = "levels"
-	ExceptionsId                    = "exceptions"
-	ExceptionId                     = "exception"
-	FuncPatternId                   = "funcpattern"
-	FilePatternId                   = "filepattern"
-	FormatId                        = "format"
-	FormatAttrId                    = "format"
-	FormatKeyAttrId                 = "id"
-	OutputFormatId                  = "formatid"
-	PathId                          = "path"
-	FileWriterId                    = "file"
-	SmtpWriterId                    = "smtp"
-	SenderAddressId                 = "senderaddress"
-	SenderNameId                    = "sendername"
-	RecipientId                     = "recipient"
-	AddressId                       = "address"
-	HostNameId                      = "hostname"
-	HostPortId                      = "hostport"
-	UserNameId                      = "username"
-	UserPassId                      = "password"
-	CACertDirPathId                 = "cacertdirpath"
-	SpliterDispatcherId             = "splitter"
-	ConsoleWriterId                 = "console"
-	FilterDispatcherId              = "filter"
-	FilterLevelsAttrId              = "levels"
-	RollingFileWriterId             = "rollingfile"
-	RollingFileTypeAttr             = "type"
-	RollingFilePathAttr             = "filename"
-	RollingFileMaxSizeAttr          = "maxsize"
-	RollingFileMaxRollsAttr         = "maxrolls"
-	RollingFileDataPatternAttr      = "datepattern"
-	RollingFileArchiveAttr          = "archivetype"
-	RollingFileArchivePathAttr      = "archivepath"
+	seelogConfigId                  = "seelog"
+	outputsId                       = "outputs"
+	formatsId                       = "formats"
+	minLevelId                      = "minlevel"
+	maxLevelId                      = "maxlevel"
+	levelsId                        = "levels"
+	exceptionsId                    = "exceptions"
+	exceptionId                     = "exception"
+	funcPatternId                   = "funcpattern"
+	filePatternId                   = "filepattern"
+	formatId                        = "format"
+	formatAttrId                    = "format"
+	formatKeyAttrId                 = "id"
+	outputFormatId                  = "formatid"
+	pathId                          = "path"
+	fileWriterId                    = "file"
+	smtpWriterId                    = "smtp"
+	senderaddressId                 = "senderaddress"
+	senderNameId                    = "sendername"
+	recipientId                     = "recipient"
+	addressId                       = "address"
+	hostNameId                      = "hostname"
+	hostPortId                      = "hostport"
+	userNameId                      = "username"
+	userPassId                      = "password"
+	cACertDirpathId                 = "cacertdirpath"
+	splitterDispatcherId            = "splitter"
+	consoleWriterId                 = "console"
+	filterDispatcherId              = "filter"
+	filterLevelsAttrId              = "levels"
+	rollingfileWriterId             = "rollingfile"
+	rollingFileTypeAttr             = "type"
+	rollingFilePathAttr             = "filename"
+	rollingFileMaxSizeAttr          = "maxsize"
+	rollingFileMaxRollsAttr         = "maxrolls"
+	rollingFileDataPatternAttr      = "datepattern"
+	rollingFileArchiveAttr          = "archivetype"
+	rollingFileArchivePathAttr      = "archivepath"
 	bufferedWriterId                = "buffered"
-	BufferedSizeAttr                = "size"
-	BufferedFlushPeriodAttr         = "flushperiod"
-	LoggerTypeFromStringAttr        = "type"
-	AsyncLoggerIntervalAttr         = "asyncinterval"
-	AdaptLoggerMinIntervalAttr      = "mininterval"
-	AdaptLoggerMaxIntervalAttr      = "maxinterval"
-	AdaptLoggerCriticalMsgCountAttr = "critmsgcount"
-	PredefinedPrefix                = "std:"
-	ConnWriterId                    = "conn"
-	ConnWriterAddrAttr              = "addr"
-	ConnWriterNetAttr               = "net"
-	ConnWriterReconnectOnMsgAttr    = "reconnectonmsg"
+	bufferedSizeAttr                = "size"
+	bufferedFlushPeriodAttr         = "flushperiod"
+	loggerTypeFromStringAttr        = "type"
+	asyncLoggerIntervalAttr         = "asyncinterval"
+	adaptLoggerMinIntervalAttr      = "mininterval"
+	adaptLoggerMaxIntervalAttr      = "maxinterval"
+	adaptLoggerCriticalMsgCountAttr = "critmsgcount"
+	predefinedPrefix                = "std:"
+	connWriterId                    = "conn"
+	connWriterAddrAttr              = "addr"
+	connWriterNetAttr               = "net"
+	connWriterReconnectOnMsgAttr    = "reconnectonmsg"
 )
 
 type elementMapEntry struct {
@@ -97,14 +97,14 @@ var predefinedFormats map[string]*formatter
 
 func init() {
 	elementMap = map[string]elementMapEntry{
-		FileWriterId:        {createfileWriter},
-		SpliterDispatcherId: {createSplitter},
-		FilterDispatcherId:  {createFilter},
-		ConsoleWriterId:     {createConsoleWriter},
-		RollingFileWriterId: {createRollingFileWriter},
+		fileWriterId:        {createfileWriter},
+		splitterDispatcherId: {createSplitter},
+		filterDispatcherId:  {createFilter},
+		consoleWriterId:     {createConsoleWriter},
+		rollingfileWriterId: {createRollingFileWriter},
 		bufferedWriterId:    {createbufferedWriter},
-		SmtpWriterId:        {createSmtpWriter},
-		ConnWriterId:        {createconnWriter},
+		smtpWriterId:        {createSmtpWriter},
+		connWriterId:        {createconnWriter},
 	}
 
 	err := fillPredefinedFormats()
@@ -138,7 +138,7 @@ func fillPredefinedFormats() error {
 			return err
 		}
 
-		predefinedFormats[PredefinedPrefix+formatKey] = formatter
+		predefinedFormats[predefinedPrefix+formatKey] = formatter
 	}
 
 	return nil
@@ -153,26 +153,26 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 		return nil, err
 	}
 
-	if config.name != SeelogConfigId {
-		return nil, errors.New("Root xml tag must be '" + SeelogConfigId + "'")
+	if config.name != seelogConfigId {
+		return nil, errors.New("Root xml tag must be '" + seelogConfigId + "'")
 	}
 
 	err = checkUnexpectedAttribute(
 		config,
-		MinLevelId,
-		MaxLevelId,
-		LevelsId,
-		LoggerTypeFromStringAttr,
-		AsyncLoggerIntervalAttr,
-		AdaptLoggerMinIntervalAttr,
-		AdaptLoggerMaxIntervalAttr,
-		AdaptLoggerCriticalMsgCountAttr,
+		minLevelId,
+		maxLevelId,
+		levelsId,
+		loggerTypeFromStringAttr,
+		asyncLoggerIntervalAttr,
+		adaptLoggerMinIntervalAttr,
+		adaptLoggerMaxIntervalAttr,
+		adaptLoggerCriticalMsgCountAttr,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	err = checkExpectedElements(config, optionalElement(OutputsId), optionalElement(FormatsId), optionalElement(ExceptionsId))
+	err = checkExpectedElements(config, optionalElement(outputsId), optionalElement(formatsId), optionalElement(exceptionsId))
 	if err != nil {
 		return nil, err
 	}
@@ -216,13 +216,13 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 }
 
 func getConstraints(node *xmlNode) (logLevelConstraints, error) {
-	minLevelStr, isMinLevel := node.attributes[MinLevelId]
-	maxLevelStr, isMaxLevel := node.attributes[MaxLevelId]
-	levelsStr, isLevels := node.attributes[LevelsId]
+	minLevelStr, isMinLevel := node.attributes[minLevelId]
+	maxLevelStr, isMaxLevel := node.attributes[maxLevelId]
+	levelsStr, isLevels := node.attributes[levelsId]
 
 	if isLevels && (isMinLevel && isMaxLevel) {
-		return nil, errors.New("For level declaration use '" + LevelsId + "'' OR '" + MinLevelId +
-			"', '" + MaxLevelId + "'")
+		return nil, errors.New("For level declaration use '" + levelsId + "'' OR '" + minLevelId +
+			"', '" + maxLevelId + "'")
 	}
 
 	offString := LogLevel(Off).String()
@@ -246,7 +246,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		found := true
 		minLevel, found = LogLevelFromString(minLevelStr)
 		if !found {
-			return nil, errors.New("Declared " + MinLevelId + " not found: " + minLevelStr)
+			return nil, errors.New("Declared " + minLevelId + " not found: " + minLevelStr)
 		}
 	}
 
@@ -255,7 +255,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		found := true
 		maxLevel, found = LogLevelFromString(maxLevelStr)
 		if !found {
-			return nil, errors.New("Declared " + MaxLevelId + " not found: " + maxLevelStr)
+			return nil, errors.New("Declared " + maxLevelId + " not found: " + maxLevelStr)
 		}
 	}
 
@@ -282,7 +282,7 @@ func getExceptions(config *xmlNode) ([]*logLevelException, error) {
 
 	var exceptionsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == ExceptionsId {
+		if child.name == exceptionsId {
 			exceptionsNode = child
 			break
 		}
@@ -303,22 +303,22 @@ func getExceptions(config *xmlNode) ([]*logLevelException, error) {
 	}
 
 	for _, exceptionNode := range exceptionsNode.children {
-		if exceptionNode.name != ExceptionId {
+		if exceptionNode.name != exceptionId {
 			return nil, errors.New("Incorrect nested element in exceptions section: " + exceptionNode.name)
 		}
 
-		err := checkUnexpectedAttribute(exceptionNode, MinLevelId, MaxLevelId, LevelsId, FuncPatternId, FilePatternId)
+		err := checkUnexpectedAttribute(exceptionNode, minLevelId, maxLevelId, levelsId, funcPatternId, filePatternId)
 		if err != nil {
 			return nil, err
 		}
 
 		constraints, err := getConstraints(exceptionNode)
 		if err != nil {
-			return nil, errors.New("Incorrect " + ExceptionsId + " node: " + err.Error())
+			return nil, errors.New("Incorrect " + exceptionsId + " node: " + err.Error())
 		}
 
-		funcPattern, isFuncPattern := exceptionNode.attributes[FuncPatternId]
-		filePattern, isFilePattern := exceptionNode.attributes[FilePatternId]
+		funcPattern, isFuncPattern := exceptionNode.attributes[funcPatternId]
+		filePattern, isFilePattern := exceptionNode.attributes[filePatternId]
 		if !isFuncPattern {
 			funcPattern = "*"
 		}
@@ -361,7 +361,7 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 
 	var formatsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == FormatsId {
+		if child.name == formatsId {
 			formatsNode = child
 			break
 		}
@@ -382,22 +382,22 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 	}
 
 	for _, formatNode := range formatsNode.children {
-		if formatNode.name != FormatId {
-			return nil, errors.New("Incorrect nested element in " + FormatsId + " section: " + formatNode.name)
+		if formatNode.name != formatId {
+			return nil, errors.New("Incorrect nested element in " + formatsId + " section: " + formatNode.name)
 		}
 
-		err := checkUnexpectedAttribute(formatNode, FormatKeyAttrId, FormatId)
+		err := checkUnexpectedAttribute(formatNode, formatKeyAttrId, formatId)
 		if err != nil {
 			return nil, err
 		}
 
-		id, isId := formatNode.attributes[FormatKeyAttrId]
-		formatStr, isFormat := formatNode.attributes[FormatAttrId]
+		id, isId := formatNode.attributes[formatKeyAttrId]
+		formatStr, isFormat := formatNode.attributes[formatAttrId]
 		if !isId {
-			return nil, errors.New("Format has no '" + FormatKeyAttrId + "' attribute")
+			return nil, errors.New("Format has no '" + formatKeyAttrId + "' attribute")
 		}
 		if !isFormat {
-			return nil, errors.New("Format[" + id + "] has no '" + FormatAttrId + "' attribute")
+			return nil, errors.New("Format[" + id + "] has no '" + formatAttrId + "' attribute")
 		}
 
 		formatter, err := newFormatter(formatStr)
@@ -412,7 +412,7 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 }
 
 func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString, logData interface{}, err error) {
-	logTypeStr, loggerTypeExists := config.attributes[LoggerTypeFromStringAttr]
+	logTypeStr, loggerTypeExists := config.attributes[loggerTypeFromStringAttr]
 
 	if !loggerTypeExists {
 		return defaultloggerTypeFromString, nil, nil
@@ -425,9 +425,9 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 	}
 
 	if logType == asyncTimerloggerTypeFromString {
-		intervalStr, intervalExists := config.attributes[AsyncLoggerIntervalAttr]
+		intervalStr, intervalExists := config.attributes[asyncLoggerIntervalAttr]
 		if !intervalExists {
-			return 0, nil, newMissingArgumentError(config.name, AsyncLoggerIntervalAttr)
+			return 0, nil, newMissingArgumentError(config.name, asyncLoggerIntervalAttr)
 		}
 
 		interval, err := strconv.ParseUint(intervalStr, 10, 32)
@@ -439,9 +439,9 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 	} else if logType == adaptiveLoggerTypeFromString {
 
 		// Min interval
-		minIntStr, minIntExists := config.attributes[AdaptLoggerMinIntervalAttr]
+		minIntStr, minIntExists := config.attributes[adaptLoggerMinIntervalAttr]
 		if !minIntExists {
-			return 0, nil, newMissingArgumentError(config.name, AdaptLoggerMinIntervalAttr)
+			return 0, nil, newMissingArgumentError(config.name, adaptLoggerMinIntervalAttr)
 		}
 		minInterval, err := strconv.ParseUint(minIntStr, 10, 32)
 		if err != nil {
@@ -449,9 +449,9 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 		}
 
 		// Max interval
-		maxIntStr, maxIntExists := config.attributes[AdaptLoggerMaxIntervalAttr]
+		maxIntStr, maxIntExists := config.attributes[adaptLoggerMaxIntervalAttr]
 		if !maxIntExists {
-			return 0, nil, newMissingArgumentError(config.name, AdaptLoggerMaxIntervalAttr)
+			return 0, nil, newMissingArgumentError(config.name, adaptLoggerMaxIntervalAttr)
 		}
 		maxInterval, err := strconv.ParseUint(maxIntStr, 10, 32)
 		if err != nil {
@@ -459,9 +459,9 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 		}
 
 		// Critical msg count
-		criticalMsgCountStr, criticalMsgCountExists := config.attributes[AdaptLoggerCriticalMsgCountAttr]
+		criticalMsgCountStr, criticalMsgCountExists := config.attributes[adaptLoggerCriticalMsgCountAttr]
 		if !criticalMsgCountExists {
-			return 0, nil, newMissingArgumentError(config.name, AdaptLoggerCriticalMsgCountAttr)
+			return 0, nil, newMissingArgumentError(config.name, adaptLoggerCriticalMsgCountAttr)
 		}
 		criticalMsgCount, err := strconv.ParseUint(criticalMsgCountStr, 10, 32)
 		if err != nil {
@@ -477,14 +477,14 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 func getOutputsTree(config *xmlNode, formats map[string]*formatter) (dispatcherInterface, error) {
 	var outputsNode *xmlNode
 	for _, child := range config.children {
-		if child.name == OutputsId {
+		if child.name == outputsId {
 			outputsNode = child
 			break
 		}
 	}
 
 	if outputsNode != nil {
-		err := checkUnexpectedAttribute(outputsNode, OutputFormatId)
+		err := checkUnexpectedAttribute(outputsNode, outputFormatId)
 		if err != nil {
 			return nil, err
 		}
@@ -513,7 +513,7 @@ func getOutputsTree(config *xmlNode, formats map[string]*formatter) (dispatcherI
 }
 
 func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (*formatter, error) {
-	formatId, isFormatId := node.attributes[OutputFormatId]
+	formatId, isFormatId := node.attributes[outputFormatId]
 	if !isFormatId {
 		return formatFromParent, nil
 	}
@@ -553,7 +553,7 @@ func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*
 }
 
 func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId)
+	err := checkUnexpectedAttribute(node, outputFormatId)
 	if err != nil {
 		return nil, err
 	}
@@ -576,7 +576,7 @@ func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[stri
 }
 
 func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, FilterLevelsAttrId)
+	err := checkUnexpectedAttribute(node, outputFormatId, filterLevelsAttrId)
 	if err != nil {
 		return nil, err
 	}
@@ -590,9 +590,9 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 		return nil, err
 	}
 
-	levelsStr, isLevels := node.attributes[FilterLevelsAttrId]
+	levelsStr, isLevels := node.attributes[filterLevelsAttrId]
 	if !isLevels {
-		return nil, newMissingArgumentError(node.name, FilterLevelsAttrId)
+		return nil, newMissingArgumentError(node.name, filterLevelsAttrId)
 	}
 
 	levels, err := parseLevels(levelsStr)
@@ -609,7 +609,7 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 }
 
 func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, PathId)
+	err := checkUnexpectedAttribute(node, outputFormatId, pathId)
 	if err != nil {
 		return nil, err
 	}
@@ -623,9 +623,9 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, err
 	}
 
-	path, isPath := node.attributes[PathId]
+	path, isPath := node.attributes[pathId]
 	if !isPath {
-		return nil, newMissingArgumentError(node.name, PathId)
+		return nil, newMissingArgumentError(node.name, pathId)
 	}
 
 	fileWriter, err := newFileWriter(path)
@@ -638,7 +638,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 // Creates new SMTP writer if encountered in the config file.
 func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, SenderAddressId, SenderNameId, HostNameId, HostPortId, UserNameId, UserPassId)
+	err := checkUnexpectedAttribute(node, outputFormatId, senderaddressId, senderNameId, hostNameId, hostPortId, userNameId, userPassId)
 	if err != nil {
 		return nil, err
 	}
@@ -650,13 +650,13 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	if err != nil {
 		return nil, err
 	}
-	senderAddress, ok := node.attributes[SenderAddressId]
+	senderAddress, ok := node.attributes[senderaddressId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, SenderAddressId)
+		return nil, newMissingArgumentError(node.name, senderaddressId)
 	}
-	senderName, ok := node.attributes[SenderNameId]
+	senderName, ok := node.attributes[senderNameId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, SenderNameId)
+		return nil, newMissingArgumentError(node.name, senderNameId)
 	}
 	// Process child nodes scanning for recipient email addresses and/or CA certificate paths.
 	var recipientAddresses []string
@@ -664,31 +664,31 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	for _, childNode := range node.children {
 		switch childNode.name {
 		// Extract recipient address from child nodes.
-		case RecipientId:
-			address, ok := childNode.attributes[AddressId]
+		case recipientId:
+			address, ok := childNode.attributes[addressId]
 			if !ok {
-				return nil, newMissingArgumentError(childNode.name, AddressId)
+				return nil, newMissingArgumentError(childNode.name, addressId)
 			}
 			recipientAddresses = append(recipientAddresses, address)
 		// Extract CA certificate file path from child nodes.
-		case CACertDirPathId:
-			path, ok := childNode.attributes[PathId]
+		case cACertDirpathId:
+			path, ok := childNode.attributes[pathId]
 			if !ok {
-				return nil, newMissingArgumentError(childNode.name, PathId)
+				return nil, newMissingArgumentError(childNode.name, pathId)
 			}
 			caCertDirPaths = append(caCertDirPaths, path)
 		default:
 			return nil, newUnexpectedChildElementError(childNode.name)
 		}
 	}
-	hostName, ok := node.attributes[HostNameId]
+	hostName, ok := node.attributes[hostNameId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, HostNameId)
+		return nil, newMissingArgumentError(node.name, hostNameId)
 	}
 
-	hostPort, ok := node.attributes[HostPortId]
+	hostPort, ok := node.attributes[hostPortId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, HostPortId)
+		return nil, newMissingArgumentError(node.name, hostPortId)
 	}
 
 	// Check if the string can really be converted into int.
@@ -696,14 +696,14 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, errors.New("Invalid host port number")
 	}
 
-	userName, ok := node.attributes[UserNameId]
+	userName, ok := node.attributes[userNameId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, UserNameId)
+		return nil, newMissingArgumentError(node.name, userNameId)
 	}
 
-	userPass, ok := node.attributes[UserPassId]
+	userPass, ok := node.attributes[userPassId]
 	if !ok {
-		return nil, newMissingArgumentError(node.name, UserPassId)
+		return nil, newMissingArgumentError(node.name, userPassId)
 	}
 
 	smtpWriter := newSmtpWriter(
@@ -721,7 +721,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 }
 
 func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId)
+	err := checkUnexpectedAttribute(node, outputFormatId)
 	if err != nil {
 		return nil, err
 	}
@@ -748,7 +748,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, nodeCannotHaveChildrenError
 	}
 
-	err := checkUnexpectedAttribute(node, OutputFormatId, ConnWriterAddrAttr, ConnWriterNetAttr, ConnWriterReconnectOnMsgAttr)
+	err := checkUnexpectedAttribute(node, outputFormatId, connWriterAddrAttr, connWriterNetAttr, connWriterReconnectOnMsgAttr)
 	if err != nil {
 		return nil, err
 	}
@@ -758,25 +758,25 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, err
 	}
 
-	addr, isAddr := node.attributes[ConnWriterAddrAttr]
+	addr, isAddr := node.attributes[connWriterAddrAttr]
 	if !isAddr {
-		return nil, newMissingArgumentError(node.name, ConnWriterAddrAttr)
+		return nil, newMissingArgumentError(node.name, connWriterAddrAttr)
 	}
 
-	net, isNet := node.attributes[ConnWriterNetAttr]
+	net, isNet := node.attributes[connWriterNetAttr]
 	if !isNet {
-		return nil, newMissingArgumentError(node.name, ConnWriterNetAttr)
+		return nil, newMissingArgumentError(node.name, connWriterNetAttr)
 	}
 
 	reconnectOnMsg := false
-	reconnectOnMsgStr, isReconnectOnMsgStr := node.attributes[ConnWriterReconnectOnMsgAttr]
+	reconnectOnMsgStr, isReconnectOnMsgStr := node.attributes[connWriterReconnectOnMsgAttr]
 	if isReconnectOnMsgStr {
 		if reconnectOnMsgStr == "true" {
 			reconnectOnMsg = true
 		} else if reconnectOnMsgStr == "false" {
 			reconnectOnMsg = false
 		} else {
-			return nil, errors.New("Node '" + node.name + "' has incorrect '" + ConnWriterReconnectOnMsgAttr + "' attribute value")
+			return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterReconnectOnMsgAttr + "' attribute value")
 		}
 	}
 
@@ -790,9 +790,9 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		return nil, nodeCannotHaveChildrenError
 	}
 
-	rollingTypeStr, isRollingType := node.attributes[RollingFileTypeAttr]
+	rollingTypeStr, isRollingType := node.attributes[rollingFileTypeAttr]
 	if !isRollingType {
-		return nil, newMissingArgumentError(node.name, RollingFileTypeAttr)
+		return nil, newMissingArgumentError(node.name, rollingFileTypeAttr)
 	}
 
 	rollingType, ok := rollingTypeFromString(rollingTypeStr)
@@ -805,12 +805,12 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		return nil, err
 	}
 
-	path, isPath := node.attributes[RollingFilePathAttr]
+	path, isPath := node.attributes[rollingFilePathAttr]
 	if !isPath {
-		return nil, newMissingArgumentError(node.name, RollingFilePathAttr)
+		return nil, newMissingArgumentError(node.name, rollingFilePathAttr)
 	}
 
-	rollingArchiveStr, archiveAttrExists := node.attributes[RollingFileArchiveAttr]
+	rollingArchiveStr, archiveAttrExists := node.attributes[rollingFileArchiveAttr]
 
 	var rArchiveType rollingArchiveTypes
 	var rArchivePath string
@@ -826,7 +826,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		if rArchiveType == rollingArchiveNone {
 			rArchivePath = ""
 		} else {
-			rArchivePath, ok = node.attributes[RollingFileArchivePathAttr]
+			rArchivePath, ok = node.attributes[rollingFileArchivePathAttr]
 			if !ok {
 				rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
 				if !ok {
@@ -838,16 +838,16 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	}
 
 	if rollingType == rollingTypeSize {
-		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr,
-			RollingFileMaxSizeAttr, RollingFileMaxRollsAttr, RollingFileArchiveAttr,
-			RollingFileArchivePathAttr)
+		err := checkUnexpectedAttribute(node, outputFormatId, rollingFileTypeAttr, rollingFilePathAttr,
+			rollingFileMaxSizeAttr, rollingFileMaxRollsAttr, rollingFileArchiveAttr,
+			rollingFileArchivePathAttr)
 		if err != nil {
 			return nil, err
 		}
 
-		maxSizeStr, isMaxSize := node.attributes[RollingFileMaxSizeAttr]
+		maxSizeStr, isMaxSize := node.attributes[rollingFileMaxSizeAttr]
 		if !isMaxSize {
-			return nil, newMissingArgumentError(node.name, RollingFileMaxSizeAttr)
+			return nil, newMissingArgumentError(node.name, rollingFileMaxSizeAttr)
 		}
 
 		maxSize, err := strconv.ParseInt(maxSizeStr, 10, 64)
@@ -855,9 +855,9 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, err
 		}
 
-		maxRollsStr, isMaxRolls := node.attributes[RollingFileMaxRollsAttr]
+		maxRollsStr, isMaxRolls := node.attributes[rollingFileMaxRollsAttr]
 		if !isMaxRolls {
-			return nil, newMissingArgumentError(node.name, RollingFileMaxRollsAttr)
+			return nil, newMissingArgumentError(node.name, rollingFileMaxRollsAttr)
 		}
 
 		maxRolls, err := strconv.Atoi(maxRollsStr)
@@ -873,16 +873,16 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		return newFormattedWriter(rollingWriter, currentFormat)
 
 	} else if rollingType == rollingTypeDate {
-		err := checkUnexpectedAttribute(node, OutputFormatId, RollingFileTypeAttr, RollingFilePathAttr,
-			RollingFileDataPatternAttr, RollingFileArchiveAttr,
-			RollingFileArchivePathAttr)
+		err := checkUnexpectedAttribute(node, outputFormatId, rollingFileTypeAttr, rollingFilePathAttr,
+			rollingFileDataPatternAttr, rollingFileArchiveAttr,
+			rollingFileArchivePathAttr)
 		if err != nil {
 			return nil, err
 		}
 
-		dataPattern, isDataPattern := node.attributes[RollingFileDataPatternAttr]
+		dataPattern, isDataPattern := node.attributes[rollingFileDataPatternAttr]
 		if !isDataPattern {
-			return nil, newMissingArgumentError(node.name, RollingFileDataPatternAttr)
+			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
 		rollingWriter, err := newRollingFileWriterDate(path, rArchiveType, rArchivePath, dataPattern)
@@ -897,7 +897,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 }
 
 func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, OutputFormatId, BufferedSizeAttr, BufferedFlushPeriodAttr)
+	err := checkUnexpectedAttribute(node, outputFormatId, bufferedSizeAttr, bufferedFlushPeriodAttr)
 	if err != nil {
 		return nil, err
 	}
@@ -911,9 +911,9 @@ func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats ma
 		return nil, err
 	}
 
-	sizeStr, isSize := node.attributes[BufferedSizeAttr]
+	sizeStr, isSize := node.attributes[bufferedSizeAttr]
 	if !isSize {
-		return nil, newMissingArgumentError(node.name, BufferedSizeAttr)
+		return nil, newMissingArgumentError(node.name, bufferedSizeAttr)
 	}
 
 	size, err := strconv.Atoi(sizeStr)
@@ -922,7 +922,7 @@ func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats ma
 	}
 
 	flushPeriod := 0
-	flushPeriodStr, isFlushPeriod := node.attributes[BufferedFlushPeriodAttr]
+	flushPeriodStr, isFlushPeriod := node.attributes[bufferedFlushPeriodAttr]
 	if isFlushPeriod {
 		flushPeriod, err = strconv.Atoi(flushPeriodStr)
 		if err != nil {

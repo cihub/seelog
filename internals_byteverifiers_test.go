@@ -28,7 +28,6 @@ import (
 	"errors"
 	"strconv"
 	"testing"
-	"time"
 )
 
 // bytesVerifier is a byte receiver which is used for correct input testing. 
@@ -100,17 +99,6 @@ func (verifier *bytesVerifier) MustNotExpect() {
 
 		verifier.testEnv.Errorf(errorText)
 	}
-}
-
-func (verifier *bytesVerifier) MustNotExpectWithDelay(delay time.Duration) {
-	c := make(chan int)
-	time.AfterFunc(delay, func() {
-		verifier.MustNotExpect()
-
-		c <- 1
-	})
-
-	<-c
 }
 
 func (verifier *bytesVerifier) Close() error {
