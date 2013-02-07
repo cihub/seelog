@@ -192,6 +192,12 @@ func (rollfileWriter *rollingFileWriter) createFile() error {
 		return rollfileWriter.createFileAndFolderIfNeeded()
 	}
 
+	e := rollfileWriter.Close()
+
+	if e != nil {
+		return e
+	}
+
 	if rollfileWriter.rollingType == rollingTypeSize {
 
 		nextRollName, err := rollfileWriter.getNextRollName()
@@ -498,7 +504,13 @@ func (rollfileWriter *rollingFileWriter) String() string {
 
 func (rollfileWriter *rollingFileWriter) Close() error {
 	if rollfileWriter.innerWriter != nil {
-		return rollfileWriter.innerWriter.Close()
+		e := rollfileWriter.innerWriter.Close()
+
+		if e != nil {
+			return e
+		}
+
+		rollfileWriter.innerWriter = nil
 	}
 	return nil
 }

@@ -20,7 +20,7 @@ Features
   * Rolling log writer (Logging with rotation)
   * SMTP writer
   * Others... (See [Wiki](https://github.com/cihub/seelog/wiki))
-* (In progress) Log message wrappers (JSON, XML, etc.)
+* Log message wrappers (JSON, XML, etc.)
 * Global variables and functions for easy usage in standalone apps
 * Functions for flexible usage in libraries
 
