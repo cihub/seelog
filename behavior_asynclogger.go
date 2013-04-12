@@ -46,7 +46,6 @@ type msgQueueItem struct {
 type asyncLogger struct {
 	commonLogger
 	msgQueue         *list.List
-	queueMutex       *sync.Mutex
 	queueHasElements *sync.Cond
 }
 
@@ -55,7 +54,6 @@ func newAsyncLogger(config *logConfig) *asyncLogger {
 	asnLogger := new(asyncLogger)
 
 	asnLogger.msgQueue = list.New()
-	asnLogger.queueMutex = new(sync.Mutex)
 	asnLogger.queueHasElements = sync.NewCond(new(sync.Mutex))
 
 	asnLogger.commonLogger = *newCommonLogger(config, asnLogger)
@@ -72,8 +70,8 @@ func (asnLogger *asyncLogger) innerLog(
 }
 
 func (asnLogger *asyncLogger) Close() {
-	asnLogger.queueMutex.Lock()
-	defer asnLogger.queueMutex.Unlock()
+	asnLogger.m.Lock()
+	defer asnLogger.m.Unlock()
 
 	if !asnLogger.closed {
 		asnLogger.flushQueue()
@@ -84,8 +82,8 @@ func (asnLogger *asyncLogger) Close() {
 }
 
 func (asnLogger *asyncLogger) Flush() {
-	asnLogger.queueMutex.Lock()
-	defer asnLogger.queueMutex.Unlock()
+	asnLogger.m.Lock()
+	defer asnLogger.m.Unlock()
 
 	if !asnLogger.closed {
 		asnLogger.flushQueue()
@@ -115,8 +113,6 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 	level LogLevel,
 	context logContextInterface,
 	message fmt.Stringer) {
-	asnLogger.queueMutex.Lock()
-	defer asnLogger.queueMutex.Unlock()
 
 	if !asnLogger.closed {
 		if asnLogger.msgQueue.Len() >= MaxQueueSize {
