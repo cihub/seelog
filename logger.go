@@ -26,6 +26,7 @@ package seelog
 
 import (
 	"fmt"
+	"sync"
 )
 
 func reportInternalError(err error) {
@@ -74,6 +75,7 @@ type commonLogger struct {
 	config       *logConfig          // Config used for logging
 	contextCache allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
 	closed       bool                // 'true' when all writers are closed, all data is flushed, logger is unusable.
+	m            sync.Mutex          // Mutex for main operations
 	unusedLevels []bool
 	innerLogger  innerLoggerInterface
 }
@@ -194,6 +196,8 @@ func (cLogger *commonLogger) log(
 	level LogLevel,
 	message fmt.Stringer,
 	stackCallDepth int) {
+	cLogger.m.Lock()
+	defer cLogger.m.Unlock()
 
 	if cLogger.Closed() {
 		return
