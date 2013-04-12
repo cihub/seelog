@@ -162,6 +162,10 @@ L:
 	return resFiles, nil
 }
 
+func isRegular(m os.FileMode) bool {
+    return m&os.ModeType == 0
+}
+
 // getDirFilePaths return full paths of the files located in the directory.
 // Remark: Ignores files for which fileFilter returns false.
 func getDirFilePaths(dirPath string, fpFilter filePathFilter, pathIsName bool) ([]string, error) {
@@ -205,7 +209,7 @@ L:
 		// THINK: Maybe, use async running.
 		for _, fi := range fis {
 			// NB: Should work on every Windows and non-Windows OS.
-			if fi.Mode().IsRegular() {
+			if isRegular(fi.Mode()) {
 				if pathIsName {
 					fp = fi.Name()
 				} else {
