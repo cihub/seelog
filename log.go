@@ -114,12 +114,12 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 	return nil, errors.New("Invalid config log type/data")
 }
 
-// UseLogger sets the 'Current' package level logger variable to the specified value. 
+// UseLogger sets the 'Current' package level logger variable to the specified value.
 // This variable is used in all Trace/Debug/... package level convenience funcs.
-// 
-// Example: 
 //
-// after calling 
+// Example:
+//
+// after calling
 //     seelog.UseLogger(somelogger)
 // the following:
 //     seelog.Debug("abc")
@@ -154,18 +154,18 @@ func UseLogger(logger LoggerInterface) error {
 //
 // Example:
 //     import log "github.com/cihub/seelog"
-//     
+//
 //     func main() {
 //         logger, err := log.LoggerFromConfigAsFile("seelog.xml")
-//     
+//
 //         if err != nil {
 //             panic(err)
 //         }
-//     
+//
 //         log.ReplaceLogger(logger)
 //         defer log.Flush()
-//     
-//         log.Trace("test") 
+//
+//         log.Trace("test")
 //         log.Debugf("var = %s", "abc")
 //     }
 func ReplaceLogger(logger LoggerInterface) error {
@@ -219,24 +219,30 @@ func Infof(format string, params ...interface{}) {
 }
 
 // Warnf formats message according to format specifier and writes to default logger with log level = Warn
-func Warnf(format string, params ...interface{}) {
+func Warnf(format string, params ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.warnWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
+	message := newLogFormattedMessage(format, params)
+	Current.warnWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Errorf formats message according to format specifier and writes to default logger with log level = Error
-func Errorf(format string, params ...interface{}) {
+func Errorf(format string, params ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.errorWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
+	message := newLogFormattedMessage(format, params)
+	Current.errorWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Criticalf formats message according to format specifier and writes to default logger with log level = Critical
-func Criticalf(format string, params ...interface{}) {
+func Criticalf(format string, params ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.criticalWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
+	message := newLogFormattedMessage(format, params)
+	Current.criticalWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Trace formats message using the default formats for its operands and writes to default logger with log level = Trace
@@ -261,28 +267,34 @@ func Info(v ...interface{}) {
 }
 
 // Warn formats message using the default formats for its operands and writes to default logger with log level = Warn
-func Warn(v ...interface{}) {
+func Warn(v ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.warnWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+	message := newLogMessage(v)
+	Current.warnWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Error formats message using the default formats for its operands and writes to default logger with log level = Error
-func Error(v ...interface{}) {
+func Error(v ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.errorWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+	message := newLogMessage(v)
+	Current.errorWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Critical formats message using the default formats for its operands and writes to default logger with log level = Critical
-func Critical(v ...interface{}) {
+func Critical(v ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
-	Current.criticalWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+	message := newLogMessage(v)
+	Current.criticalWithCallDepth(staticFuncCallDepth, message)
+	return errors.New(message.String())
 }
 
 // Flush immediately processes all currently queued messages and all currently buffered messages.
-// It is a blocking call which returns only after the queue is empty and all the buffers are empty. 
+// It is a blocking call which returns only after the queue is empty and all the buffers are empty.
 //
 // If Flush is called for a synchronous logger (type='sync'), it only flushes buffers (e.g. '<buffered>' receivers)
 // , because there is no queue.
