@@ -84,6 +84,7 @@ var verbFuncs = map[string]verbFunc{
 
 var verbFuncsParametrized = map[string]verbFuncCreator{
 	"Date": createDateTimeVerbFunc,
+	"EscM": createANSIEscapeFunc,
 }
 
 // formatter is used to write messages in a specific format, inserting such additional data
@@ -256,6 +257,7 @@ func (formatter *formatter) String() string {
 
 const (
 	wrongLogLevel = "WRONG_LOGLEVEL"
+	wrongEscapeCode = "WRONG_ESCAPE"
 )
 
 var levelToString = map[LogLevel]string{
@@ -373,5 +375,15 @@ func createDateTimeVerbFunc(dateTimeFormat string) verbFunc {
 	}
 	return func(message string, level LogLevel, context logContextInterface) interface{} {
 		return time.Now().Format(format)
+	}
+}
+
+func createANSIEscapeFunc(escapeCodeString string) verbFunc {
+	return func(message string, level LogLevel, context logContextInterface) interface{} {
+		if len(escapeCodeString) == 0 {
+			return wrongEscapeCode
+		}
+
+		return fmt.Sprintf("%c[%sm", 0x1B, escapeCodeString)
 	}
 }
