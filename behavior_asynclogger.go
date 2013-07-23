@@ -74,7 +74,7 @@ func (asnLogger *asyncLogger) Close() {
 	defer asnLogger.m.Unlock()
 
 	if !asnLogger.closed {
-		asnLogger.flushQueue()
+		asnLogger.flushQueue(true)
 		asnLogger.config.RootDispatcher.Flush()
 		asnLogger.config.RootDispatcher.Close()
 		asnLogger.queueHasElements.Broadcast()
@@ -86,14 +86,17 @@ func (asnLogger *asyncLogger) Flush() {
 	defer asnLogger.m.Unlock()
 
 	if !asnLogger.closed {
-		asnLogger.flushQueue()
+		asnLogger.flushQueue(true)
 		asnLogger.config.RootDispatcher.Flush()
 	}
 }
 
-func (asnLogger *asyncLogger) flushQueue() {
-	asnLogger.queueHasElements.L.Lock()
-	defer asnLogger.queueHasElements.L.Unlock()
+func (asnLogger *asyncLogger) flushQueue(lockNeeded bool) {
+
+	if lockNeeded {
+		asnLogger.queueHasElements.L.Lock()
+		defer asnLogger.queueHasElements.L.Unlock()
+	}
 
 	for asnLogger.msgQueue.Len() > 0 {
 		asnLogger.processQueueElement()
@@ -120,7 +123,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 
 		if asnLogger.msgQueue.Len() >= MaxQueueSize {
 			fmt.Printf("Seelog queue overflow: more than %v messages in the queue. Flushing.\n", MaxQueueSize)
-			asnLogger.flushQueue()
+			asnLogger.flushQueue(false)
 		}
 
 		queueItem := msgQueueItem{level, context, message}
