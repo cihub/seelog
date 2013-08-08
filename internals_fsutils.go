@@ -163,7 +163,7 @@ L:
 }
 
 func isRegular(m os.FileMode) bool {
-    return m&os.ModeType == 0
+	return m&os.ModeType == 0
 }
 
 // getDirFilePaths return full paths of the files located in the directory.
