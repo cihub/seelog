@@ -97,14 +97,14 @@ var predefinedFormats map[string]*formatter
 
 func init() {
 	elementMap = map[string]elementMapEntry{
-		fileWriterId:        {createfileWriter},
+		fileWriterId:         {createfileWriter},
 		splitterDispatcherId: {createSplitter},
-		filterDispatcherId:  {createFilter},
-		consoleWriterId:     {createConsoleWriter},
-		rollingfileWriterId: {createRollingFileWriter},
-		bufferedWriterId:    {createbufferedWriter},
-		smtpWriterId:        {createSmtpWriter},
-		connWriterId:        {createconnWriter},
+		filterDispatcherId:   {createFilter},
+		consoleWriterId:      {createConsoleWriter},
+		rollingfileWriterId:  {createRollingFileWriter},
+		bufferedWriterId:     {createbufferedWriter},
+		smtpWriterId:         {createSmtpWriter},
+		connWriterId:         {createconnWriter},
 	}
 
 	err := fillPredefinedFormats()

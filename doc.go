@@ -1,16 +1,16 @@
 // Copyright (c) 2013 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,8 +22,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/* 
-Package seelog implements logging functionality with flexible dispatching, filtering, and formatting. 
+/*
+Package seelog implements logging functionality with flexible dispatching, filtering, and formatting.
 
 Creation
 
@@ -43,13 +43,13 @@ Example:
       defer logger.Flush()
       ... use logger ...
   }
-The "defer" line is important because if you are using asynchronous logger behavior, without this line you may end up losing some 
-messages when you close your application because they are processed in another non-blocking goroutine. To avoid that you 
+The "defer" line is important because if you are using asynchronous logger behavior, without this line you may end up losing some
+messages when you close your application because they are processed in another non-blocking goroutine. To avoid that you
 explicitly defer flushing all messages before closing.
 
 Usage
 
-Logger created using one of the LoggerFrom* funcs can be used directly by calling one of the main log funcs. 
+Logger created using one of the LoggerFrom* funcs can be used directly by calling one of the main log funcs.
 Example:
   import log "github.com/cihub/seelog"
 
@@ -63,7 +63,7 @@ Example:
       logger.Debugf("var = %s", "abc")
   }
 
-Having loggers as variables is convenient if you are writing your own package with internal logging or if you have 
+Having loggers as variables is convenient if you are writing your own package with internal logging or if you have
 several loggers with different options.
 But for most standalone apps it is more convenient to use package level funcs and vars. There is a package level
 var 'Current' made for it. You can replace it with another logger using 'ReplaceLogger' and then use package level funcs:
@@ -85,7 +85,7 @@ Last lines
 do the same as
       log.Current.Trace("test")
       log.Current.Debugf("var = %s", "abc")
-In this example the 'Current' logger was replaced using a 'ReplaceLogger' call and became equal to 'logger' variable created from config. 
+In this example the 'Current' logger was replaced using a 'ReplaceLogger' call and became equal to 'logger' variable created from config.
 This way you are able to use package level funcs instead of passing the logger variable.
 
 Configuration

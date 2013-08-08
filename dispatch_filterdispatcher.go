@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,14 +28,14 @@ import (
 	"fmt"
 )
 
-// A filterDispatcher writes the given message to underlying receivers only if message log level 
+// A filterDispatcher writes the given message to underlying receivers only if message log level
 // is in the allowed list.
 type filterDispatcher struct {
 	*dispatcher
 	allowList map[LogLevel]bool
 }
 
-// newFilterDispatcher creates a new filterDispatcher using a list of allowed levels. 
+// newFilterDispatcher creates a new filterDispatcher using a list of allowed levels.
 func newFilterDispatcher(formatter *formatter, receivers []interface{}, allowList ...LogLevel) (*filterDispatcher, error) {
 	disp, err := createDispatcher(formatter, receivers)
 	if err != nil {
