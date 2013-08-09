@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -97,7 +97,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 
 // Returns context of the function with placed "skip" stack frames of the caller
 // If skip == 0 then behaves like currentContext
-// Context is returned in any situation, even if error occurs. But, if an error 
+// Context is returned in any situation, even if error occurs. But, if an error
 // occurs, the returned context is an error context, which contains no paths
 // or names, but states that they can't be extracted.
 func specificContext(skip int) (logContextInterface, error) {

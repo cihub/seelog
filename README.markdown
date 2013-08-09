@@ -51,7 +51,7 @@ go get -u github.com/cihub/seelog
 Documentation
 ---------------
 
-Seelog has github wiki pages which contain a detailed Seelog reference: https://github.com/cihub/seelog/wiki
+Seelog has github wiki pages, which contain detailed how-tos references: https://github.com/cihub/seelog/wiki
 
 Examples
 ---------------

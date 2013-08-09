@@ -1,16 +1,16 @@
 // Copyright (c) 2012 - Cloud Instruments Co., Ltd.
-// 
+//
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met: 
-// 
+// modification, are permitted provided that the following conditions are met:
+//
 // 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer. 
+//    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution. 
-// 
+//    and/or other materials provided with the distribution.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,7 +36,7 @@ import (
 
 // VerbSymbol is a special symbol used in config files to mark special format aliases.
 const (
-	VerbSymbol         = '%'
+	VerbSymbol = '%'
 )
 const (
 	verbSymbolString   = "%"
@@ -46,8 +46,8 @@ const (
 
 // These are the time and date formats that are used when %Date or %Time format aliases are used.
 const (
-	DateDefaultFormat  = "2006-01-02"
-	TimeFormat         = "15:04:05"
+	DateDefaultFormat = "2006-01-02"
+	TimeFormat        = "15:04:05"
 )
 
 var defaultformatter *formatter
@@ -64,22 +64,22 @@ type verbFunc func(message string, level LogLevel, context logContextInterface) 
 type verbFuncCreator func(param string) verbFunc
 
 var verbFuncs = map[string]verbFunc{
-	"Level":    verbLevel,
-	"Lev":      verbLev,
-	"LEVEL":    verbLEVEL,
-	"LEV":      verbLEV,
-	"l":        verbl,
-	"Msg":      verbMsg,
-	"FullPath": verbFullPath,
-	"File":     verbFile,
-	"RelFile":  verbRelFile,
-	"Func":     verbFunction,
-	"FuncShort":verbFunctionShort,
-	"Line":     verbLine,
-	"Time":     verbTime,
-	"Ns":       verbNs,
-	"n":        verbn,
-	"t":        verbt,
+	"Level":     verbLevel,
+	"Lev":       verbLev,
+	"LEVEL":     verbLEVEL,
+	"LEV":       verbLEV,
+	"l":         verbl,
+	"Msg":       verbMsg,
+	"FullPath":  verbFullPath,
+	"File":      verbFile,
+	"RelFile":   verbRelFile,
+	"Func":      verbFunction,
+	"FuncShort": verbFunctionShort,
+	"Line":      verbLine,
+	"Time":      verbTime,
+	"Ns":        verbNs,
+	"n":         verbn,
+	"t":         verbt,
 }
 
 var verbFuncsParametrized = map[string]verbFuncCreator{
@@ -256,7 +256,7 @@ func (formatter *formatter) String() string {
 //=====================================================
 
 const (
-	wrongLogLevel = "WRONG_LOGLEVEL"
+	wrongLogLevel   = "WRONG_LOGLEVEL"
 	wrongEscapeCode = "WRONG_ESCAPE"
 )
 
@@ -345,7 +345,7 @@ func verbFunction(message string, level LogLevel, context logContextInterface) i
 func verbFunctionShort(message string, level LogLevel, context logContextInterface) interface{} {
 	f := context.Func()
 	spl := strings.Split(f, ".")
-	return spl[len(spl) - 1]
+	return spl[len(spl)-1]
 }
 
 func verbLine(message string, level LogLevel, context logContextInterface) interface{} {
