@@ -51,11 +51,10 @@ func simplefileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, error
 }
 
 //===============================================================
-// ???
 type fileWriterTestCase struct {
 	files       []string
 	fileName    string
-	rollingType rollingTypes
+	rollingType rollingType
 	fileSize    int64
 	maxRolls    int
 	datePattern string

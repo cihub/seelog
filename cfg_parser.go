@@ -812,7 +812,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 	rollingArchiveStr, archiveAttrExists := node.attributes[rollingFileArchiveAttr]
 
-	var rArchiveType rollingArchiveTypes
+	var rArchiveType rollingArchiveType
 	var rArchivePath string
 	if !archiveAttrExists {
 		rArchiveType = rollingArchiveNone
@@ -855,14 +855,13 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, err
 		}
 
+		maxRolls := 0
 		maxRollsStr, isMaxRolls := node.attributes[rollingFileMaxRollsAttr]
-		if !isMaxRolls {
-			return nil, newMissingArgumentError(node.name, rollingFileMaxRollsAttr)
-		}
-
-		maxRolls, err := strconv.Atoi(maxRollsStr)
-		if err != nil {
-			return nil, err
+		if isMaxRolls {
+			maxRolls, err = strconv.Atoi(maxRollsStr)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		rollingWriter, err := newRollingFileWriterSize(path, rArchiveType, rArchivePath, maxSize, maxRolls)
@@ -872,12 +871,21 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 		return newFormattedWriter(rollingWriter, currentFormat)
 
-	} else if rollingType == rollingTypeDate {
+	} else if rollingType == rollingTypeTime {
 		err := checkUnexpectedAttribute(node, outputFormatId, rollingFileTypeAttr, rollingFilePathAttr,
-			rollingFileDataPatternAttr, rollingFileArchiveAttr,
+			rollingFileDataPatternAttr, rollingFileArchiveAttr, rollingFileMaxRollsAttr,
 			rollingFileArchivePathAttr)
 		if err != nil {
 			return nil, err
+		}
+
+		maxRolls := 0
+		maxRollsStr, isMaxRolls := node.attributes[rollingFileMaxRollsAttr]
+		if isMaxRolls {
+			maxRolls, err = strconv.Atoi(maxRollsStr)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		dataPattern, isDataPattern := node.attributes[rollingFileDataPatternAttr]
@@ -885,7 +893,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
-		rollingWriter, err := newRollingFileWriterDate(path, rArchiveType, rArchivePath, dataPattern)
+		rollingWriter, err := newRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny)
 		if err != nil {
 			return nil, err
 		}
