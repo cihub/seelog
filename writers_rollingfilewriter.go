@@ -166,7 +166,7 @@ func (rw *rollingFileWriter) getSortedLogHistory() ([]string, error) {
 	pref := rw.originalFileName + rollingLogHistoryDelimiter
 	var validFileTails []string
 	for _, file := range files {
-		if strings.HasPrefix(file, pref) {
+		if file != rw.fileName && strings.HasPrefix(file, pref) {
 			tail := rw.getFileTail(file)
 			if rw.self.isFileTailValid(tail) {
 				validFileTails = append(validFileTails, tail)
@@ -315,14 +315,13 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		//     * file.log.4
 		//     * file.log.5
 		//     * file.log.6
-		//     * file.log
 		//
 		// For date roller it may look like this:
 		//     * ...
 		//     * file.log.11.Aug.13
 		//     * file.log.15.Aug.13
 		//     * file.log.16.Aug.13
-		//     * file.log
+		// Sorted log history does NOT include current file.
 		history, err := rw.getSortedLogHistory()
 		if err != nil {
 			return 0, err
@@ -335,13 +334,7 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		//     * file.log.5
 		//     * file.log.6
 		//     n file.log.7  <---- RENAMED (from file.log)
-		//
-		// For date roller it may look like this:
-		//     * ...
-		//     * file.log.11.Aug.13
-		//     * file.log.15.Aug.13
-		//     * file.log.16.Aug.13
-		//     n file.log.21.Aug.13 <---- RENAMED (from file.log)
+		// Time rollers that doesn't modify file names (e.g. Time roller) skip this logic.
 		var newHistoryName string
 		var newTail string
 		if len(history) > 0 {
