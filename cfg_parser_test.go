@@ -264,7 +264,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ := newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily)
+		testrollingFileWriterTime, _ := newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriterTime})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
