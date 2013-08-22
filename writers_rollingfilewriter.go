@@ -334,12 +334,14 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		//     * file.log.5
 		//     * file.log.6
 		//     n file.log.7  <---- RENAMED (from file.log)
-		// Time rollers that doesn't modify file names (e.g. Time roller) skip this logic.
+		// Time rollers that doesn't modify file names (e.g. 'date' roller) skip this logic.
 		var newHistoryName string
 		var newTail string
 		if len(history) > 0 {
+			// Create new tail name using last history file name
 			newTail = rw.self.getNewHistoryFileNameTail(rw.getFileTail(history[len(history)-1]))
 		} else {
+			// Create first tail name
 			newTail = rw.self.getNewHistoryFileNameTail("")
 		}
 
@@ -354,9 +356,12 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 			if err != nil {
 				return 0, err
 			}
-			history = append(history, newHistoryName)
 		}
 
+		// Finally, add the newly added history file to the history archive
+		// and, if after that the archive exceeds the allowed max limit, older rolls
+		// must the removed/archived.
+		history = append(history, newHistoryName)
 		if len(history) > rw.maxRolls {
 			err = rw.deleteOldRolls(history)
 			if err != nil {
@@ -483,7 +488,7 @@ func newRollingFileWriterTime(fpath string, atype rollingArchiveType, apath stri
 }
 
 func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
-	if time.Now().Format(rwt.timePattern) == rwt.fileName {
+	if rwt.originalFileName+rollingLogHistoryDelimiter+time.Now().Format(rwt.timePattern) == rwt.fileName {
 		return false, nil
 	}
 	if rwt.interval == rollingIntervalAny {
