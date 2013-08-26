@@ -264,8 +264,8 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterDate(testLogFileName, rollingArchiveNone, "", "2006-01-02T15:04:05Z07:00")
-		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
+		testrollingFileWriterTime, _ := newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny)
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriterTime})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -283,8 +283,8 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterDate(testLogFileName, rollingArchiveNone, "", "2006-01-02T15:04:05Z07:00")
-		testbufferedWriter, _ := newBufferedWriter(testrollingFileWriter, 100500, 100)
+		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily)
+		testbufferedWriter, _ := newBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testbufferedWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -822,8 +822,8 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterDate(testLogFileName, rollingArchiveNone, "", "2006-01-02T15:04:05Z07:00")
-		testbufferedWriter, _ = newBufferedWriter(testrollingFileWriter, 100500, 100)
+		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily)
+		testbufferedWriter, _ = newBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testFormat, _ = newFormatter("%Level %Msg %File 123")
 		formattedWriter, _ = newFormattedWriter(testbufferedWriter, testFormat)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{formattedWriter})
