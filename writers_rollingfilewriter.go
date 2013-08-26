@@ -195,14 +195,6 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded() error {
 		}
 	}
 
-	if rw.currentFile != nil {
-		err = rw.currentFile.Close()
-
-		if err != nil {
-			return err
-		}
-	}
-
 	rw.fileName = rw.self.getCurrentModifiedFileName(rw.originalFileName)
 	filePath := filepath.Join(rw.currentDirPath, rw.fileName)
 
@@ -309,6 +301,12 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		return 0, err
 	}
 	if nr {
+		// First, close current file.
+		err = rw.currentFile.Close()
+		if err != nil {
+			return 0, err
+		}
+
 		// Current history of all previous log files.
 		// For file roller it may be like this:
 		//     * ...
