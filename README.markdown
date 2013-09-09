@@ -4,6 +4,8 @@ Seelog
 Seelog is a powerful and easy-to-learn logging framework that provides functionality for flexible dispatching, filtering, and formatting log messages.
 It is natively written in the [Go](http://golang.org/) programming language. 
 
+[![Build Status](https://drone.io/github.com/cihub/seelog/status.png)](https://drone.io/github.com/cihub/seelog/latest)
+
 Features
 ------------------
 
