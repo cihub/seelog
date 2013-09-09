@@ -60,6 +60,18 @@ type LoggerInterface interface {
 	Close()
 	Flush()
 	Closed() bool
+
+	// SetAdditionalStackDepth sets the additional number of frames to skip by runtime.Caller
+	// when getting function information needed to print seelog format identifiers such as %Func or %File.
+	//
+	// This func may be used when you wrap seelog funcs and want to print caller info of you own
+	// wrappers instead of seelog func callers. In this case you should set depth = 1. If you then
+	// wrap your wrapper, you should set depth = 2, etc.
+	//
+	// NOTE: Incorrect depth value may lead to errors in runtime.Caller evaluation or incorrect
+	// function/file names in log files. Do not use it if you are not going to wrap seelog funcs.
+	// You may reset the value to default using a SetAdditionalStackDepth(0) call.
+	SetAdditionalStackDepth(depth int) error
 }
 
 // innerLoggerInterface is an internal logging interface
@@ -73,12 +85,13 @@ type allowedContextCache map[string]map[string]map[LogLevel]bool
 
 // commonLogger contains all common data needed for logging and contains methods used to log messages.
 type commonLogger struct {
-	config       *logConfig          // Config used for logging
-	contextCache allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
-	closed       bool                // 'true' when all writers are closed, all data is flushed, logger is unusable.
-	m            sync.Mutex          // Mutex for main operations
-	unusedLevels []bool
-	innerLogger  innerLoggerInterface
+	config        *logConfig          // Config used for logging
+	contextCache  allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
+	closed        bool                // 'true' when all writers are closed, all data is flushed, logger is unusable.
+	m             sync.Mutex          // Mutex for main operations
+	unusedLevels  []bool
+	innerLogger   innerLoggerInterface
+	addStackDepth int // Additional stack depth needed for correct seelog caller context detection
 }
 
 func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) *commonLogger {
@@ -91,6 +104,14 @@ func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) *co
 	cLogger.innerLogger = internalLogger
 
 	return cLogger
+}
+
+func (cLogger *commonLogger) SetAdditionalStackDepth(depth int) error {
+	if depth < 0 {
+		return fmt.Errorf("negative depth: %d", depth)
+	}
+	cLogger.addStackDepth = depth
+	return nil
 }
 
 func (cLogger *commonLogger) Tracef(format string, params ...interface{}) {
@@ -154,27 +175,27 @@ func (cLogger *commonLogger) Critical(v ...interface{}) error {
 }
 
 func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(TraceLvl, message, callDepth)
+	cLogger.log(TraceLvl, message, callDepth+cLogger.addStackDepth)
 }
 
 func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(DebugLvl, message, callDepth)
+	cLogger.log(DebugLvl, message, callDepth+cLogger.addStackDepth)
 }
 
 func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(InfoLvl, message, callDepth)
+	cLogger.log(InfoLvl, message, callDepth+cLogger.addStackDepth)
 }
 
 func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(WarnLvl, message, callDepth)
+	cLogger.log(WarnLvl, message, callDepth+cLogger.addStackDepth)
 }
 
 func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(ErrorLvl, message, callDepth)
+	cLogger.log(ErrorLvl, message, callDepth+cLogger.addStackDepth)
 }
 
 func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(CriticalLvl, message, callDepth)
+	cLogger.log(CriticalLvl, message, callDepth+cLogger.addStackDepth)
 	cLogger.innerLogger.Flush()
 }
 
