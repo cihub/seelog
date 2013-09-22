@@ -33,14 +33,35 @@ import (
 
 var registeredReceivers = make(map[string]reflect.Type)
 
-// RegisterReceiver connects a custom receiver name and the type
-// of the second argument.
+// RegisterReceiver records a custom receiver type, identified by a value
+// of that type (second argument), under the specified name. Registered
+// names can be used in the "name" attribute of <custom> config items.
+//
+// RegisterReceiver takes the type of the receiver argument, without taking
+// the value into the account. So do NOT enter any data to the second argument
+// and only call it like:
+//     RegisterReceiver("somename", &MyReceiverType{})
 //
 // After that, when a '<custom>' config tag with this name is used,
 // a receiver of the specified type would be instantiated. Check
 // CustomReceiver comments for interface details.
+//
+// NOTE 1: RegisterReceiver fails if you attempt to register different types
+// with the same name.
+//
+// NOTE 2: RegisterReceiver registers those receivers that must be used in
+// the configuration files (<custom> items). Basically it is just the way
+// you tell seelog config parser what should it do when it meets a
+// <custom> tag with a specific name and data attributes.
+//
+// But If you are only using seelog as a proxy to an already instantiated
+// CustomReceiver (via LoggerFromCustomReceiver func), you should not call RegisterReceiver.
 func RegisterReceiver(name string, receiver CustomReceiver) {
-	registeredReceivers[name] = reflect.TypeOf(reflect.ValueOf(receiver).Elem().Interface())
+	newType := reflect.TypeOf(reflect.ValueOf(receiver).Elem().Interface())
+	if t, ok := registeredReceivers[name]; ok && t != newType {
+		panic(fmt.Sprintf("duplicate types for %s: %s != %s", name, t, newType))
+	}
+	registeredReceivers[name] = newType
 }
 
 func customReceiverByName(name string) (creceiver CustomReceiver, err error) {
@@ -92,9 +113,9 @@ type CustomReceiver interface {
 	// any other internal seelog error.
 	ReceiveMessage(message string, level LogLevel, context LogContextInterface) error
 
-	// Init is called immediately after your custom receiver is instantiated.
-	// So, if you need to do any startup logic, like open file or allocate any resources,
-	// do it here.
+	// AfterParse is called immediately after your custom receiver is instantiated by
+	// the xml config parser. So, if you need to do any startup logic after config parsing,
+	// like opening file or allocating any resources after the receiver is instantiated, do it here.
 	//
 	// If this func returns a non-nil error, then the loading procedure will fail. E.g.
 	// if you are loading a seelog xml config, the parser would not finish the loading
@@ -102,7 +123,11 @@ type CustomReceiver interface {
 	//
 	// If your custom logger needs some configuration, you can use custom attributes in
 	// your config. Check CustomReceiverInitArgs.XmlCustomAttrs comments.
-	Init(initArgs CustomReceiverInitArgs) error
+	//
+	// IMPORTANT: This func is NOT called when the LoggerFromCustomReceiver func is used
+	// to create seelog proxy logger using the custom receiver. This func is only called when
+	// receiver is instantiated from a config.
+	AfterParse(initArgs CustomReceiverInitArgs) error
 
 	// Flush is called when the custom receiver gets a 'flush' directive from a
 	// parent receiver. If custom receiver implements some kind of buffering or
@@ -140,7 +165,7 @@ func newCustomReceiverDispatcher(formatter *formatter, customReceiverName string
 	if err != nil {
 		return nil, err
 	}
-	err = creceiver.Init(cArgs)
+	err = creceiver.AfterParse(cArgs)
 	if err != nil {
 		return nil, err
 	}
@@ -149,21 +174,43 @@ func newCustomReceiverDispatcher(formatter *formatter, customReceiverName string
 	return disp, nil
 }
 
+// newCustomReceiverDispatcherByValue is basically the same as newCustomReceiverDispatcher, but using
+// a specific CustomReceiver value instead of instantiating a new one by type.
+func newCustomReceiverDispatcherByValue(formatter *formatter, customReceiver CustomReceiver) (*customReceiverDispatcher, error) {
+	if formatter == nil {
+		return nil, errors.New("formatter cannot be nil")
+	}
+
+	disp := &customReceiverDispatcher{formatter, customReceiver, "-", CustomReceiverInitArgs{}}
+
+	return disp, nil
+}
+
+// CustomReceiver implementation. Check CustomReceiver comments.
 func (disp *customReceiverDispatcher) Dispatch(
 	message string,
 	level LogLevel,
 	context LogContextInterface,
 	errorFunc func(err error)) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			errorFunc(fmt.Errorf("Panic in custom receiver '%s'.Dispatch: %s", reflect.TypeOf(disp.innerReceiver), err))
+		}
+	}()
+
 	err := disp.innerReceiver.ReceiveMessage(disp.formatter.Format(message, level, context), level, context)
 	if err != nil {
 		errorFunc(err)
 	}
 }
 
+// CustomReceiver implementation. Check CustomReceiver comments.
 func (disp *customReceiverDispatcher) Flush() {
 	disp.innerReceiver.Flush()
 }
 
+// CustomReceiver implementation. Check CustomReceiver comments.
 func (disp *customReceiverDispatcher) Close() error {
 	disp.innerReceiver.Flush()
 

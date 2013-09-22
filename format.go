@@ -51,12 +51,17 @@ const (
 )
 
 var defaultformatter *formatter
+var msgonlyformatter *formatter
 
 func init() {
 	var err error
 	defaultformatter, err = newFormatter("%Ns [%Level] %Msg%n")
 	if err != nil {
 		fmt.Println("Error during defaultformatter creation: " + err.Error())
+	}
+	msgonlyformatter, err = newFormatter("%Msg")
+	if err != nil {
+		fmt.Println("Error during msgonlyformatter creation: " + err.Error())
 	}
 }
 

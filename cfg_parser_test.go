@@ -48,7 +48,7 @@ func (cr *customTestReceiver) ReceiveMessage(message string, level LogLevel, con
 	return nil
 }
 
-func (cr *customTestReceiver) Init(initArgs CustomReceiverInitArgs) error {
+func (cr *customTestReceiver) AfterParse(initArgs CustomReceiverInitArgs) error {
 	cr.co = new(customTestReceiverOutput)
 	cr.co.initCalled = true
 	cr.co.dataPassed = initArgs.XmlCustomAttrs["test"]
@@ -366,6 +366,24 @@ func getParserTests() []parserTest {
 				"test": "set",
 			},
 		})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testCustomReceiver})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		RegisterReceiver("-", &customTestReceiver{})
+		testName = "Custom receiver 2"
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<custom name="-"/>
+			</outputs>
+		</seelog>
+		`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testCustomReceiver, _ = newCustomReceiverDispatcherByValue(defaultformatter, &customTestReceiver{})
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testCustomReceiver})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter

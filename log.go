@@ -178,7 +178,7 @@ func ReplaceLogger(logger LoggerInterface) error {
 
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(err)
+			reportInternalError(fmt.Errorf("Recovered from panic during ReplaceLogger: %s", err))
 		}
 	}()
 
