@@ -26,12 +26,43 @@ package seelog
 
 import (
 	"fmt"
-	//"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 )
+
+type customTestReceiverOutput struct {
+	initCalled    bool
+	dataPassed    string
+	messageOutput string
+	levelOutput   LogLevel
+	closed        bool
+	flushed       bool
+}
+type customTestReceiver struct{ co *customTestReceiverOutput }
+
+func (cr *customTestReceiver) ReceiveMessage(message string, level LogLevel, context LogContextInterface) error {
+	cr.co.messageOutput = message
+	cr.co.levelOutput = level
+	return nil
+}
+
+func (cr *customTestReceiver) Init(initArgs CustomReceiverInitArgs) error {
+	cr.co = new(customTestReceiverOutput)
+	cr.co.initCalled = true
+	cr.co.dataPassed = initArgs.XmlCustomAttrs["test"]
+	return nil
+}
+
+func (cr *customTestReceiver) Flush() {
+	cr.co.flushed = true
+}
+
+func (cr *customTestReceiver) Close() error {
+	cr.co.closed = true
+	return nil
+}
 
 var re *regexp.Regexp = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
@@ -313,6 +344,56 @@ func getParserTests() []parserTest {
 		testInnerSplitter, _ := newSplitDispatcher(defaultformatter, []interface{}{testfileWriter1, testfileWriter2})
 		testfileWriter, _ = newFileWriter(testLogFileName1)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testfileWriter, testInnerSplitter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		RegisterReceiver("custom-name-1", &customTestReceiver{})
+
+		testName = "Custom receiver 1"
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<custom name="custom-name-1" data-test="set"/>
+			</outputs>
+		</seelog>
+		`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testCustomReceiver, _ := newCustomReceiverDispatcher(defaultformatter, "custom-name-1", CustomReceiverInitArgs{
+			XmlCustomAttrs: map[string]string{
+				"test": "set",
+			},
+		})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testCustomReceiver})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
+
+		testName = "Custom receivers with formats"
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<custom name="custom-name-1" data-test="set1"/>
+				<custom name="custom-name-1" data-test="set2"/>
+				<custom name="custom-name-1" data-test="set3"/>
+			</outputs>
+		</seelog>
+		`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testCustomReceivers := make([]*customReceiverDispatcher, 3)
+		for i := 0; i < 3; i++ {
+			testCustomReceivers[i], _ = newCustomReceiverDispatcher(defaultformatter, "custom-name-1", CustomReceiverInitArgs{
+				XmlCustomAttrs: map[string]string{
+					"test": fmt.Sprintf("set%d", i+1),
+				},
+			})
+		}
+
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testCustomReceivers[0], testCustomReceivers[1], testCustomReceivers[2]})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false})
@@ -836,7 +917,10 @@ func getParserTests() []parserTest {
 	return parserTests
 }
 
-// Temporary solution: compare by string identity.
+// Temporary solution: compare by string identity. Not the best solution in
+// terms of performance, but a valid one in terms of comparison, because
+// every seelog dispatcher/receiver must have a valid String() func
+// that fully represents its internal parameters.
 func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 	if conf1 == nil {
 		return conf2 == nil

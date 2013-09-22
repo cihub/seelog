@@ -37,7 +37,7 @@ import (
 type dispatcherInterface interface {
 	flusherInterface
 	io.Closer
-	Dispatch(message string, level LogLevel, context logContextInterface, errorFunc func(err error))
+	Dispatch(message string, level LogLevel, context LogContextInterface, errorFunc func(err error))
 }
 
 type dispatcher struct {
@@ -89,7 +89,7 @@ func createDispatcher(formatter *formatter, receivers []interface{}) (*dispatche
 func (disp *dispatcher) Dispatch(
 	message string,
 	level LogLevel,
-	context logContextInterface,
+	context LogContextInterface,
 	errorFunc func(err error)) {
 
 	for _, writer := range disp.writers {

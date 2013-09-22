@@ -63,6 +63,9 @@ const (
 	cACertDirpathId                 = "cacertdirpath"
 	splitterDispatcherId            = "splitter"
 	consoleWriterId                 = "console"
+	customReceiverId                = "custom"
+	customNameAttrId                = "name"
+	customNameDataAttrPrefix        = "data-"
 	filterDispatcherId              = "filter"
 	filterLevelsAttrId              = "levels"
 	rollingfileWriterId             = "rollingfile"
@@ -99,6 +102,7 @@ func init() {
 	elementMap = map[string]elementMapEntry{
 		fileWriterId:         {createfileWriter},
 		splitterDispatcherId: {createSplitter},
+		customReceiverId:     {createCustomReceiver},
 		filterDispatcherId:   {createFilter},
 		consoleWriterId:      {createConsoleWriter},
 		rollingfileWriterId:  {createRollingFileWriter},
@@ -573,6 +577,41 @@ func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[stri
 	}
 
 	return newSplitDispatcher(currentFormat, receivers)
+}
+
+func createCustomReceiver(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {
+	dataCustomPrefixes := make(map[string]string)
+	// Expecting only 'formatid', 'name' and 'data-' attrs
+	for attr, attrval := range node.attributes {
+		isExpected := false
+		if attr == outputFormatId ||
+			attr == customNameAttrId {
+			isExpected = true
+		}
+		if strings.HasPrefix(attr, customNameDataAttrPrefix) {
+			dataCustomPrefixes[attr[len(customNameDataAttrPrefix):]] = attrval
+			isExpected = true
+		}
+		if !isExpected {
+			return nil, newUnexpectedAttributeError(node.name, attr)
+		}
+	}
+
+	if node.hasChildren() {
+		return nil, nodeCannotHaveChildrenError
+	}
+	customName, hasCustomName := node.attributes[customNameAttrId]
+	if !hasCustomName {
+		return nil, newMissingArgumentError(node.name, customNameAttrId)
+	}
+	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
+	if err != nil {
+		return nil, err
+	}
+	args := CustomReceiverInitArgs{
+		XmlCustomAttrs: dataCustomPrefixes,
+	}
+	return newCustomReceiverDispatcher(currentFormat, customName, args)
 }
 
 func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter) (interface{}, error) {

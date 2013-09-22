@@ -111,7 +111,7 @@ type LoggerInterface interface {
 
 // innerLoggerInterface is an internal logging interface
 type innerLoggerInterface interface {
-	innerLog(level LogLevel, context logContextInterface, message fmt.Stringer)
+	innerLog(level LogLevel, context LogContextInterface, message fmt.Stringer)
 	Flush()
 }
 
@@ -293,7 +293,7 @@ func (cLogger *commonLogger) log(
 func (cLogger *commonLogger) processLogMsg(
 	level LogLevel,
 	message fmt.Stringer,
-	context logContextInterface) {
+	context LogContextInterface) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -306,7 +306,7 @@ func (cLogger *commonLogger) processLogMsg(
 	}
 }
 
-func (cLogger *commonLogger) isAllowed(level LogLevel, context logContextInterface) bool {
+func (cLogger *commonLogger) isAllowed(level LogLevel, context LogContextInterface) bool {
 	funcMap, ok := cLogger.contextCache[context.FullPath()]
 	if !ok {
 		funcMap = make(map[string]map[LogLevel]bool, 0)
