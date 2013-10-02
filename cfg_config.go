@@ -61,6 +61,40 @@ func LoggerFromConfigAsString(data string) (LoggerInterface, error) {
 	return LoggerFromConfigAsBytes([]byte(data))
 }
 
+// LoggerFromParamConfigAsFile does the same as LoggerFromConfigAsFile, but includes special parser options.
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsFile(fileName string, parserParams *CfgParseParams) (LoggerInterface, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	conf, err := configFromReaderWithConfig(file, parserParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return createLoggerFromConfig(conf)
+}
+
+// LoggerFromParamConfigAsBytes does the same as LoggerFromConfigAsBytes, but includes special parser options.
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsBytes(data []byte, parserParams *CfgParseParams) (LoggerInterface, error) {
+	conf, err := configFromReaderWithConfig(bytes.NewBuffer(data), parserParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return createLoggerFromConfig(conf)
+}
+
+// LoggerFromParamConfigAsString does the same as LoggerFromConfigAsString, but includes special parser options.
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsString(data string, parserParams *CfgParseParams) (LoggerInterface, error) {
+	return LoggerFromParamConfigAsBytes([]byte(data), parserParams)
+}
+
 // LoggerFromWriterWithMinLevel creates a proxy logger that uses io.Writer as the
 // receiver with minimal level = minLevel.
 //
@@ -79,7 +113,7 @@ func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerIn
 		return nil, err
 	}
 
-	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil)
+	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +150,7 @@ func LoggerFromCustomReceiver(receiver CustomReceiver) (LoggerInterface, error) 
 		return nil, err
 	}
 
-	output, err := newCustomReceiverDispatcherByValue(msgonlyformatter, receiver)
+	output, err := newCustomReceiverDispatcherByValue(msgonlyformatter, receiver, "user-proxy", CustomReceiverInitArgs{})
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +159,7 @@ func LoggerFromCustomReceiver(receiver CustomReceiver) (LoggerInterface, error) 
 		return nil, err
 	}
 
-	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil)
+	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil, nil)
 	if err != nil {
 		return nil, err
 	}

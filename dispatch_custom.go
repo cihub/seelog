@@ -176,12 +176,14 @@ func newCustomReceiverDispatcher(formatter *formatter, customReceiverName string
 
 // newCustomReceiverDispatcherByValue is basically the same as newCustomReceiverDispatcher, but using
 // a specific CustomReceiver value instead of instantiating a new one by type.
-func newCustomReceiverDispatcherByValue(formatter *formatter, customReceiver CustomReceiver) (*customReceiverDispatcher, error) {
+func newCustomReceiverDispatcherByValue(formatter *formatter, customReceiver CustomReceiver, name string, cArgs CustomReceiverInitArgs) (*customReceiverDispatcher, error) {
 	if formatter == nil {
 		return nil, errors.New("formatter cannot be nil")
 	}
-
-	disp := &customReceiverDispatcher{formatter, customReceiver, "-", CustomReceiverInitArgs{}}
+	if customReceiver == nil {
+		return nil, errors.New("customReceiver cannot be nil")
+	}
+	disp := &customReceiverDispatcher{formatter, customReceiver, name, cArgs}
 
 	return disp, nil
 }
@@ -233,7 +235,8 @@ func (disp *customReceiverDispatcher) String() string {
 		datas += fmt.Sprintf("<%s, %s> ", key, disp.usedArgs.XmlCustomAttrs[key])
 	}
 
-	str := fmt.Sprintf("Custom receiver %s [fmt='%s'],[data='%s']\n", disp.customReceiverName, disp.formatter.String(), datas)
+	str := fmt.Sprintf("Custom receiver %s [fmt='%s'],[data='%s'],[inner='%s']\n",
+		disp.customReceiverName, disp.formatter.String(), datas, disp.innerReceiver)
 
 	return str
 }

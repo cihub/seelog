@@ -83,6 +83,7 @@ type logConfig struct {
 	RootDispatcher dispatcherInterface  // Root of output tree
 	LogType        loggerTypeFromString
 	LoggerData     interface{}
+	Params         *CfgParseParams // Check cfg_parser: CfgParseParams
 }
 
 func newConfig(
@@ -90,7 +91,8 @@ func newConfig(
 	exceptions []*logLevelException,
 	rootDispatcher dispatcherInterface,
 	logType loggerTypeFromString,
-	logData interface{}) (*logConfig, error) {
+	logData interface{},
+	cfgParams *CfgParseParams) (*logConfig, error) {
 	if constraints == nil {
 		return nil, errors.New("Constraints can not be nil")
 	}
@@ -104,6 +106,7 @@ func newConfig(
 	config.RootDispatcher = rootDispatcher
 	config.LogType = logType
 	config.LoggerData = logData
+	config.Params = cfgParams
 
 	return config, nil
 }
