@@ -65,3 +65,47 @@ Issues
 
 Feel free to push issues that could make Seelog better: https://github.com/cihub/seelog/issues
 
+Changelog
+---------------
+
+* **v2.5** : Interaction with other systems. Part 2: custom receivers
+    * Finished custom receivers feature. Check [wiki](https://github.com/cihub/seelog/wiki/custom-receivers)
+    * Added 'LoggerFromCustomReceiver'
+    * Added 'LoggerFromWriterWithMinLevelAndFormat'
+    * Added 'LoggerFromCustomReceiver'
+    * Added 'LoggerFromParamConfigAs...' 
+* **v2.4** : Interaction with other systems. Part 1: wrapping seelog
+    * Added configurable caller stack skip logic
+    * Added 'SetAdditionalStackDepth' to 'LoggerInterface'
+* **v2.3** : Rethinking 'rolling' receiver
+    * Reimplemented 'rolling' receiver
+    * Added 'Max rolls' feature for 'rolling' receiver with type='date'
+    * Fixed 'rolling' receiver issue: renaming on Windows
+* **v2.2** : go1 compatibility point [go1 tag]
+    * Fixed internal bugs
+    * Added 'ANSI n [;k]' format identifier:  %EscN
+    * Made current release go1 compatible 
+* **v2.1** : Some new features
+    * Rolling receiver archiving option.
+    * Added format identifier: %Line
+    * Smtp: added paths to PEM files directories
+    * Added format identifier: %FuncShort
+    * Warn, Error and Critical methods now return an error
+* **v2.0** : Second major release. BREAKING CHANGES.
+    * Support of binaries with stripped symbols
+    * Added log strategy: adaptive
+    * Critical message now forces Flush()
+    * Added predefined formats: xml-debug, xml-debug-short, xml, xml-short, json-debug, json-debug-short, json, json-short, debug, debug-short, fast
+    * Added receiver: conn (network connection writer)
+    * BREAKING CHANGE: added Tracef, Debugf, Infof, etc. to satisfy the print/printf principle
+    * Bug fixes
+* **v1.0** : Initial release. Features:
+    * Xml config
+    * Changing configurations on the fly without app restart
+    * Contraints and exceptions
+    * Formatting
+    * Log strategies: sync, async loop, async timer
+    * Receivers: buffered, console, file, rolling, smtp
+
+
+
