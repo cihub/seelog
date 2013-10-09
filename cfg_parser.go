@@ -91,6 +91,10 @@ const (
 	connWriterReconnectOnMsgAttr    = "reconnectonmsg"
 )
 
+// CustomReceiverProducer is the signature of the function CfgParseParams needs to create
+// custom receivers.
+type CustomReceiverProducer func(CustomReceiverInitArgs) (CustomReceiver, error)
+
 // CfgParseParams represent specific parse options or flags used by parser. It is used if seelog parser needs
 // some special directives or additional info to correctly parse a config.
 type CfgParseParams struct {
@@ -114,7 +118,7 @@ type CfgParseParams struct {
 	// You may use this param to set custom producers in case you need to pass some context when instantiating
 	// a custom receiver or if you frequently change custom receivers with different parameters or in any other
 	// situation where package-level registering (RegisterReceiver) is not an option for you.
-	CustomReceiverProducers map[string]func(initArgs CustomReceiverInitArgs) (CustomReceiver, error)
+	CustomReceiverProducers map[string]CustomReceiverProducer
 }
 
 func (cfg *CfgParseParams) String() string {

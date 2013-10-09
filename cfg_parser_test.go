@@ -398,11 +398,12 @@ func getParserTests() []parserTest {
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testCustomReceiver2})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
+		fnc := func(initArgs CustomReceiverInitArgs) (CustomReceiver, error) {
+			return &customTestReceiver{}, nil
+		}
 		cfg := CfgParseParams{
-			CustomReceiverProducers: map[string]func(initArgs CustomReceiverInitArgs) (CustomReceiver, error){
-				"custom-name-2": func(initArgs CustomReceiverInitArgs) (CustomReceiver, error) {
-					return &customTestReceiver{}, nil
-				},
+			CustomReceiverProducers: map[string]CustomReceiverProducer{
+				"custom-name-2": CustomReceiverProducer(fnc),
 			},
 		}
 		testExpected.Params = &cfg
