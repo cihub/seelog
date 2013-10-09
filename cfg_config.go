@@ -95,20 +95,28 @@ func LoggerFromParamConfigAsString(data string, parserParams *CfgParseParams) (L
 	return LoggerFromParamConfigAsBytes([]byte(data), parserParams)
 }
 
-// LoggerFromWriterWithMinLevel creates a proxy logger that uses io.Writer as the
-// receiver with minimal level = minLevel.
+// LoggerFromWriterWithMinLevel is shortcut for LoggerFromWriterWithMinLevelAndFormat(output, minLevel, DefaultMsgFormat)
+func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerInterface, error) {
+	return LoggerFromWriterWithMinLevelAndFormat(output, minLevel, DefaultMsgFormat)
+}
+
+// LoggerFromWriterWithMinLevelAndFormat creates a proxy logger that uses io.Writer as the
+// receiver with minimal level = minLevel and with specified format.
 //
 // All messages with level more or equal to minLevel will be written to output and
 // formatted using the default seelog format.
 //
 // Can be called for usage with non-Seelog systems
-func LoggerFromWriterWithMinLevel(output io.Writer, minLevel LogLevel) (LoggerInterface, error) {
+func LoggerFromWriterWithMinLevelAndFormat(output io.Writer, minLevel LogLevel, format string) (LoggerInterface, error) {
 	constraints, err := newMinMaxConstraints(minLevel, CriticalLvl)
 	if err != nil {
 		return nil, err
 	}
-
-	dispatcher, err := newSplitDispatcher(defaultformatter, []interface{}{output})
+	formatter, err := newFormatter(format)
+	if err != nil {
+		return nil, err
+	}
+	dispatcher, err := newSplitDispatcher(formatter, []interface{}{output})
 	if err != nil {
 		return nil, err
 	}

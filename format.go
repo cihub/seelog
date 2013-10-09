@@ -50,12 +50,14 @@ const (
 	TimeFormat        = "15:04:05"
 )
 
+var DefaultMsgFormat = "%Ns [%Level] %Msg%n"
+
 var defaultformatter *formatter
 var msgonlyformatter *formatter
 
 func init() {
 	var err error
-	defaultformatter, err = newFormatter("%Ns [%Level] %Msg%n")
+	defaultformatter, err = newFormatter(DefaultMsgFormat)
 	if err != nil {
 		fmt.Println("Error during defaultformatter creation: " + err.Error())
 	}
