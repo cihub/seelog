@@ -45,7 +45,7 @@ func newSyncLogger(config *logConfig) *syncLogger {
 
 func (cLogger *syncLogger) innerLog(
 	level LogLevel,
-	context logContextInterface,
+	context LogContextInterface,
 	message fmt.Stringer) {
 
 	cLogger.processLogMsg(level, message, context)
@@ -56,7 +56,9 @@ func (syncLogger *syncLogger) Close() {
 	defer syncLogger.m.Unlock()
 
 	if !syncLogger.closed {
-		syncLogger.config.RootDispatcher.Close()
+		if err := syncLogger.config.RootDispatcher.Close(); err != nil {
+			reportInternalError(err)
+		}
 	}
 }
 
