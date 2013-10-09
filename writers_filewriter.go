@@ -47,7 +47,11 @@ func newFileWriter(fileName string) (writer *fileWriter, err error) {
 
 func (fw *fileWriter) Close() error {
 	if fw.innerWriter != nil {
-		return fw.innerWriter.Close()
+		err := fw.innerWriter.Close()
+		if err != nil {
+			return err
+		}
+		fw.innerWriter = nil
 	}
 	return nil
 }

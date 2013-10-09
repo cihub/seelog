@@ -50,17 +50,24 @@ const (
 	TimeFormat        = "15:04:05"
 )
 
+var DefaultMsgFormat = "%Ns [%Level] %Msg%n"
+
 var defaultformatter *formatter
+var msgonlyformatter *formatter
 
 func init() {
 	var err error
-	defaultformatter, err = newFormatter("%Ns [%Level] %Msg%n")
+	defaultformatter, err = newFormatter(DefaultMsgFormat)
 	if err != nil {
 		fmt.Println("Error during defaultformatter creation: " + err.Error())
 	}
+	msgonlyformatter, err = newFormatter("%Msg")
+	if err != nil {
+		fmt.Println("Error during msgonlyformatter creation: " + err.Error())
+	}
 }
 
-type verbFunc func(message string, level LogLevel, context logContextInterface) interface{}
+type verbFunc func(message string, level LogLevel, context LogContextInterface) interface{}
 type verbFuncCreator func(param string) verbFunc
 
 var verbFuncs = map[string]verbFunc{
@@ -236,7 +243,7 @@ func (formatter *formatter) findparameter(startIndex int) (string, int, bool) {
 
 // Format processes a message with special verbs, log level, and context. Returns formatted string
 // with all verb identifiers changed to appropriate values.
-func (formatter *formatter) Format(message string, level LogLevel, context logContextInterface) string {
+func (formatter *formatter) Format(message string, level LogLevel, context LogContextInterface) string {
 	if len(formatter.verbFuncs) == 0 {
 		return formatter.fmtString
 	}
@@ -290,7 +297,7 @@ var levelToShortestString = map[LogLevel]string{
 	Off:         "o",
 }
 
-func verbLevel(message string, level LogLevel, context logContextInterface) interface{} {
+func verbLevel(message string, level LogLevel, context LogContextInterface) interface{} {
 	levelStr, ok := levelToString[level]
 	if !ok {
 		return wrongLogLevel
@@ -298,7 +305,7 @@ func verbLevel(message string, level LogLevel, context logContextInterface) inte
 	return levelStr
 }
 
-func verbLev(message string, level LogLevel, context logContextInterface) interface{} {
+func verbLev(message string, level LogLevel, context LogContextInterface) interface{} {
 	levelStr, ok := levelToShortString[level]
 	if !ok {
 		return wrongLogLevel
@@ -306,15 +313,15 @@ func verbLev(message string, level LogLevel, context logContextInterface) interf
 	return levelStr
 }
 
-func verbLEVEL(message string, level LogLevel, context logContextInterface) interface{} {
+func verbLEVEL(message string, level LogLevel, context LogContextInterface) interface{} {
 	return strings.ToTitle(verbLevel(message, level, context).(string))
 }
 
-func verbLEV(message string, level LogLevel, context logContextInterface) interface{} {
+func verbLEV(message string, level LogLevel, context LogContextInterface) interface{} {
 	return strings.ToTitle(verbLev(message, level, context).(string))
 }
 
-func verbl(message string, level LogLevel, context logContextInterface) interface{} {
+func verbl(message string, level LogLevel, context LogContextInterface) interface{} {
 	levelStr, ok := levelToShortestString[level]
 	if !ok {
 		return wrongLogLevel
@@ -322,49 +329,49 @@ func verbl(message string, level LogLevel, context logContextInterface) interfac
 	return levelStr
 }
 
-func verbMsg(message string, level LogLevel, context logContextInterface) interface{} {
+func verbMsg(message string, level LogLevel, context LogContextInterface) interface{} {
 	return message
 }
 
-func verbFullPath(message string, level LogLevel, context logContextInterface) interface{} {
+func verbFullPath(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.FullPath()
 }
 
-func verbFile(message string, level LogLevel, context logContextInterface) interface{} {
+func verbFile(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.FileName()
 }
 
-func verbRelFile(message string, level LogLevel, context logContextInterface) interface{} {
+func verbRelFile(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.ShortPath()
 }
 
-func verbFunction(message string, level LogLevel, context logContextInterface) interface{} {
+func verbFunction(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.Func()
 }
 
-func verbFunctionShort(message string, level LogLevel, context logContextInterface) interface{} {
+func verbFunctionShort(message string, level LogLevel, context LogContextInterface) interface{} {
 	f := context.Func()
 	spl := strings.Split(f, ".")
 	return spl[len(spl)-1]
 }
 
-func verbLine(message string, level LogLevel, context logContextInterface) interface{} {
+func verbLine(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.Line()
 }
 
-func verbTime(message string, level LogLevel, context logContextInterface) interface{} {
+func verbTime(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.CallTime().Format(TimeFormat)
 }
 
-func verbNs(message string, level LogLevel, context logContextInterface) interface{} {
+func verbNs(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.CallTime().UnixNano()
 }
 
-func verbn(message string, level LogLevel, context logContextInterface) interface{} {
+func verbn(message string, level LogLevel, context LogContextInterface) interface{} {
 	return "\n"
 }
 
-func verbt(message string, level LogLevel, context logContextInterface) interface{} {
+func verbt(message string, level LogLevel, context LogContextInterface) interface{} {
 	return "\t"
 }
 
@@ -373,13 +380,13 @@ func createDateTimeVerbFunc(dateTimeFormat string) verbFunc {
 	if format == "" {
 		format = DateDefaultFormat
 	}
-	return func(message string, level LogLevel, context logContextInterface) interface{} {
+	return func(message string, level LogLevel, context LogContextInterface) interface{} {
 		return time.Now().Format(format)
 	}
 }
 
 func createANSIEscapeFunc(escapeCodeString string) verbFunc {
-	return func(message string, level LogLevel, context logContextInterface) interface{} {
+	return func(message string, level LogLevel, context LogContextInterface) interface{} {
 		if len(escapeCodeString) == 0 {
 			return wrongEscapeCode
 		}

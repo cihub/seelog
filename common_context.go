@@ -50,18 +50,27 @@ func setWorkDir() {
 }
 
 // Represents runtime caller context
-type logContextInterface interface {
+type LogContextInterface interface {
+	// Caller func name
 	Func() string
+	// Caller line num
 	Line() int
+	// Caller file short path
 	ShortPath() string
+	// Caller file full path
 	FullPath() string
+	// Caller file name (without path)
 	FileName() string
+	// True if the context is correct and may be used.
+	// If false, then an error in context evaluation occurred and
+	// all its other data may be corrupted.
 	IsValid() bool
+	// Time when log func was called
 	CallTime() time.Time
 }
 
 // Returns context of the caller
-func currentContext() (logContextInterface, error) {
+func currentContext() (LogContextInterface, error) {
 	return specificContext(1)
 }
 
@@ -100,7 +109,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 // Context is returned in any situation, even if error occurs. But, if an error
 // occurs, the returned context is an error context, which contains no paths
 // or names, but states that they can't be extracted.
-func specificContext(skip int) (logContextInterface, error) {
+func specificContext(skip int) (LogContextInterface, error) {
 	callTime := time.Now()
 
 	if skip < 0 {

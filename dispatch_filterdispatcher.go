@@ -53,7 +53,7 @@ func newFilterDispatcher(formatter *formatter, receivers []interface{}, allowLis
 func (filter *filterDispatcher) Dispatch(
 	message string,
 	level LogLevel,
-	context logContextInterface,
+	context LogContextInterface,
 	errorFunc func(err error)) {
 	isAllowed, ok := filter.allowList[level]
 	if ok && isAllowed {
