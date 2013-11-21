@@ -78,12 +78,7 @@ func (fw *fileWriter) createFile() error {
 	}
 
 	// If exists
-	_, err = os.Lstat(fw.fileName)
-	if nil == err {
-		fw.innerWriter, err = os.OpenFile(fw.fileName, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
-	} else {
-		fw.innerWriter, err = os.Create(fw.fileName)
-	}
+	fw.innerWriter, err = os.OpenFile(fw.fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, defaultFilePermissions)
 
 	if err != nil {
 		return err
