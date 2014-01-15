@@ -50,6 +50,8 @@ If you don't have the Go development environment installed, visit the
 go get -u github.com/cihub/seelog
 ```
 
+*IMPORTANT*: If you are not using the latest 'tip' version of go, check this [wiki page](https://github.com/cihub/seelog/wiki/Notes-on-'go-get')
+
 Documentation
 ---------------
 
@@ -81,7 +83,7 @@ Changelog
     * Reimplemented 'rolling' receiver
     * Added 'Max rolls' feature for 'rolling' receiver with type='date'
     * Fixed 'rolling' receiver issue: renaming on Windows
-* **v2.2** : go1 compatibility point [go1 tag]
+* **v2.2** : go1.0 compatibility point [go1.0 tag]
     * Fixed internal bugs
     * Added 'ANSI n [;k]' format identifier:  %EscN
     * Made current release go1 compatible 
