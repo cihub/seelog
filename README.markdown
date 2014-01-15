@@ -50,7 +50,7 @@ If you don't have the Go development environment installed, visit the
 go get -u github.com/cihub/seelog
 ```
 
-*IMPORTANT*: If you are not using the latest 'tip' version of go, check this [wiki page](https://github.com/cihub/seelog/wiki/Notes-on-'go-get')
+*IMPORTANT*: If you are not using the latest release version of Go, check out this [wiki page](https://github.com/cihub/seelog/wiki/Notes-on-'go-get')
 
 Documentation
 ---------------
