@@ -92,8 +92,13 @@ type LoggerInterface interface {
 	errorWithCallDepth(callDepth int, message fmt.Stringer)
 	criticalWithCallDepth(callDepth int, message fmt.Stringer)
 
+	// Close flushes all the messages in the logger and closes it. It cannot be used after this operation.
 	Close()
+
+	// Flush flushes all the messages in the logger.
 	Flush()
+
+	// Closed returns true if the logger was previously closed.
 	Closed() bool
 
 	// SetAdditionalStackDepth sets the additional number of frames to skip by runtime.Caller

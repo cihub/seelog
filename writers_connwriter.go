@@ -34,7 +34,7 @@ import (
 type connWriter struct {
 	innerWriter    io.WriteCloser
 	reconnectOnMsg bool
-	recconect      bool
+	reconnect      bool
 	net            string
 	addr           string
 }
@@ -73,7 +73,7 @@ func (connWriter *connWriter) Write(bytes []byte) (n int, err error) {
 
 	n, err = connWriter.innerWriter.Write(bytes)
 	if err != nil {
-		connWriter.recconect = true
+		connWriter.reconnect = true
 	}
 
 	return
@@ -105,8 +105,8 @@ func (connWriter *connWriter) connect() error {
 }
 
 func (connWriter *connWriter) neddedConnectOnMsg() bool {
-	if connWriter.recconect {
-		connWriter.recconect = false
+	if connWriter.reconnect {
+		connWriter.reconnect = false
 		return true
 	}
 
