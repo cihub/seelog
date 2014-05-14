@@ -96,14 +96,17 @@ var formatterFuncs = map[string]FormatterFunc{
 	"FuncShort": FormatterFunctionShort,
 	"Line":      formatterLine,
 	"Time":      formatterTime,
+	"UTCTime":   formatterUTCTime,
 	"Ns":        formatterNs,
+	"UTCNs":     formatterUTCNs,
 	"n":         formattern,
 	"t":         formattert,
 }
 
 var formatterFuncsParameterized = map[string]FormatterFuncCreator{
-	"Date": createDateTimeFormatterFunc,
-	"EscM": createANSIEscapeFunc,
+	"Date":    createDateTimeFormatterFunc,
+	"UTCDate": createUTCDateTimeFormatterFunc,
+	"EscM":    createANSIEscapeFunc,
 }
 
 func errorAliasReserved(name string) error {
@@ -405,8 +408,16 @@ func formatterTime(message string, level LogLevel, context LogContextInterface) 
 	return context.CallTime().Format(TimeFormat)
 }
 
+func formatterUTCTime(message string, level LogLevel, context LogContextInterface) interface{} {
+	return context.CallTime().UTC().Format(TimeFormat)
+}
+
 func formatterNs(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.CallTime().UnixNano()
+}
+
+func formatterUTCNs(message string, level LogLevel, context LogContextInterface) interface{} {
+	return context.CallTime().UTC().UnixNano()
 }
 
 func formattern(message string, level LogLevel, context LogContextInterface) interface{} {
@@ -424,6 +435,16 @@ func createDateTimeFormatterFunc(dateTimeFormat string) FormatterFunc {
 	}
 	return func(message string, level LogLevel, context LogContextInterface) interface{} {
 		return time.Now().Format(format)
+	}
+}
+
+func createUTCDateTimeFormatterFunc(dateTimeFormat string) FormatterFunc {
+	format := dateTimeFormat
+	if format == "" {
+		format = DateDefaultFormat
+	}
+	return func(message string, level LogLevel, context LogContextInterface) interface{} {
+		return time.Now().UTC().Format(format)
 	}
 }
 
