@@ -25,6 +25,7 @@
 package seelog
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -35,60 +36,62 @@ import (
 
 // Names of elements of seelog config.
 const (
-	seelogConfigId                  = "seelog"
-	outputsId                       = "outputs"
-	formatsId                       = "formats"
-	minLevelId                      = "minlevel"
-	maxLevelId                      = "maxlevel"
-	levelsId                        = "levels"
-	exceptionsId                    = "exceptions"
-	exceptionId                     = "exception"
-	funcPatternId                   = "funcpattern"
-	filePatternId                   = "filepattern"
-	formatId                        = "format"
-	formatAttrId                    = "format"
-	formatKeyAttrId                 = "id"
-	outputFormatId                  = "formatid"
-	pathId                          = "path"
-	fileWriterId                    = "file"
-	smtpWriterId                    = "smtp"
-	senderaddressId                 = "senderaddress"
-	senderNameId                    = "sendername"
-	recipientId                     = "recipient"
-	addressId                       = "address"
-	hostNameId                      = "hostname"
-	hostPortId                      = "hostport"
-	userNameId                      = "username"
-	userPassId                      = "password"
-	cACertDirpathId                 = "cacertdirpath"
-	splitterDispatcherId            = "splitter"
-	consoleWriterId                 = "console"
-	customReceiverId                = "custom"
-	customNameAttrId                = "name"
-	customNameDataAttrPrefix        = "data-"
-	filterDispatcherId              = "filter"
-	filterLevelsAttrId              = "levels"
-	rollingfileWriterId             = "rollingfile"
-	rollingFileTypeAttr             = "type"
-	rollingFilePathAttr             = "filename"
-	rollingFileMaxSizeAttr          = "maxsize"
-	rollingFileMaxRollsAttr         = "maxrolls"
-	rollingFileDataPatternAttr      = "datepattern"
-	rollingFileArchiveAttr          = "archivetype"
-	rollingFileArchivePathAttr      = "archivepath"
-	bufferedWriterId                = "buffered"
-	bufferedSizeAttr                = "size"
-	bufferedFlushPeriodAttr         = "flushperiod"
-	loggerTypeFromStringAttr        = "type"
-	asyncLoggerIntervalAttr         = "asyncinterval"
-	adaptLoggerMinIntervalAttr      = "mininterval"
-	adaptLoggerMaxIntervalAttr      = "maxinterval"
-	adaptLoggerCriticalMsgCountAttr = "critmsgcount"
-	predefinedPrefix                = "std:"
-	connWriterId                    = "conn"
-	connWriterAddrAttr              = "addr"
-	connWriterNetAttr               = "net"
-	connWriterReconnectOnMsgAttr    = "reconnectonmsg"
+	seelogConfigId                   = "seelog"
+	outputsId                        = "outputs"
+	formatsId                        = "formats"
+	minLevelId                       = "minlevel"
+	maxLevelId                       = "maxlevel"
+	levelsId                         = "levels"
+	exceptionsId                     = "exceptions"
+	exceptionId                      = "exception"
+	funcPatternId                    = "funcpattern"
+	filePatternId                    = "filepattern"
+	formatId                         = "format"
+	formatAttrId                     = "format"
+	formatKeyAttrId                  = "id"
+	outputFormatId                   = "formatid"
+	pathId                           = "path"
+	fileWriterId                     = "file"
+	smtpWriterId                     = "smtp"
+	senderaddressId                  = "senderaddress"
+	senderNameId                     = "sendername"
+	recipientId                      = "recipient"
+	addressId                        = "address"
+	hostNameId                       = "hostname"
+	hostPortId                       = "hostport"
+	userNameId                       = "username"
+	userPassId                       = "password"
+	cACertDirpathId                  = "cacertdirpath"
+	splitterDispatcherId             = "splitter"
+	consoleWriterId                  = "console"
+	customReceiverId                 = "custom"
+	customNameAttrId                 = "name"
+	customNameDataAttrPrefix         = "data-"
+	filterDispatcherId               = "filter"
+	filterLevelsAttrId               = "levels"
+	rollingfileWriterId              = "rollingfile"
+	rollingFileTypeAttr              = "type"
+	rollingFilePathAttr              = "filename"
+	rollingFileMaxSizeAttr           = "maxsize"
+	rollingFileMaxRollsAttr          = "maxrolls"
+	rollingFileDataPatternAttr       = "datepattern"
+	rollingFileArchiveAttr           = "archivetype"
+	rollingFileArchivePathAttr       = "archivepath"
+	bufferedWriterId                 = "buffered"
+	bufferedSizeAttr                 = "size"
+	bufferedFlushPeriodAttr          = "flushperiod"
+	loggerTypeFromStringAttr         = "type"
+	asyncLoggerIntervalAttr          = "asyncinterval"
+	adaptLoggerMinIntervalAttr       = "mininterval"
+	adaptLoggerMaxIntervalAttr       = "maxinterval"
+	adaptLoggerCriticalMsgCountAttr  = "critmsgcount"
+	predefinedPrefix                 = "std:"
+	connWriterId                     = "conn"
+	connWriterAddrAttr               = "addr"
+	connWriterNetAttr                = "net"
+	connWriterReconnectOnMsgAttr     = "reconnectonmsg"
+	connWriterUseTLSAttr             = "useTLS"
+	connWriterInsecureSkipVerifyAttr = "insecureSkipVerify"
 )
 
 // CustomReceiverProducer is the signature of the function CfgParseParams needs to create
@@ -847,7 +850,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, nodeCannotHaveChildrenError
 	}
 
-	err := checkUnexpectedAttribute(node, outputFormatId, connWriterAddrAttr, connWriterNetAttr, connWriterReconnectOnMsgAttr)
+	err := checkUnexpectedAttribute(node, outputFormatId, connWriterAddrAttr, connWriterNetAttr, connWriterReconnectOnMsgAttr, connWriterUseTLSAttr, connWriterInsecureSkipVerifyAttr)
 	if err != nil {
 		return nil, err
 	}
@@ -876,6 +879,34 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 			reconnectOnMsg = false
 		} else {
 			return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterReconnectOnMsgAttr + "' attribute value")
+		}
+	}
+
+	useTLS := false
+	useTLSStr, isUseTLSStr := node.attributes[connWriterUseTLSAttr]
+	if isUseTLSStr {
+		if useTLSStr == "true" {
+			useTLS = true
+		} else if useTLSStr == "false" {
+			useTLS = false
+		} else {
+			return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterUseTLSAttr + "' attribute value")
+		}
+		if useTLS {
+			insecureSkipVerify := false
+			insecureSkipVerifyStr, isInsecureSkipVerify := node.attributes[connWriterInsecureSkipVerifyAttr]
+			if isInsecureSkipVerify {
+				if insecureSkipVerifyStr == "true" {
+					insecureSkipVerify = true
+				} else if insecureSkipVerifyStr == "false" {
+					insecureSkipVerify = false
+				} else {
+					return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterInsecureSkipVerifyAttr + "' attribute value")
+				}
+			}
+			config := tls.Config{InsecureSkipVerify: insecureSkipVerify}
+			connWriter := newTLSWriter(net, addr, reconnectOnMsg, &config)
+			return newFormattedWriter(connWriter, currentFormat)
 		}
 	}
 
