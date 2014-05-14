@@ -92,6 +92,7 @@ var verbFuncs = map[string]verbFunc{
 var verbFuncsParametrized = map[string]verbFuncCreator{
 	"Date": createDateTimeVerbFunc,
 	"EscM": createANSIEscapeFunc,
+	"PRI":  createPRIVerbFunc,
 }
 
 // formatter is used to write messages in a specific format, inserting such additional data
@@ -392,5 +393,28 @@ func createANSIEscapeFunc(escapeCodeString string) verbFunc {
 		}
 
 		return fmt.Sprintf("%c[%sm", 0x1B, escapeCodeString)
+	}
+}
+
+var levelToSyslogSeverity = map[LogLevel]int{
+	// Mapping to RFC 5424 where possible
+	TraceLvl:    7,
+	DebugLvl:    7,
+	InfoLvl:     6,
+	WarnLvl:     5,
+	ErrorLvl:    3,
+	CriticalLvl: 2,
+	Off:         7,
+}
+
+func createPRIVerbFunc(facilityFormat string) verbFunc {
+	// Default is syslog facility local4
+	facility := 20
+	i, err := strconv.Atoi(facilityFormat)
+	if err == nil && i >= 0 && i <= 23 {
+		facility = i
+	}
+	return func(message string, level LogLevel, context LogContextInterface) interface{} {
+		return fmt.Sprintf("%v", facility*8+levelToSyslogSeverity[level])
 	}
 }

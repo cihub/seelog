@@ -25,6 +25,7 @@
 package seelog
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -37,6 +38,8 @@ type connWriter struct {
 	recconect      bool
 	net            string
 	addr           string
+	useTLS         bool
+	configTLS      *tls.Config
 }
 
 // Creates writer to the address addr on the network netName.
@@ -47,6 +50,19 @@ func newConnWriter(netName string, addr string, reconnectOnMsg bool) *connWriter
 	newWriter.net = netName
 	newWriter.addr = addr
 	newWriter.reconnectOnMsg = reconnectOnMsg
+
+	return newWriter
+}
+
+// Creates a writer that uses SSL/TLS
+func newTLSWriter(netName string, addr string, reconnectOnMsg bool, config *tls.Config) *connWriter {
+	newWriter := new(connWriter)
+
+	newWriter.net = netName
+	newWriter.addr = addr
+	newWriter.reconnectOnMsg = reconnectOnMsg
+	newWriter.useTLS = true
+	newWriter.configTLS = config
 
 	return newWriter
 }
@@ -87,6 +103,16 @@ func (connWriter *connWriter) connect() error {
 	if connWriter.innerWriter != nil {
 		connWriter.innerWriter.Close()
 		connWriter.innerWriter = nil
+	}
+
+	if connWriter.useTLS {
+		conn, err := tls.Dial(connWriter.net, connWriter.addr, connWriter.configTLS)
+		if err != nil {
+			return err
+		}
+		connWriter.innerWriter = conn
+
+		return nil
 	}
 
 	conn, err := net.Dial(connWriter.net, connWriter.addr)
