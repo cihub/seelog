@@ -1,4 +1,4 @@
-// Copyright (c) 2013 - Cloud Instruments Co., Ltd.
+// Copyright (c) 2014 - Cloud Instruments Co., Ltd.
 //
 // All rights reserved.
 //
@@ -32,6 +32,8 @@ To create a logger, use one of the following constructors:
   func LoggerFromConfigAsFile
   func LoggerFromConfigAsString
   func LoggerFromWriterWithMinLevel
+  func LoggerFromWriterWithMinLevelAndFormat
+  func LoggerFromCustomReceiver (check https://github.com/cihub/seelog/wiki/Custom-receivers)
 Example:
   import log "github.com/cihub/seelog"
 

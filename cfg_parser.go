@@ -90,8 +90,8 @@ const (
 	connWriterAddrAttr               = "addr"
 	connWriterNetAttr                = "net"
 	connWriterReconnectOnMsgAttr     = "reconnectonmsg"
-	connWriterUseTLSAttr             = "useTLS"
-	connWriterInsecureSkipVerifyAttr = "insecureSkipVerify"
+	connWriterUseTLSAttr             = "tls"
+	connWriterInsecureSkipVerifyAttr = "insecureskipverify"
 )
 
 // CustomReceiverProducer is the signature of the function CfgParseParams needs to create

@@ -76,7 +76,7 @@ func (connWriter *connWriter) Close() error {
 }
 
 func (connWriter *connWriter) Write(bytes []byte) (n int, err error) {
-	if connWriter.neddedConnectOnMsg() {
+	if connWriter.neededConnectOnMsg() {
 		err = connWriter.connect()
 		if err != nil {
 			return 0, err
@@ -130,7 +130,7 @@ func (connWriter *connWriter) connect() error {
 	return nil
 }
 
-func (connWriter *connWriter) neddedConnectOnMsg() bool {
+func (connWriter *connWriter) neededConnectOnMsg() bool {
 	if connWriter.reconnect {
 		connWriter.reconnect = false
 		return true
