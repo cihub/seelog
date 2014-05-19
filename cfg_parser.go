@@ -395,7 +395,7 @@ func checkDistinctExceptions(exceptions []*logLevelException) error {
 			if exception.FuncPattern() == exception1.FuncPattern() &&
 				exception.FilePattern() == exception1.FilePattern() {
 
-				return errors.New(fmt.Sprintf("There are two or more duplicate exceptions. Func: %v, file% %v",
+				return errors.New(fmt.Sprintf("There are two or more duplicate exceptions. Func: %v, file %v",
 					exception.FuncPattern(), exception.FilePattern()))
 			}
 		}

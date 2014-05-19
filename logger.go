@@ -150,7 +150,9 @@ func (cLogger *commonLogger) SetAdditionalStackDepth(depth int) error {
 	if depth < 0 {
 		return fmt.Errorf("negative depth: %d", depth)
 	}
+	cLogger.m.Lock()
 	cLogger.addStackDepth = depth
+	cLogger.m.Unlock()
 	return nil
 }
 
@@ -215,27 +217,27 @@ func (cLogger *commonLogger) Critical(v ...interface{}) error {
 }
 
 func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(TraceLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(TraceLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(DebugLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(DebugLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(InfoLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(InfoLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(WarnLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(WarnLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(ErrorLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(ErrorLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(CriticalLvl, message, callDepth+cLogger.addStackDepth)
+	cLogger.log(CriticalLvl, message, callDepth)
 	cLogger.innerLogger.Flush()
 }
 
@@ -281,7 +283,7 @@ func (cLogger *commonLogger) log(
 		return
 	}
 
-	context, _ := specificContext(stackCallDepth)
+	context, _ := specificContext(stackCallDepth + cLogger.addStackDepth)
 
 	// Context errors are not reported because there are situations
 	// in which context errors are normal Seelog usage cases. For

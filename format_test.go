@@ -25,6 +25,7 @@
 package seelog
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -222,7 +223,7 @@ func TestCustomFormatterRegistration(t *testing.T) {
 		t.Fatalf("%s\n", err.Error())
 	}
 
-	expected := "test TEST github.com/cihub/seelog.TestCustomFormatterRegistration TEST 123"
+	expected := fmt.Sprintf("test TEST %sTestCustomFormatterRegistration TEST 123", commonPrefix)
 	msg := form.Format("test", DebugLvl, context)
 	if msg != expected {
 		t.Fatalf("Custom formatter: invalid output. Expected: '%s'. Got: '%s'", expected, msg)
