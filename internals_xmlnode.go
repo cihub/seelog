@@ -160,8 +160,6 @@ func unmarshalNode(xmlParser *xml.Decoder, curToken xml.Token) (node *xmlNode, e
 			return
 		}
 	}
-
-	return
 }
 
 func getNextToken(xmlParser *xml.Decoder) (tok xml.Token, err error) {

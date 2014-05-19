@@ -19,7 +19,7 @@ const (
 
 const (
 	// Max number of directories can be read asynchronously.
-	maxDirNumberReadAsync = 1e3
+	maxDirNumberReadAsync = 1000
 )
 
 type cannotOpenFileError struct {
