@@ -997,7 +997,7 @@ func configsAreEqual(conf1 *logConfig, conf2 interface{}) bool {
 	// 	return false
 	// }
 
-	return fmt.Sprintf("%s", conf1) == fmt.Sprintf("%s", conf2) //logConfig)
+	return fmt.Sprintf("%v", conf1) == fmt.Sprintf("%v", conf2) //logConfig)
 }
 
 func testLogFileFilter(fn string) bool {
@@ -1038,7 +1038,7 @@ func parseTest(test parserTest, t *testing.T) {
 	}
 
 	if err == nil && !configsAreEqual(conf, test.expected) {
-		t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %s. \n* Got: %s\n",
+		t.Errorf("\n----ERROR in %s:\nConfig: %s\n* Expected: %v. \n* Got: %v\n",
 			test.testName, test.config, test.expected, conf)
 	}
 }
