@@ -217,27 +217,27 @@ func (cLogger *commonLogger) Critical(v ...interface{}) error {
 }
 
 func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(TraceLvl, message, callDepth, true)
+	cLogger.log(TraceLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) debugWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(DebugLvl, message, callDepth, true)
+	cLogger.log(DebugLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) infoWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(InfoLvl, message, callDepth, true)
+	cLogger.log(InfoLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) warnWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(WarnLvl, message, callDepth, true)
+	cLogger.log(WarnLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) errorWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(ErrorLvl, message, callDepth, true)
+	cLogger.log(ErrorLvl, message, callDepth)
 }
 
 func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message fmt.Stringer) {
-	cLogger.log(CriticalLvl, message, callDepth, true)
+	cLogger.log(CriticalLvl, message, callDepth)
 	cLogger.innerLogger.Flush()
 }
 
@@ -271,8 +271,7 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 func (cLogger *commonLogger) log(
 	level LogLevel,
 	message fmt.Stringer,
-	stackCallDepth int,
-	useCallDepth bool) {
+	stackCallDepth int) {
 	cLogger.m.Lock()
 	defer cLogger.m.Unlock()
 
@@ -284,11 +283,7 @@ func (cLogger *commonLogger) log(
 		return
 	}
 
-	if useCallDepth {
-		stackCallDepth += cLogger.addStackDepth
-	}
-
-	context, _ := specificContext(stackCallDepth)
+	context, _ := specificContext(stackCallDepth + cLogger.addStackDepth)
 
 	// Context errors are not reported because there are situations
 	// in which context errors are normal Seelog usage cases. For
