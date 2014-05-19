@@ -25,6 +25,7 @@
 package seelog
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -194,6 +195,8 @@ func createTestFormatter(format string) FormatterFunc {
 }
 
 func TestCustomFormatterRegistration(t *testing.T) {
+	_, _, funcName, _, _ := extractCallerInfo(1)
+
 	err := RegisterCustomFormatter("Level", createTestFormatter)
 	if err == nil {
 		t.Errorf("Expected an error when trying to register a custom formatter with a reserved alias")
@@ -222,7 +225,7 @@ func TestCustomFormatterRegistration(t *testing.T) {
 		t.Fatalf("%s\n", err.Error())
 	}
 
-	expected := "test TEST github.com/hailocab/seelog.TestCustomFormatterRegistration TEST 123"
+	expected := fmt.Sprintf("test TEST %s TEST 123", funcName)
 	msg := form.Format("test", DebugLvl, context)
 	if msg != expected {
 		t.Fatalf("Custom formatter: invalid output. Expected: '%s'. Got: '%s'", expected, msg)
