@@ -32,10 +32,17 @@ import (
 )
 
 const (
-	shortPath    = "common_context_test.go"
-	commonPrefix = "github.com/hailocab/seelog."
+	shortPath = "common_context_test.go"
+	// commonPrefix = "github.com/hailocab/seelog."
 )
 
+func init() {
+	_, _, funcName, _, _ := extractCallerInfo(1)
+
+	commonPrefix = funcName[:strings.Index(funcName, "init·")]
+}
+
+var commonPrefix string
 var testFullPath string
 
 func fullPath(t *testing.T) string {
@@ -53,6 +60,7 @@ func fullPath(t *testing.T) string {
 }
 
 func TestContext(t *testing.T) {
+
 	context, err := currentContext()
 
 	nameFunc := commonPrefix + "TestContext"
