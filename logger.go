@@ -150,7 +150,9 @@ func (cLogger *commonLogger) SetAdditionalStackDepth(depth int) error {
 	if depth < 0 {
 		return fmt.Errorf("negative depth: %d", depth)
 	}
+	cLogger.m.Lock()
 	cLogger.addStackDepth = depth
+	cLogger.m.Unlock()
 	return nil
 }
 
