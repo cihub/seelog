@@ -222,7 +222,7 @@ func TestCustomFormatterRegistration(t *testing.T) {
 		t.Fatalf("%s\n", err.Error())
 	}
 
-	expected := "test TEST github.com/cihub/seelog.TestCustomFormatterRegistration TEST 123"
+	expected := "test TEST github.com/hailocab/seelog.TestCustomFormatterRegistration TEST 123"
 	msg := form.Format("test", DebugLvl, context)
 	if msg != expected {
 		t.Fatalf("Custom formatter: invalid output. Expected: '%s'. Got: '%s'", expected, msg)
