@@ -1,3 +1,0 @@
-[submodule "common"]
-	path = common
-	url = git://github.com:hailocab/h2o-common.git
