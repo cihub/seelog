@@ -33,20 +33,26 @@ import (
 	"time"
 )
 
+var errorCaller = errors.New("Error during runtime.Caller")
+
 var workingDir = ""
 
 func init() {
-	setWorkDir()
+	wd, err := getWorkDir()
+	if err != nil {
+		panic(err)
+	}
+	workingDir = wd
 }
 
-func setWorkDir() {
-	workDir, workingDirError := os.Getwd()
-	if workingDirError != nil {
-		workingDir = string(os.PathSeparator)
-		return
+func getWorkDir() (string, error) {
+	_, filename, _, ok := runtime.Caller(0)
+
+	if !ok {
+		return "", errorCaller
 	}
 
-	workingDir = workDir + string(os.PathSeparator)
+	return filepath.Dir(filename) + string(os.PathSeparator), nil
 }
 
 // Represents runtime caller context
@@ -78,7 +84,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	pc, fullPath, line, ok := runtime.Caller(skip)
 
 	if !ok {
-		return "", "", "", 0, errors.New("Error during runtime.Caller")
+		return "", "", "", 0, errorCaller
 	}
 
 	//TODO:Currently fixes bug in weekly.2012-03-13+: Caller returns incorrect separators

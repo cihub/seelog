@@ -25,7 +25,6 @@
 package seelog
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -47,7 +46,7 @@ var testFullPath string
 
 func fullPath(t *testing.T) string {
 	if testFullPath == "" {
-		wd, err := os.Getwd()
+		wd, err := getWorkDir()
 
 		if err != nil {
 			t.Fatalf("Cannot get working directory: %s", err.Error())
