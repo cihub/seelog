@@ -71,7 +71,7 @@ func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, erro
 }
 
 //===============================================================
-var rollingfileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
+var rollingfileWriterTests = []*fileWriterTestCase{
 	createRollingSizeFileWriterTestCase([]string{}, "log.testlog", 10, 10, 1, []string{"log.testlog"}),
 	createRollingSizeFileWriterTestCase([]string{}, "log.testlog", 10, 10, 2, []string{"log.testlog", "log.testlog.1"}),
 	createRollingSizeFileWriterTestCase([]string{"log.testlog.1"}, "log.testlog", 10, 10, 2, []string{"log.testlog", "log.testlog.1", "log.testlog.2"}),

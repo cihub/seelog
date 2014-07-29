@@ -31,7 +31,7 @@ import (
 func TestformattedWriter(t *testing.T) {
 	formatStr := "%Level %LEVEL %Msg"
 	message := "message"
-	var logLevel LogLevel = TraceLvl
+	var logLevel = LogLevel(TraceLvl)
 
 	bytesVerifier, err := newBytesVerifier(t)
 	if err != nil {

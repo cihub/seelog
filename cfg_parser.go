@@ -289,7 +289,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		return newListConstraints(levels)
 	}
 
-	var minLevel LogLevel = TraceLvl
+	var minLevel = LogLevel(TraceLvl)
 	if isMinLevel {
 		found := true
 		minLevel, found = LogLevelFromString(minLevelStr)
@@ -298,7 +298,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		}
 	}
 
-	var maxLevel LogLevel = CriticalLvl
+	var maxLevel = LogLevel(CriticalLvl)
 	if isMaxLevel {
 		found := true
 		maxLevel, found = LogLevelFromString(maxLevelStr)

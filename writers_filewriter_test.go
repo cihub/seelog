@@ -66,7 +66,7 @@ func createSimplefileWriterTestCase(fileName string, writeCount int) *fileWriter
 	return &fileWriterTestCase{[]string{}, fileName, rollingTypeSize, 0, 0, "", writeCount, []string{fileName}}
 }
 
-var simplefileWriterTests []*fileWriterTestCase = []*fileWriterTestCase{
+var simplefileWriterTests = []*fileWriterTestCase{
 	createSimplefileWriterTestCase("log.testlog", 1),
 	createSimplefileWriterTestCase("log.testlog", 50),
 	createSimplefileWriterTestCase(filepath.Join("dir", "log.testlog"), 50),

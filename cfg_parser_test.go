@@ -68,7 +68,7 @@ func (cr *customTestReceiver) Close() error {
 	return nil
 }
 
-var re *regexp.Regexp = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+var re = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 func getTestFileName(testName, postfix string) string {
 	if len(postfix) != 0 {
