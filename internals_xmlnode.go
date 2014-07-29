@@ -5,10 +5,10 @@
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
-// 1. Redistributions of source code must retain the above copyright notice, this
+// 1. Redistributions of source code must retain the above copyright notice, node
 //    list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
+//    node list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -46,51 +46,51 @@ func newNode() *xmlNode {
 	return node
 }
 
-func (this *xmlNode) String() string {
-	str := fmt.Sprintf("<%s", this.name)
+func (node *xmlNode) String() string {
+	str := fmt.Sprintf("<%s", node.name)
 
-	for attrName, attrVal := range this.attributes {
+	for attrName, attrVal := range node.attributes {
 		str += fmt.Sprintf(" %s=\"%s\"", attrName, attrVal)
 	}
 
 	str += ">"
-	str += this.value
+	str += node.value
 
-	if len(this.children) != 0 {
-		for _, child := range this.children {
+	if len(node.children) != 0 {
+		for _, child := range node.children {
 			str += fmt.Sprintf("%s", child)
 		}
 	}
 
-	str += fmt.Sprintf("</%s>", this.name)
+	str += fmt.Sprintf("</%s>", node.name)
 
 	return str
 }
 
-func (this *xmlNode) unmarshal(startEl xml.StartElement) error {
-	this.name = startEl.Name.Local
+func (node *xmlNode) unmarshal(startEl xml.StartElement) error {
+	node.name = startEl.Name.Local
 
 	for _, v := range startEl.Attr {
-		_, alreadyExists := this.attributes[v.Name.Local]
+		_, alreadyExists := node.attributes[v.Name.Local]
 		if alreadyExists {
-			return errors.New("Tag '" + this.name + "' has duplicated attribute: '" + v.Name.Local + "'")
+			return errors.New("Tag '" + node.name + "' has duplicated attribute: '" + v.Name.Local + "'")
 		}
-		this.attributes[v.Name.Local] = v.Value
+		node.attributes[v.Name.Local] = v.Value
 	}
 
 	return nil
 }
 
-func (this *xmlNode) add(child *xmlNode) {
-	if this.children == nil {
-		this.children = make([]*xmlNode, 0)
+func (node *xmlNode) add(child *xmlNode) {
+	if node.children == nil {
+		node.children = make([]*xmlNode, 0)
 	}
 
-	this.children = append(this.children, child)
+	node.children = append(node.children, child)
 }
 
-func (this *xmlNode) hasChildren() bool {
-	return this.children != nil && len(this.children) > 0
+func (node *xmlNode) hasChildren() bool {
+	return node.children != nil && len(node.children) > 0
 }
 
 //=============================================

@@ -109,10 +109,10 @@ func (verifier *bytesVerifier) Close() error {
 type nullWriter struct {
 }
 
-func (this *nullWriter) Write(bytes []byte) (n int, err error) {
+func (writer *nullWriter) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (this *nullWriter) Close() error {
+func (writer *nullWriter) Close() error {
 	return nil
 }
