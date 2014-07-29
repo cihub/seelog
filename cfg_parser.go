@@ -312,7 +312,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 
 func parseLevels(str string) ([]LogLevel, error) {
 	levelsStrArr := strings.Split(strings.Replace(str, " ", "", -1), ",")
-	levels := make([]LogLevel, 0)
+	var levels []LogLevel
 	for _, levelStr := range levelsStrArr {
 		level, found := LogLevelFromString(levelStr)
 		if !found {
@@ -326,7 +326,7 @@ func parseLevels(str string) ([]LogLevel, error) {
 }
 
 func getExceptions(config *xmlNode) ([]*logLevelException, error) {
-	exceptions := make([]*logLevelException, 0)
+	var exceptions []*logLevelException
 
 	var exceptionsNode *xmlNode
 	for _, child := range config.children {
@@ -582,7 +582,7 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[st
 }
 
 func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*formatter, cfg *CfgParseParams) ([]interface{}, error) {
-	outputs := make([]interface{}, 0)
+	var outputs []interface{}
 	for _, childNode := range node.children {
 		entry, ok := elementMap[childNode.name]
 		if !ok {

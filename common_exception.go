@@ -137,7 +137,7 @@ func (logLevelEx *logLevelException) String() string {
 
 // splitPattern splits pattern into strings and asterisks. Example: "ab*cde**f" -> ["ab", "*", "cde", "*", "f"]
 func splitPattern(pattern string) []string {
-	patternParts := make([]string, 0)
+	var patternParts []string
 	var lastChar rune
 	for _, char := range pattern {
 		if char == '*' {
