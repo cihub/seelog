@@ -708,10 +708,10 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
 
 		testName = "Predefined formats"
-		formatId := predefinedPrefix + "xml-debug-short"
+		formatID := predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
-			<outputs formatid="` + formatId + `">
+			<outputs formatid="` + formatID + `">
 				<console />
 			</outputs>
 		</seelog>`
@@ -719,7 +719,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testFormat, _ = predefinedFormats[formatId]
+		testFormat, _ = predefinedFormats[formatID]
 		testHeadSplitter, _ = newSplitDispatcher(testFormat, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -727,14 +727,14 @@ func getParserTests() []parserTest {
 
 		testName = "Predefined formats redefine"
 		testLogFileName = getTestFileName(testName, "")
-		formatId = predefinedPrefix + "xml-debug-short"
+		formatID = predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
-			<outputs formatid="` + formatId + `">
+			<outputs formatid="` + formatID + `">
 				<file path="` + testLogFileName + `"/>
 			</outputs>
 			<formats>
-				<format id="` + formatId + `" format="%Level %Msg %File" />
+				<format id="` + formatID + `" format="%Level %Msg %File" />
 			</formats>
 		</seelog>`
 		testExpected = new(logConfig)
