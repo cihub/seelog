@@ -44,13 +44,13 @@ type minMaxConstraints struct {
 // newMinMaxConstraints creates a new minMaxConstraints struct with the specified min and max levels.
 func newMinMaxConstraints(min LogLevel, max LogLevel) (*minMaxConstraints, error) {
 	if min > max {
-		return nil, errors.New(fmt.Sprintf("Min level can't be greater than max. Got min: %d, max: %d", min, max))
+		return nil, fmt.Errorf("Min level can't be greater than max. Got min: %d, max: %d", min, max)
 	}
 	if min < TraceLvl || min > CriticalLvl {
-		return nil, errors.New(fmt.Sprintf("Min level can't be less than Trace or greater than Critical. Got min: %d", min))
+		return nil, fmt.Errorf("Min level can't be less than Trace or greater than Critical. Got min: %d", min)
 	}
 	if max < TraceLvl || max > CriticalLvl {
-		return nil, errors.New(fmt.Sprintf("Max level can't be less than Trace or greater than Critical. Got max: %d", max))
+		return nil, fmt.Errorf("Max level can't be less than Trace or greater than Critical. Got max: %d", max)
 	}
 
 	return &minMaxConstraints{min, max}, nil
@@ -113,7 +113,7 @@ func createMapFromList(allowedList []LogLevel) (map[LogLevel]bool, error) {
 	allowedLevels := make(map[LogLevel]bool, 0)
 	for _, level := range allowedList {
 		if level < TraceLvl || level > Off {
-			return nil, errors.New(fmt.Sprintf("Level can't be less than Trace or greater than Critical. Got level: %d", level))
+			return nil, fmt.Errorf("Level can't be less than Trace or greater than Critical. Got level: %d", level)
 		}
 		allowedLevels[level] = true
 	}

@@ -51,11 +51,11 @@ func newBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.D
 		return nil, errors.New("Argument is nil: innerWriter")
 	}
 	if flushPeriod < 0 {
-		return nil, errors.New(fmt.Sprintf("flushPeriod can not be less than 0. Got: %d", flushPeriod))
+		return nil, fmt.Errorf("flushPeriod can not be less than 0. Got: %d", flushPeriod)
 	}
 
 	if bufferSize <= 0 {
-		return nil, errors.New(fmt.Sprintf("bufferSize can not be less or equal to 0. Got: %d", bufferSize))
+		return nil, fmt.Errorf("bufferSize can not be less or equal to 0. Got: %d", bufferSize)
 	}
 
 	buffer := bufio.NewWriterSize(innerWriter, bufferSize)

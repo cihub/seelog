@@ -27,7 +27,6 @@ package seelog
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -61,7 +60,7 @@ func countSequencedRowsInFile(filePath string) (int64, error) {
 		}
 
 		if intVal != gotCounter {
-			return 0, errors.New(fmt.Sprintf("Wrong order: %d Expected: %d\n", intVal, gotCounter))
+			return 0, fmt.Errorf("Wrong order: %d Expected: %d\n", intVal, gotCounter)
 		}
 
 		gotCounter++

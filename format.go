@@ -172,7 +172,7 @@ func (formatter *formatter) buildFormatterFuncs() error {
 
 		isEndOfStr := i == len(formatter.fmtStringOriginal)-1
 		if isEndOfStr {
-			return errors.New(fmt.Sprintf("Format error: %v - last symbol", formatterSymbolString))
+			return fmt.Errorf("Format error: %v - last symbol", formatterSymbolString)
 		}
 
 		isDoubledFormatterSymbol := formatter.fmtStringOriginal[i+1] == FormatterSymbol
@@ -199,7 +199,7 @@ func (formatter *formatter) buildFormatterFuncs() error {
 func (formatter *formatter) extractFormatterFunc(index int) (FormatterFunc, int, error) {
 	letterSequence := formatter.extractLetterSequence(index)
 	if len(letterSequence) == 0 {
-		return nil, 0, errors.New(fmt.Sprintf("Format error: lack of formatter after %v. At %v", formatterSymbolString, index))
+		return nil, 0, fmt.Errorf("Format error: lack of formatter after %v. At %v", formatterSymbolString, index)
 	}
 
 	function, formatterLength, ok := formatter.findFormatterFunc(letterSequence)
