@@ -197,7 +197,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 }
 
 // Close closes down SMTP-connection.
-func (smtpWriter *smtpWriter) Close() error {
+func (smtpw *smtpWriter) Close() error {
 	// Do nothing as Write method opens and closes connection automatically
 	return nil
 }
