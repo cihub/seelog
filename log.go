@@ -74,12 +74,12 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 	} else if config.LogType == asyncTimerloggerTypeFromString {
 		logData := config.LoggerData
 		if logData == nil {
-			return nil, errors.New("async timer data not set!")
+			return nil, errors.New("async timer data not set")
 		}
 
 		asyncInt, ok := logData.(asyncTimerLoggerData)
 		if !ok {
-			return nil, errors.New("invalid async timer data!")
+			return nil, errors.New("invalid async timer data")
 		}
 
 		logger, err := newAsyncTimerLogger(config, time.Duration(asyncInt.AsyncInterval))
@@ -91,12 +91,12 @@ func createLoggerFromConfig(config *logConfig) (LoggerInterface, error) {
 	} else if config.LogType == adaptiveLoggerTypeFromString {
 		logData := config.LoggerData
 		if logData == nil {
-			return nil, errors.New("adaptive logger parameters not set!")
+			return nil, errors.New("adaptive logger parameters not set")
 		}
 
 		adaptData, ok := logData.(adaptiveLoggerData)
 		if !ok {
-			return nil, errors.New("invalid adaptive logger parameters!")
+			return nil, errors.New("invalid adaptive logger parameters")
 		}
 
 		logger, err := newAsyncAdaptiveLogger(

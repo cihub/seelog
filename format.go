@@ -110,7 +110,7 @@ var formatterFuncsParameterized = map[string]FormatterFuncCreator{
 }
 
 func errorAliasReserved(name string) error {
-	return fmt.Errorf("cannot use '%s' as custom formatter name. Name is reserved.", name)
+	return fmt.Errorf("cannot use '%s' as custom formatter name. Name is reserved", name)
 }
 
 // RegisterCustomFormatter registers a new custom formatter factory with a given name. If returned error is nil,
