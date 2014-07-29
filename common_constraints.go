@@ -130,7 +130,7 @@ func validateOffLevel(allowedLevels map[LogLevel]bool) error {
 // IsAllowed returns true, if log level is in allowed log levels list.
 // If the list contains the only item 'common.Off' then IsAllowed will always return false for any input values.
 func (listConstr *listConstraints) IsAllowed(level LogLevel) bool {
-	for l, _ := range listConstr.allowedLevels {
+	for l := range listConstr.allowedLevels {
 		if l == level && level != Off {
 			return true
 		}

@@ -103,14 +103,14 @@ type logLevelTestCase struct {
 }
 
 var minMaxTests = []logLevelTestCase{
-	logLevelTestCase{TraceLvl, false},
-	logLevelTestCase{DebugLvl, false},
-	logLevelTestCase{InfoLvl, true},
-	logLevelTestCase{WarnLvl, true},
-	logLevelTestCase{ErrorLvl, false},
-	logLevelTestCase{CriticalLvl, false},
-	logLevelTestCase{123, false},
-	logLevelTestCase{6, false},
+	{TraceLvl, false},
+	{DebugLvl, false},
+	{InfoLvl, true},
+	{WarnLvl, true},
+	{ErrorLvl, false},
+	{CriticalLvl, false},
+	{123, false},
+	{6, false},
 }
 
 func TestValidminMaxConstraints(t *testing.T) {
@@ -134,14 +134,14 @@ func TestValidminMaxConstraints(t *testing.T) {
 }
 
 var listTests = []logLevelTestCase{
-	logLevelTestCase{TraceLvl, true},
-	logLevelTestCase{DebugLvl, false},
-	logLevelTestCase{InfoLvl, true},
-	logLevelTestCase{WarnLvl, true},
-	logLevelTestCase{ErrorLvl, false},
-	logLevelTestCase{CriticalLvl, true},
-	logLevelTestCase{123, false},
-	logLevelTestCase{6, false},
+	{TraceLvl, true},
+	{DebugLvl, false},
+	{InfoLvl, true},
+	{WarnLvl, true},
+	{ErrorLvl, false},
+	{CriticalLvl, true},
+	{123, false},
+	{6, false},
 }
 
 func TestValidlistConstraints(t *testing.T) {
@@ -165,14 +165,14 @@ func TestValidlistConstraints(t *testing.T) {
 }
 
 var offTests = []logLevelTestCase{
-	logLevelTestCase{TraceLvl, false},
-	logLevelTestCase{DebugLvl, false},
-	logLevelTestCase{InfoLvl, false},
-	logLevelTestCase{WarnLvl, false},
-	logLevelTestCase{ErrorLvl, false},
-	logLevelTestCase{CriticalLvl, false},
-	logLevelTestCase{123, false},
-	logLevelTestCase{6, false},
+	{TraceLvl, false},
+	{DebugLvl, false},
+	{InfoLvl, false},
+	{WarnLvl, false},
+	{ErrorLvl, false},
+	{CriticalLvl, false},
+	{123, false},
+	{6, false},
 }
 
 func TestValidListoffConstraints(t *testing.T) {

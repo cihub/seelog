@@ -1094,7 +1094,7 @@ func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats ma
 
 // Returns an error if node has any attributes not listed in expectedAttrs.
 func checkUnexpectedAttribute(node *xmlNode, expectedAttrs ...string) error {
-	for attr, _ := range node.attributes {
+	for attr := range node.attributes {
 		isExpected := false
 		for _, expected := range expectedAttrs {
 			if attr == expected {

@@ -37,19 +37,19 @@ type exceptionTestCase struct {
 }
 
 var exceptionTestCases = []exceptionTestCase{
-	exceptionTestCase{"*", "*", "func", "file", true},
-	exceptionTestCase{"func*", "*", "func", "file", true},
-	exceptionTestCase{"*func", "*", "func", "file", true},
-	exceptionTestCase{"*func", "*", "1func", "file", true},
-	exceptionTestCase{"func*", "*", "func1", "file", true},
-	exceptionTestCase{"fu*nc", "*", "func", "file", true},
-	exceptionTestCase{"fu*nc", "*", "fu1nc", "file", true},
-	exceptionTestCase{"fu*nc", "*", "func1nc", "file", true},
-	exceptionTestCase{"*fu*nc*", "*", "somefuntonc", "file", true},
-	exceptionTestCase{"fu*nc", "*", "f1nc", "file", false},
-	exceptionTestCase{"func*", "*", "fun", "file", false},
-	exceptionTestCase{"fu*nc", "*", "func1n", "file", false},
-	exceptionTestCase{"**f**u**n**c**", "*", "func1n", "file", true},
+	{"*", "*", "func", "file", true},
+	{"func*", "*", "func", "file", true},
+	{"*func", "*", "func", "file", true},
+	{"*func", "*", "1func", "file", true},
+	{"func*", "*", "func1", "file", true},
+	{"fu*nc", "*", "func", "file", true},
+	{"fu*nc", "*", "fu1nc", "file", true},
+	{"fu*nc", "*", "func1nc", "file", true},
+	{"*fu*nc*", "*", "somefuntonc", "file", true},
+	{"fu*nc", "*", "f1nc", "file", false},
+	{"func*", "*", "fun", "file", false},
+	{"fu*nc", "*", "func1n", "file", false},
+	{"**f**u**n**c**", "*", "func1n", "file", true},
 }
 
 func TestMatchingCorrectness(t *testing.T) {

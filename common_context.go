@@ -96,7 +96,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	funName := runtime.FuncForPC(pc).Name()
 	var functionName string
 	if strings.HasPrefix(funName, workingDir) {
-		functionName = funName[len(workingDir):len(funName)]
+		functionName = funName[len(workingDir):]
 	} else {
 		functionName = funName
 	}
