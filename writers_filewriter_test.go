@@ -100,12 +100,12 @@ func cleanupWriterTest(t *testing.T) {
 
 	for _, p := range toDel {
 		if err = tryRemoveFile(p); nil != err {
-			t.Errorf("Cannot remove file %s in test directory: %s", p, err.Error())
+			t.Errorf("cannot remove file %s in test directory: %s", p, err.Error())
 		}
 	}
 
 	if err = os.RemoveAll("dir"); nil != err {
-		t.Errorf("Cannot remove temp test directory: %s", err.Error())
+		t.Errorf("cannot remove temp test directory: %s", err.Error())
 	}
 }
 
@@ -225,7 +225,7 @@ func (tester *fileWriterTester) checkRequiredFilesExist(testCase *fileWriterTest
 		}
 
 		if !found {
-			tester.t.Errorf("Expected file: %s doesn't exist. Got %v\n", exAbs, files)
+			tester.t.Errorf("expected file: %s doesn't exist. Got %v\n", exAbs, files)
 		}
 	}
 }
@@ -247,7 +247,7 @@ func (tester *fileWriterTester) checkJustRequiredFilesExist(testCase *fileWriter
 		}
 
 		if !found {
-			tester.t.Errorf("Unexpected file: %v", f)
+			tester.t.Errorf("unexpected file: %v", f)
 		}
 	}
 }

@@ -110,7 +110,7 @@ var formatterFuncsParameterized = map[string]FormatterFuncCreator{
 }
 
 func errorAliasReserved(name string) error {
-	return fmt.Errorf("Cannot use '%s' as custom formatter name. Name is reserved.", name)
+	return fmt.Errorf("cannot use '%s' as custom formatter name. Name is reserved.", name)
 }
 
 // RegisterCustomFormatter registers a new custom formatter factory with a given name. If returned error is nil,
@@ -172,7 +172,7 @@ func (formatter *formatter) buildFormatterFuncs() error {
 
 		isEndOfStr := i == len(formatter.fmtStringOriginal)-1
 		if isEndOfStr {
-			return fmt.Errorf("Format error: %v - last symbol", formatterSymbolString)
+			return fmt.Errorf("format error: %v - last symbol", formatterSymbolString)
 		}
 
 		isDoubledFormatterSymbol := formatter.fmtStringOriginal[i+1] == FormatterSymbol
@@ -199,7 +199,7 @@ func (formatter *formatter) buildFormatterFuncs() error {
 func (formatter *formatter) extractFormatterFunc(index int) (FormatterFunc, int, error) {
 	letterSequence := formatter.extractLetterSequence(index)
 	if len(letterSequence) == 0 {
-		return nil, 0, fmt.Errorf("Format error: lack of formatter after %v. At %v", formatterSymbolString, index)
+		return nil, 0, fmt.Errorf("format error: lack of formatter after %v. At %v", formatterSymbolString, index)
 	}
 
 	function, formatterLength, ok := formatter.findFormatterFunc(letterSequence)
@@ -212,7 +212,7 @@ func (formatter *formatter) extractFormatterFunc(index int) (FormatterFunc, int,
 		return function, index + formatterLength - 1, nil
 	}
 
-	return nil, 0, errors.New("Format error: unrecognized formatter at " + strconv.Itoa(index) + ": " + letterSequence)
+	return nil, 0, errors.New("format error: unrecognized formatter at " + strconv.Itoa(index) + ": " + letterSequence)
 }
 
 func (formatter *formatter) extractLetterSequence(index int) string {

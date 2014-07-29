@@ -73,7 +73,7 @@ func (node *xmlNode) unmarshal(startEl xml.StartElement) error {
 	for _, v := range startEl.Attr {
 		_, alreadyExists := node.attributes[v.Name.Local]
 		if alreadyExists {
-			return errors.New("Tag '" + node.name + "' has duplicated attribute: '" + v.Name.Local + "'")
+			return errors.New("tag '" + node.name + "' has duplicated attribute: '" + v.Name.Local + "'")
 		}
 		node.attributes[v.Name.Local] = v.Value
 	}
@@ -103,12 +103,12 @@ func unmarshalConfig(reader io.Reader) (*xmlNode, error) {
 		return nil, err
 	}
 	if config == nil {
-		return nil, errors.New("Xml has no content")
+		return nil, errors.New("xml has no content")
 	}
 
 	nextConfigEntry, err := unmarshalNode(xmlParser, nil)
 	if nextConfigEntry != nil {
-		return nil, errors.New("Xml contains more than one root element")
+		return nil, errors.New("xml contains more than one root element")
 	}
 
 	return config, nil

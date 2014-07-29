@@ -52,7 +52,7 @@ type logLevelException struct {
 // newLogLevelException creates a new exception.
 func newLogLevelException(funcPattern string, filePattern string, constraints logLevelConstraints) (*logLevelException, error) {
 	if constraints == nil {
-		return nil, errors.New("Constraints can not be nil")
+		return nil, errors.New("constraints can not be nil")
 	}
 
 	exception := new(logLevelException)
@@ -98,7 +98,7 @@ func (logLevelEx *logLevelException) FilePattern() string {
 func (logLevelEx *logLevelException) initFuncPatternParts(funcPattern string) (err error) {
 
 	if funcFormatValidator.FindString(funcPattern) != funcPattern {
-		return errors.New("Func path \"" + funcPattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 _ * . allowed)")
+		return errors.New("func path \"" + funcPattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 _ * . allowed)")
 	}
 
 	logLevelEx.funcPatternParts = splitPattern(funcPattern)
@@ -109,7 +109,7 @@ func (logLevelEx *logLevelException) initFuncPatternParts(funcPattern string) (e
 func (logLevelEx *logLevelException) initFilePatternParts(filePattern string) (err error) {
 
 	if fileFormatValidator.FindString(filePattern) != filePattern {
-		return errors.New("File path \"" + filePattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 \\ / _ * . allowed)")
+		return errors.New("file path \"" + filePattern + "\" contains incorrect symbols. Only a-z A-Z 0-9 \\ / _ * . allowed)")
 	}
 
 	logLevelEx.filePatternParts = splitPattern(filePattern)

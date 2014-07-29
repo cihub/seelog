@@ -133,7 +133,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 		asnLogger.msgQueue.PushBack(queueItem)
 		asnLogger.queueHasElements.Broadcast()
 	} else {
-		err := fmt.Errorf("Queue closed! Cannot process element: %d %#v", level, message)
+		err := fmt.Errorf("queue closed! Cannot process element: %d %#v", level, message)
 		reportInternalError(err)
 	}
 }

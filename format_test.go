@@ -138,7 +138,7 @@ func TestFormats(t *testing.T) {
 		form, err := newFormatter(test.formatString)
 
 		if (err != nil) != test.errorExpected {
-			t.Errorf("Input: %s \nInput LL: %s\n* Expected error:%t Got error: %t\n",
+			t.Errorf("input: %s \nInput LL: %s\n* Expected error:%t Got error: %t\n",
 				test.input, test.inputLogLevel, test.errorExpected, (err != nil))
 			if err != nil {
 				t.Logf("%s\n", err.Error())
@@ -151,7 +151,7 @@ func TestFormats(t *testing.T) {
 		msg := form.Format(test.input, test.inputLogLevel, context)
 
 		if err == nil && msg != test.expectedOutput {
-			t.Errorf("Format: %s \nInput: %s \nInput LL: %s\n* Expected: %s \n* Got: %s\n",
+			t.Errorf("format: %s \nInput: %s \nInput LL: %s\n* Expected: %s \n* Got: %s\n",
 				test.formatString, test.input, test.inputLogLevel, test.expectedOutput, msg)
 		}
 	}
@@ -184,7 +184,7 @@ func TestDateParameterizedFormat(t *testing.T) {
 	dateAfter := time.Now().Format(testFormat)
 
 	if !strings.HasPrefix(msg, dateBefore) && !strings.HasPrefix(msg, dateAfter) {
-		t.Errorf("Incorrect message: %v. Expected %v or %v", msg, dateBefore, dateAfter)
+		t.Errorf("incorrect message: %v. Expected %v or %v", msg, dateBefore, dateAfter)
 	}
 }
 
@@ -197,11 +197,11 @@ func createTestFormatter(format string) FormatterFunc {
 func TestCustomFormatterRegistration(t *testing.T) {
 	err := RegisterCustomFormatter("Level", createTestFormatter)
 	if err == nil {
-		t.Errorf("Expected an error when trying to register a custom formatter with a reserved alias")
+		t.Errorf("expected an error when trying to register a custom formatter with a reserved alias")
 	}
 	err = RegisterCustomFormatter("EscM", createTestFormatter)
 	if err == nil {
-		t.Errorf("Expected an error when trying to register a custom formatter with a reserved parameterized alias")
+		t.Errorf("expected an error when trying to register a custom formatter with a reserved parameterized alias")
 	}
 	err = RegisterCustomFormatter("TEST", createTestFormatter)
 	if err != nil {
@@ -209,7 +209,7 @@ func TestCustomFormatterRegistration(t *testing.T) {
 	}
 	err = RegisterCustomFormatter("TEST", createTestFormatter)
 	if err == nil {
-		t.Errorf("Expected an error when trying to register a custom formatter with duplicate name")
+		t.Errorf("expected an error when trying to register a custom formatter with duplicate name")
 	}
 
 	context, conErr := currentContext()

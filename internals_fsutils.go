@@ -182,7 +182,7 @@ func getDirFilePaths(dirPath string, fpFilter filePathFilter, pathIsName bool) (
 	if !filepath.IsAbs(dirPath) {
 		absDirPath, err = filepath.Abs(dirPath)
 		if err != nil {
-			return nil, fmt.Errorf("Cannot get absolute path of directory: %s", err.Error())
+			return nil, fmt.Errorf("cannot get absolute path of directory: %s", err.Error())
 		}
 	} else {
 		absDirPath = dirPath
@@ -239,7 +239,7 @@ func getOpenFilesByDirectoryAsync(
 ) error {
 	n := len(dirPaths)
 	if n > maxDirNumberReadAsync {
-		return fmt.Errorf("Number of input directories to be read exceeded max value %d", maxDirNumberReadAsync)
+		return fmt.Errorf("number of input directories to be read exceeded max value %d", maxDirNumberReadAsync)
 	}
 	type filesInDirResult struct {
 		DirName string

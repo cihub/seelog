@@ -202,7 +202,7 @@ func configFromReaderWithConfig(reader io.Reader, cfg *CfgParseParams) (*logConf
 	}
 
 	if config.name != seelogConfigID {
-		return nil, errors.New("Root xml tag must be '" + seelogConfigID + "'")
+		return nil, errors.New("root xml tag must be '" + seelogConfigID + "'")
 	}
 
 	err = checkUnexpectedAttribute(
@@ -269,7 +269,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 	levelsStr, isLevels := node.attributes[levelsID]
 
 	if isLevels && (isMinLevel && isMaxLevel) {
-		return nil, errors.New("For level declaration use '" + levelsID + "'' OR '" + minLevelID +
+		return nil, errors.New("for level declaration use '" + levelsID + "'' OR '" + minLevelID +
 			"', '" + maxLevelID + "'")
 	}
 
@@ -294,7 +294,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		found := true
 		minLevel, found = LogLevelFromString(minLevelStr)
 		if !found {
-			return nil, errors.New("Declared " + minLevelID + " not found: " + minLevelStr)
+			return nil, errors.New("declared " + minLevelID + " not found: " + minLevelStr)
 		}
 	}
 
@@ -303,7 +303,7 @@ func getConstraints(node *xmlNode) (logLevelConstraints, error) {
 		found := true
 		maxLevel, found = LogLevelFromString(maxLevelStr)
 		if !found {
-			return nil, errors.New("Declared " + maxLevelID + " not found: " + maxLevelStr)
+			return nil, errors.New("declared " + maxLevelID + " not found: " + maxLevelStr)
 		}
 	}
 
@@ -316,7 +316,7 @@ func parseLevels(str string) ([]LogLevel, error) {
 	for _, levelStr := range levelsStrArr {
 		level, found := LogLevelFromString(levelStr)
 		if !found {
-			return nil, errors.New("Declared level not found: " + levelStr)
+			return nil, errors.New("declared level not found: " + levelStr)
 		}
 
 		levels = append(levels, level)
@@ -352,7 +352,7 @@ func getExceptions(config *xmlNode) ([]*logLevelException, error) {
 
 	for _, exceptionNode := range exceptionsNode.children {
 		if exceptionNode.name != exceptionID {
-			return nil, errors.New("Incorrect nested element in exceptions section: " + exceptionNode.name)
+			return nil, errors.New("incorrect nested element in exceptions section: " + exceptionNode.name)
 		}
 
 		err := checkUnexpectedAttribute(exceptionNode, minLevelID, maxLevelID, levelsID, funcPatternID, filePatternID)
@@ -362,7 +362,7 @@ func getExceptions(config *xmlNode) ([]*logLevelException, error) {
 
 		constraints, err := getConstraints(exceptionNode)
 		if err != nil {
-			return nil, errors.New("Incorrect " + exceptionsID + " node: " + err.Error())
+			return nil, errors.New("incorrect " + exceptionsID + " node: " + err.Error())
 		}
 
 		funcPattern, isFuncPattern := exceptionNode.attributes[funcPatternID]
@@ -376,7 +376,7 @@ func getExceptions(config *xmlNode) ([]*logLevelException, error) {
 
 		exception, err := newLogLevelException(funcPattern, filePattern, constraints)
 		if err != nil {
-			return nil, errors.New("Incorrect exception node: " + err.Error())
+			return nil, errors.New("incorrect exception node: " + err.Error())
 		}
 
 		exceptions = append(exceptions, exception)
@@ -395,7 +395,7 @@ func checkDistinctExceptions(exceptions []*logLevelException) error {
 			if exception.FuncPattern() == exception1.FuncPattern() &&
 				exception.FilePattern() == exception1.FilePattern() {
 
-				return fmt.Errorf("There are two or more duplicate exceptions. Func: %v, file %v",
+				return fmt.Errorf("there are two or more duplicate exceptions. Func: %v, file %v",
 					exception.FuncPattern(), exception.FilePattern())
 			}
 		}
@@ -431,7 +431,7 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 
 	for _, formatNode := range formatsNode.children {
 		if formatNode.name != formatID {
-			return nil, errors.New("Incorrect nested element in " + formatsID + " section: " + formatNode.name)
+			return nil, errors.New("incorrect nested element in " + formatsID + " section: " + formatNode.name)
 		}
 
 		err := checkUnexpectedAttribute(formatNode, formatKeyAttrID, formatID)
@@ -442,10 +442,10 @@ func getFormats(config *xmlNode) (map[string]*formatter, error) {
 		id, isID := formatNode.attributes[formatKeyAttrID]
 		formatStr, isFormat := formatNode.attributes[formatAttrID]
 		if !isID {
-			return nil, errors.New("Format has no '" + formatKeyAttrID + "' attribute")
+			return nil, errors.New("format has no '" + formatKeyAttrID + "' attribute")
 		}
 		if !isFormat {
-			return nil, errors.New("Format[" + id + "] has no '" + formatAttrID + "' attribute")
+			return nil, errors.New("format[" + id + "] has no '" + formatAttrID + "' attribute")
 		}
 
 		formatter, err := newFormatter(formatStr)
@@ -469,7 +469,7 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 	logType, found := getLoggerTypeFromString(logTypeStr)
 
 	if !found {
-		return 0, nil, fmt.Errorf("Unknown logger type: %s", logTypeStr)
+		return 0, nil, fmt.Errorf("unknown logger type: %s", logTypeStr)
 	}
 
 	if logType == asyncTimerloggerTypeFromString {
@@ -575,7 +575,7 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[st
 	pdFormat, pdOk := predefinedFormats[formatID]
 
 	if !pdOk {
-		return nil, errors.New("Formatid = '" + formatID + "' doesn't exist")
+		return nil, errors.New("formatid = '" + formatID + "' doesn't exist")
 	}
 
 	return pdFormat, nil
@@ -586,7 +586,7 @@ func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*
 	for _, childNode := range node.children {
 		entry, ok := elementMap[childNode.name]
 		if !ok {
-			return nil, errors.New("Unnknown tag '" + childNode.name + "' in outputs section")
+			return nil, errors.New("unnknown tag '" + childNode.name + "' in outputs section")
 		}
 
 		output, err := entry.constructor(childNode, format, formats, cfg)
@@ -795,7 +795,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 	// Check if the string can really be converted into int.
 	if _, err := strconv.Atoi(hostPort); err != nil {
-		return nil, errors.New("Invalid host port number")
+		return nil, errors.New("invalid host port number")
 	}
 
 	userName, ok := node.attributes[userNameID]
@@ -878,7 +878,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		} else if reconnectOnMsgStr == "false" {
 			reconnectOnMsg = false
 		} else {
-			return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterReconnectOnMsgAttr + "' attribute value")
+			return nil, errors.New("node '" + node.name + "' has incorrect '" + connWriterReconnectOnMsgAttr + "' attribute value")
 		}
 	}
 
@@ -890,7 +890,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		} else if useTLSStr == "false" {
 			useTLS = false
 		} else {
-			return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterUseTLSAttr + "' attribute value")
+			return nil, errors.New("node '" + node.name + "' has incorrect '" + connWriterUseTLSAttr + "' attribute value")
 		}
 		if useTLS {
 			insecureSkipVerify := false
@@ -901,7 +901,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 				} else if insecureSkipVerifyStr == "false" {
 					insecureSkipVerify = false
 				} else {
-					return nil, errors.New("Node '" + node.name + "' has incorrect '" + connWriterInsecureSkipVerifyAttr + "' attribute value")
+					return nil, errors.New("node '" + node.name + "' has incorrect '" + connWriterInsecureSkipVerifyAttr + "' attribute value")
 				}
 			}
 			config := tls.Config{InsecureSkipVerify: insecureSkipVerify}
@@ -927,7 +927,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 	rollingType, ok := rollingTypeFromString(rollingTypeStr)
 	if !ok {
-		return nil, errors.New("Unknown rolling file type: " + rollingTypeStr)
+		return nil, errors.New("unknown rolling file type: " + rollingTypeStr)
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -950,7 +950,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	} else {
 		rArchiveType, ok = rollingArchiveTypeFromString(rollingArchiveStr)
 		if !ok {
-			return nil, errors.New("Unknown rolling archive type: " + rollingArchiveStr)
+			return nil, errors.New("unknown rolling archive type: " + rollingArchiveStr)
 		}
 
 		if rArchiveType == rollingArchiveNone {
@@ -960,7 +960,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			if !ok {
 				rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
 				if !ok {
-					return nil, fmt.Errorf("Cannot get default filename for archive type = %v",
+					return nil, fmt.Errorf("cannot get default filename for archive type = %v",
 						rArchiveType)
 				}
 			}
@@ -1031,7 +1031,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		return newFormattedWriter(rollingWriter, currentFormat)
 	}
 
-	return nil, errors.New("Incorrect rolling writer type " + rollingTypeStr)
+	return nil, errors.New("incorrect rolling writer type " + rollingTypeStr)
 }
 
 func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
@@ -1076,12 +1076,12 @@ func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats ma
 
 	formattedWriter, ok := receivers[0].(*formattedWriter)
 	if !ok {
-		return nil, errors.New("Buffered writer's child is not writer")
+		return nil, errors.New("buffered writer's child is not writer")
 	}
 
 	// ... and then we check that it hasn't changed
 	if formattedWriter.Format() != currentFormat {
-		return nil, errors.New("Inner writer cannot have his own format")
+		return nil, errors.New("inner writer cannot have his own format")
 	}
 
 	bufferedWriter, err := newBufferedWriter(formattedWriter.Writer(), size, time.Duration(flushPeriod))

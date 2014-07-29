@@ -76,18 +76,18 @@ func TestContext(t *testing.T) {
 	if nf := context.Func(); nf != nameFunc {
 		// Account for a case when the func full path is bigger than commonPrefix but includes it.
 		if !strings.HasSuffix(nf, nameFunc) {
-			t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+			t.Errorf("expected context.Func == %s ; got %s", nameFunc, context.Func())
 		}
 	}
 
 	if context.ShortPath() != shortPath {
-		t.Errorf("Expected context.ShortPath == %s ; got %s", shortPath, context.ShortPath())
+		t.Errorf("expected context.ShortPath == %s ; got %s", shortPath, context.ShortPath())
 	}
 
 	fp := fullPath(t)
 
 	if context.FullPath() != fp {
-		t.Errorf("Expected context.FullPath == %s ; got %s", fp, context.FullPath())
+		t.Errorf("expected context.FullPath == %s ; got %s", fp, context.FullPath())
 	}
 }
 
@@ -111,17 +111,17 @@ func TestInnerContext(t *testing.T) {
 	if cf := context.Func(); cf != nameFunc {
 		// Account for a case when the func full path is bigger than commonPrefix but includes it.
 		if !strings.HasSuffix(cf, nameFunc) {
-			t.Errorf("Expected context.Func == %s ; got %s", nameFunc, context.Func())
+			t.Errorf("expected context.Func == %s ; got %s", nameFunc, context.Func())
 		}
 	}
 
 	if context.ShortPath() != shortPath {
-		t.Errorf("Expected context.ShortPath == %s ; got %s", shortPath, context.ShortPath())
+		t.Errorf("expected context.ShortPath == %s ; got %s", shortPath, context.ShortPath())
 	}
 
 	fp := fullPath(t)
 
 	if context.FullPath() != fp {
-		t.Errorf("Expected context.FullPath == %s ; got %s", fp, context.FullPath())
+		t.Errorf("expected context.FullPath == %s ; got %s", fp, context.FullPath())
 	}
 }

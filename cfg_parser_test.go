@@ -1013,7 +1013,7 @@ func cleanupAfterCfgTest(t *testing.T) {
 	for _, p := range toDel {
 		err = tryRemoveFile(p)
 		if nil != err {
-			t.Errorf("Cannot remove file %s in test directory: %s", p, err.Error())
+			t.Errorf("cannot remove file %s in test directory: %s", p, err.Error())
 		}
 	}
 }

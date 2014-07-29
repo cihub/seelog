@@ -68,7 +68,7 @@ func TestMatchingCorrectness(t *testing.T) {
 
 		match := rule.match(testCase.funcName, testCase.fileName)
 		if match != testCase.match {
-			t.Errorf("Incorrect matching for [ %v, %v ] [ %v, %v ] Expected: %t. Got: %t",
+			t.Errorf("incorrect matching for [ %v, %v ] [ %v, %v ] Expected: %t. Got: %t",
 				testCase.funcPattern, testCase.filePattern, testCase.funcName, testCase.fileName, testCase.match, match)
 		}
 	}
@@ -88,11 +88,11 @@ func TestAsterisksReducing(t *testing.T) {
 	}
 	expectFunc := "*func*"
 	if rule.FuncPattern() != expectFunc {
-		t.Errorf("Asterisks must be reduced. Expect:%v, Got:%v", expectFunc, rule.FuncPattern())
+		t.Errorf("asterisks must be reduced. Expect:%v, Got:%v", expectFunc, rule.FuncPattern())
 	}
 
 	expectFile := "fi*le"
 	if rule.FilePattern() != expectFile {
-		t.Errorf("Asterisks must be reduced. Expect:%v, Got:%v", expectFile, rule.FilePattern())
+		t.Errorf("asterisks must be reduced. Expect:%v, Got:%v", expectFile, rule.FilePattern())
 	}
 }

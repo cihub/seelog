@@ -67,7 +67,7 @@ func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, erro
 		return newRollingFileWriterTime(testCase.fileName, rollingArchiveNone, "", -1, testCase.datePattern, rollingIntervalDaily)
 	}
 
-	return nil, fmt.Errorf("Incorrect rollingType")
+	return nil, fmt.Errorf("incorrect rollingType")
 }
 
 //===============================================================

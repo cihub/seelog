@@ -61,15 +61,15 @@ func TestCustomDispatcher_Message(t *testing.T) {
 		return
 	}
 	if cout.dataPassed != "testdata" {
-		t.Errorf("Wrong data passed: '%s'", cout.dataPassed)
+		t.Errorf("wrong data passed: '%s'", cout.dataPassed)
 		return
 	}
 	if cout.messageOutput != string(bytes) {
-		t.Errorf("Wrong message output: '%s'", cout.messageOutput)
+		t.Errorf("wrong message output: '%s'", cout.messageOutput)
 		return
 	}
 	if cout.levelOutput != TraceLvl {
-		t.Errorf("Wrong log level: '%s'", cout.levelOutput)
+		t.Errorf("wrong log level: '%s'", cout.levelOutput)
 		return
 	}
 	if cout.flushed {
@@ -108,15 +108,15 @@ func TestCustomDispatcher_Flush(t *testing.T) {
 		return
 	}
 	if cout.dataPassed != "testdata" {
-		t.Errorf("Wrong data passed: '%s'", cout.dataPassed)
+		t.Errorf("wrong data passed: '%s'", cout.dataPassed)
 		return
 	}
 	if cout.messageOutput != "" {
-		t.Errorf("Wrong message output: '%s'", cout.messageOutput)
+		t.Errorf("wrong message output: '%s'", cout.messageOutput)
 		return
 	}
 	if cout.levelOutput != TraceLvl {
-		t.Errorf("Wrong log level: '%s'", cout.levelOutput)
+		t.Errorf("wrong log level: '%s'", cout.levelOutput)
 		return
 	}
 	if !cout.flushed {
@@ -155,15 +155,15 @@ func TestCustomDispatcher_Close(t *testing.T) {
 		return
 	}
 	if cout.dataPassed != "testdata" {
-		t.Errorf("Wrong data passed: '%s'", cout.dataPassed)
+		t.Errorf("wrong data passed: '%s'", cout.dataPassed)
 		return
 	}
 	if cout.messageOutput != "" {
-		t.Errorf("Wrong message output: '%s'", cout.messageOutput)
+		t.Errorf("wrong message output: '%s'", cout.messageOutput)
 		return
 	}
 	if cout.levelOutput != TraceLvl {
-		t.Errorf("Wrong log level: '%s'", cout.levelOutput)
+		t.Errorf("wrong log level: '%s'", cout.levelOutput)
 		return
 	}
 	if !cout.flushed {

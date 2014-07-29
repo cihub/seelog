@@ -75,7 +75,7 @@ func prepareMessage(senderAddr, senderName, subject string, body []byte) []byte 
 // host server name and tries to create an appropriate TLS.Config.
 func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config, err error) {
 	if pemFileDirPaths == nil || len(pemFileDirPaths) == 0 {
-		err = errors.New("Invalid PEM file paths")
+		err = errors.New("invalid PEM file paths")
 		return
 	}
 	pemEncodedContent := []byte{}
@@ -102,7 +102,7 @@ func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config
 			if bytes, e = ioutil.ReadFile(pfp); e == nil {
 				pemEncodedContent = append(pemEncodedContent, bytes...)
 			} else {
-				return nil, fmt.Errorf("Cannot read file: %s: %s", pfp, e.Error())
+				return nil, fmt.Errorf("cannot read file: %s: %s", pfp, e.Error())
 			}
 		}
 	}
@@ -111,7 +111,7 @@ func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config
 	isAppended := config.RootCAs.AppendCertsFromPEM(pemEncodedContent)
 	if !isAppended {
 		// Extract this into a separate error.
-		err = errors.New("Invalid PEM content")
+		err = errors.New("invalid PEM content")
 		return
 	}
 	return

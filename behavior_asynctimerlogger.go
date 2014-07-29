@@ -40,7 +40,7 @@ type asyncTimerLogger struct {
 func newAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimerLogger, error) {
 
 	if interval <= 0 {
-		return nil, errors.New("Async logger interval should be > 0")
+		return nil, errors.New("async logger interval should be > 0")
 	}
 
 	asnTimerLogger := new(asyncTimerLogger)

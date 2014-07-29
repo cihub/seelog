@@ -44,13 +44,13 @@ type minMaxConstraints struct {
 // newMinMaxConstraints creates a new minMaxConstraints struct with the specified min and max levels.
 func newMinMaxConstraints(min LogLevel, max LogLevel) (*minMaxConstraints, error) {
 	if min > max {
-		return nil, fmt.Errorf("Min level can't be greater than max. Got min: %d, max: %d", min, max)
+		return nil, fmt.Errorf("min level can't be greater than max. Got min: %d, max: %d", min, max)
 	}
 	if min < TraceLvl || min > CriticalLvl {
-		return nil, fmt.Errorf("Min level can't be less than Trace or greater than Critical. Got min: %d", min)
+		return nil, fmt.Errorf("min level can't be less than Trace or greater than Critical. Got min: %d", min)
 	}
 	if max < TraceLvl || max > CriticalLvl {
-		return nil, fmt.Errorf("Max level can't be less than Trace or greater than Critical. Got max: %d", max)
+		return nil, fmt.Errorf("max level can't be less than Trace or greater than Critical. Got max: %d", max)
 	}
 
 	return &minMaxConstraints{min, max}, nil
@@ -75,7 +75,7 @@ type listConstraints struct {
 // newListConstraints creates a new listConstraints struct with the specified allowed levels.
 func newListConstraints(allowList []LogLevel) (*listConstraints, error) {
 	if allowList == nil {
-		return nil, errors.New("List can't be nil")
+		return nil, errors.New("list can't be nil")
 	}
 
 	allowLevels, err := createMapFromList(allowList)
@@ -113,7 +113,7 @@ func createMapFromList(allowedList []LogLevel) (map[LogLevel]bool, error) {
 	allowedLevels := make(map[LogLevel]bool, 0)
 	for _, level := range allowedList {
 		if level < TraceLvl || level > Off {
-			return nil, fmt.Errorf("Level can't be less than Trace or greater than Critical. Got level: %d", level)
+			return nil, fmt.Errorf("level can't be less than Trace or greater than Critical. Got level: %d", level)
 		}
 		allowedLevels[level] = true
 	}
@@ -121,7 +121,7 @@ func createMapFromList(allowedList []LogLevel) (map[LogLevel]bool, error) {
 }
 func validateOffLevel(allowedLevels map[LogLevel]bool) error {
 	if _, ok := allowedLevels[Off]; ok && len(allowedLevels) > 1 {
-		return errors.New("LogLevel Off cant be mixed with other levels")
+		return errors.New("logLevel Off cant be mixed with other levels")
 	}
 
 	return nil

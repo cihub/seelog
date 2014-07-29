@@ -78,7 +78,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	pc, fullPath, line, ok := runtime.Caller(skip)
 
 	if !ok {
-		return "", "", "", 0, errors.New("Error during runtime.Caller")
+		return "", "", "", 0, errors.New("error during runtime.Caller")
 	}
 
 	//TODO:Currently fixes bug in weekly.2012-03-13+: Caller returns incorrect separators
@@ -113,7 +113,7 @@ func specificContext(skip int) (LogContextInterface, error) {
 	callTime := time.Now()
 
 	if skip < 0 {
-		negativeStackFrameErr := errors.New("Can not skip negative stack frames")
+		negativeStackFrameErr := errors.New("can not skip negative stack frames")
 		return &errorContext{callTime, negativeStackFrameErr}, negativeStackFrameErr
 	}
 

@@ -41,7 +41,7 @@ type bytesVerifier struct {
 
 func newBytesVerifier(t *testing.T) (*bytesVerifier, error) {
 	if t == nil {
-		return nil, errors.New("Testing environment param is nil")
+		return nil, errors.New("testing environment param is nil")
 	}
 
 	verifier := new(bytesVerifier)
@@ -54,7 +54,7 @@ func newBytesVerifier(t *testing.T) (*bytesVerifier, error) {
 // After Write call, waitingForInput is set to false.
 func (verifier *bytesVerifier) Write(bytes []byte) (n int, err error) {
 	if !verifier.waitingForInput {
-		verifier.testEnv.Errorf("Unexpected input: %v", string(bytes))
+		verifier.testEnv.Errorf("unexpected input: %v", string(bytes))
 		return
 	}
 
@@ -63,7 +63,7 @@ func (verifier *bytesVerifier) Write(bytes []byte) (n int, err error) {
 
 	if verifier.expectedBytes != nil {
 		if bytes == nil {
-			verifier.testEnv.Errorf("Incoming 'bytes' is nil")
+			verifier.testEnv.Errorf("incoming 'bytes' is nil")
 		} else {
 			if len(bytes) != len(verifier.expectedBytes) {
 				verifier.testEnv.Errorf("'Bytes' has unexpected len. Expected: %d. Got: %d. . Expected string: %q. Got: %q",
@@ -71,7 +71,7 @@ func (verifier *bytesVerifier) Write(bytes []byte) (n int, err error) {
 			} else {
 				for i := 0; i < len(bytes); i++ {
 					if verifier.expectedBytes[i] != bytes[i] {
-						verifier.testEnv.Errorf("Incorrect data on position %d. Expected: %d. Got: %d. Expected string: %q. Got: %q",
+						verifier.testEnv.Errorf("incorrect data on position %d. Expected: %d. Got: %d. Expected string: %q. Got: %q",
 							i, verifier.expectedBytes[i], bytes[i], string(verifier.expectedBytes), string(bytes))
 						break
 					}
