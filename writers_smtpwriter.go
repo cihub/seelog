@@ -52,8 +52,8 @@ type smtpWriter struct {
 	caCertDirPaths     []string
 }
 
-// newSmtpWriter returns a new SMTP-writer.
-func newSmtpWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string) *smtpWriter {
+// newSMTPWriter returns a new SMTP-writer.
+func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
 		hostName:           hn,

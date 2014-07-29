@@ -147,7 +147,7 @@ func getParserTests() []parserTest {
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
 
-		testName = "Smtp writer"
+		testName = "SMTP writer"
 		testConfig = `
 <seelog>
 	<outputs>
@@ -165,7 +165,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testSmtpWriter := newSmtpWriter(
+		testSMTPWriter := newSMTPWriter(
 			"sa",
 			"sn",
 			[]string{"ra1", "ra2", "ra3"},
@@ -175,7 +175,7 @@ func getParserTests() []parserTest {
 			"up",
 			[]string{"cacdp1", "cacdp2"},
 		)
-		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSmtpWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSMTPWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})

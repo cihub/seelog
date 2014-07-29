@@ -144,7 +144,7 @@ func init() {
 		consoleWriterID:      {createConsoleWriter},
 		rollingfileWriterID:  {createRollingFileWriter},
 		bufferedWriterID:     {createbufferedWriter},
-		smtpWriterID:         {createSmtpWriter},
+		smtpWriterID:         {createSMTPWriter},
 		connWriterID:         {createconnWriter},
 	}
 
@@ -739,7 +739,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 }
 
 // Creates new SMTP writer if encountered in the config file.
-func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
+func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID)
 	if err != nil {
 		return nil, err
@@ -808,7 +808,7 @@ func createSmtpWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, newMissingArgumentError(node.name, userPassID)
 	}
 
-	smtpWriter := newSmtpWriter(
+	smtpWriter := newSMTPWriter(
 		senderAddress,
 		senderName,
 		recipientAddresses,
