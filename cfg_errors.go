@@ -29,8 +29,8 @@ import (
 )
 
 var (
-	nodeMustHaveChildrenError   = errors.New("Node must have children")
-	nodeCannotHaveChildrenError = errors.New("Node cannot have children")
+	errNodeMustHaveChildrenError   = errors.New("Node must have children")
+	errNodeCannotHaveChildrenError = errors.New("Node cannot have children")
 )
 
 type unexpectedChildElementError struct {
