@@ -607,7 +607,7 @@ func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[stri
 	}
 
 	if !node.hasChildren() {
-		return nil, errNodeMustHaveChildrenError
+		return nil, errNodeMustHaveChildren
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -642,7 +642,7 @@ func createCustomReceiver(node *xmlNode, formatFromParent *formatter, formats ma
 	}
 
 	if node.hasChildren() {
-		return nil, errNodeCannotHaveChildrenError
+		return nil, errNodeCannotHaveChildren
 	}
 	customName, hasCustomName := node.attributes[customNameAttrID]
 	if !hasCustomName {
@@ -684,7 +684,7 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 	}
 
 	if !node.hasChildren() {
-		return nil, errNodeMustHaveChildrenError
+		return nil, errNodeMustHaveChildren
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -717,7 +717,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	}
 
 	if node.hasChildren() {
-		return nil, errNodeCannotHaveChildrenError
+		return nil, errNodeCannotHaveChildren
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -746,7 +746,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	}
 	// Node must have children.
 	if !node.hasChildren() {
-		return nil, errNodeMustHaveChildrenError
+		return nil, errNodeMustHaveChildren
 	}
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
 	if err != nil {
@@ -829,7 +829,7 @@ func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map
 	}
 
 	if node.hasChildren() {
-		return nil, errNodeCannotHaveChildrenError
+		return nil, errNodeCannotHaveChildren
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
@@ -847,7 +847,7 @@ func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map
 
 func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	if node.hasChildren() {
-		return nil, errNodeCannotHaveChildrenError
+		return nil, errNodeCannotHaveChildren
 	}
 
 	err := checkUnexpectedAttribute(node, outputFormatID, connWriterAddrAttr, connWriterNetAttr, connWriterReconnectOnMsgAttr, connWriterUseTLSAttr, connWriterInsecureSkipVerifyAttr)
@@ -917,7 +917,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	if node.hasChildren() {
-		return nil, errNodeCannotHaveChildrenError
+		return nil, errNodeCannotHaveChildren
 	}
 
 	rollingTypeStr, isRollingType := node.attributes[rollingFileTypeAttr]
@@ -1041,7 +1041,7 @@ func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats ma
 	}
 
 	if !node.hasChildren() {
-		return nil, errNodeMustHaveChildrenError
+		return nil, errNodeMustHaveChildren
 	}
 
 	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
