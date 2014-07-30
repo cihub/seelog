@@ -42,51 +42,51 @@ func TestConfig(t *testing.T) {
 
 	conf, err := configFromReader(strings.NewReader(testConfig))
 	if err != nil {
-		t.Errorf("Parse error: %s\n", err.Error())
+		t.Errorf("parse error: %s\n", err.Error())
 		return
 	}
 
 	context, err := currentContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context:" + err.Error())
 		return
 	}
 	firstContext, err := getFirstContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context:" + err.Error())
 		return
 	}
 	secondContext, err := getSecondContext()
 	if err != nil {
-		t.Errorf("Cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context:" + err.Error())
 		return
 	}
 
 	if !conf.IsAllowed(TraceLvl, context) {
-		t.Errorf("Error: deny trace in current context")
+		t.Errorf("error: deny trace in current context")
 	}
 	if conf.IsAllowed(TraceLvl, firstContext) {
-		t.Errorf("Error: allow trace in first context")
+		t.Errorf("error: allow trace in first context")
 	}
 	if conf.IsAllowed(ErrorLvl, context) {
-		t.Errorf("Error: allow error in current context")
+		t.Errorf("error: allow error in current context")
 	}
 	if !conf.IsAllowed(ErrorLvl, secondContext) {
-		t.Errorf("Error: deny error in second context")
+		t.Errorf("error: deny error in second context")
 	}
 
 	// cache test
 	if !conf.IsAllowed(TraceLvl, context) {
-		t.Errorf("Error: deny trace in current context")
+		t.Errorf("error: deny trace in current context")
 	}
 	if conf.IsAllowed(TraceLvl, firstContext) {
-		t.Errorf("Error: allow trace in first context")
+		t.Errorf("error: allow trace in first context")
 	}
 	if conf.IsAllowed(ErrorLvl, context) {
-		t.Errorf("Error: allow error in current context")
+		t.Errorf("error: allow error in current context")
 	}
 	if !conf.IsAllowed(ErrorLvl, secondContext) {
-		t.Errorf("Error: deny error in second context")
+		t.Errorf("error: deny error in second context")
 	}
 }
 

@@ -43,12 +43,12 @@ func newSyncLogger(config *logConfig) *syncLogger {
 	return syncLogger
 }
 
-func (cLogger *syncLogger) innerLog(
+func (syncLogger *syncLogger) innerLog(
 	level LogLevel,
 	context LogContextInterface,
 	message fmt.Stringer) {
 
-	cLogger.processLogMsg(level, message, context)
+	syncLogger.processLogMsg(level, message, context)
 }
 
 func (syncLogger *syncLogger) Close() {

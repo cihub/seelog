@@ -304,7 +304,7 @@ func (cLogger *commonLogger) processLogMsg(
 
 	defer func() {
 		if err := recover(); err != nil {
-			reportInternalError(fmt.Errorf("Recovered from panic during message processing: %s", err))
+			reportInternalError(fmt.Errorf("recovered from panic during message processing: %s", err))
 		}
 	}()
 

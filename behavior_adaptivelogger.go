@@ -57,21 +57,21 @@ func newAsyncAdaptiveLogger(
 	criticalMsgCount uint32) (*asyncAdaptiveLogger, error) {
 
 	if minInterval <= 0 {
-		return nil, errors.New("Async adaptive logger min interval should be > 0")
+		return nil, errors.New("async adaptive logger min interval should be > 0")
 	}
 
 	if maxInterval > adaptiveLoggerMaxInterval {
-		return nil, errors.New(fmt.Sprintf("Async adaptive logger max interval should be <= %s",
-			adaptiveLoggerMaxInterval))
+		return nil, fmt.Errorf("async adaptive logger max interval should be <= %s",
+			adaptiveLoggerMaxInterval)
 	}
 
 	if criticalMsgCount <= 0 {
-		return nil, errors.New("Async adaptive logger critical msg count should be > 0")
+		return nil, errors.New("async adaptive logger critical msg count should be > 0")
 	}
 
 	if criticalMsgCount > adaptiveLoggerMaxCriticalMsgCount {
-		return nil, errors.New(fmt.Sprintf("Async adaptive logger critical msg count should be <= %s",
-			adaptiveLoggerMaxInterval))
+		return nil, fmt.Errorf("async adaptive logger critical msg count should be <= %s",
+			adaptiveLoggerMaxInterval)
 	}
 
 	asnAdaptiveLogger := new(asyncAdaptiveLogger)

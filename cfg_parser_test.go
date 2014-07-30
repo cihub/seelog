@@ -68,7 +68,7 @@ func (cr *customTestReceiver) Close() error {
 	return nil
 }
 
-var re *regexp.Regexp = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+var re = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 func getTestFileName(testName, postfix string) string {
 	if len(postfix) != 0 {
@@ -147,7 +147,7 @@ func getParserTests() []parserTest {
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
 
-		testName = "Smtp writer"
+		testName = "SMTP writer"
 		testConfig = `
 <seelog>
 	<outputs>
@@ -165,7 +165,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testSmtpWriter := newSmtpWriter(
+		testSMTPWriter := newSMTPWriter(
 			"sa",
 			"sn",
 			[]string{"ra1", "ra2", "ra3"},
@@ -175,7 +175,7 @@ func getParserTests() []parserTest {
 			"up",
 			[]string{"cacdp1", "cacdp2"},
 		)
-		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSmtpWriter})
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSMTPWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
@@ -708,10 +708,10 @@ func getParserTests() []parserTest {
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
 
 		testName = "Predefined formats"
-		formatId := predefinedPrefix + "xml-debug-short"
+		formatID := predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
-			<outputs formatid="` + formatId + `">
+			<outputs formatid="` + formatID + `">
 				<console />
 			</outputs>
 		</seelog>`
@@ -719,7 +719,7 @@ func getParserTests() []parserTest {
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
 		testconsoleWriter, _ = newConsoleWriter()
-		testFormat, _ = predefinedFormats[formatId]
+		testFormat, _ = predefinedFormats[formatID]
 		testHeadSplitter, _ = newSplitDispatcher(testFormat, []interface{}{testconsoleWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -727,14 +727,14 @@ func getParserTests() []parserTest {
 
 		testName = "Predefined formats redefine"
 		testLogFileName = getTestFileName(testName, "")
-		formatId = predefinedPrefix + "xml-debug-short"
+		formatID = predefinedPrefix + "xml-debug-short"
 		testConfig = `
 		<seelog type="sync">
-			<outputs formatid="` + formatId + `">
+			<outputs formatid="` + formatID + `">
 				<file path="` + testLogFileName + `"/>
 			</outputs>
 			<formats>
-				<format id="` + formatId + `" format="%Level %Msg %File" />
+				<format id="` + formatID + `" format="%Level %Msg %File" />
 			</formats>
 		</seelog>`
 		testExpected = new(logConfig)
@@ -1013,7 +1013,7 @@ func cleanupAfterCfgTest(t *testing.T) {
 	for _, p := range toDel {
 		err = tryRemoveFile(p)
 		if nil != err {
-			t.Errorf("Cannot remove file %s in test directory: %s", p, err.Error())
+			t.Errorf("cannot remove file %s in test directory: %s", p, err.Error())
 		}
 	}
 }

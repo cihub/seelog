@@ -44,10 +44,10 @@ var testEnv *testing.T
 		return
 	}
 
-	printXml(config, 0)
+	printXML(config, 0)
 }
 
-func printXml(node *xmlNode, level int) {
+func printXML(node *xmlNode, level int) {
 	indent := strings.Repeat("\t", level)
 	fmt.Print(indent + node.name)
 	for key, value := range node.attributes {
@@ -56,7 +56,7 @@ func printXml(node *xmlNode, level int) {
 	fmt.Println()
 
 	for _, child := range node.children {
-		printXml(child, level+1)
+		printXML(child, level+1)
 	}
 }*/
 
@@ -64,33 +64,33 @@ var xmlNodeTests []xmlNodeTest
 
 type xmlNodeTest struct {
 	testName      string
-	inputXml      string
+	inputXML      string
 	expected      interface{}
 	errorExpected bool
 }
 
-func getXmlTests() []xmlNodeTest {
+func getXMLTests() []xmlNodeTest {
 	if xmlNodeTests == nil {
 		xmlNodeTests = make([]xmlNodeTest, 0)
 
 		testName := "Simple test"
-		testXml := `<a></a>`
+		testXML := `<a></a>`
 		testExpected := newNode()
 		testExpected.name = "a"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Multiline test"
-		testXml =
+		testXML =
 			`
 <a>
 </a>
 `
 		testExpected = newNode()
 		testExpected.name = "a"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Multiline test #2"
-		testXml =
+		testXML =
 			`
 
 
@@ -101,58 +101,58 @@ func getXmlTests() []xmlNodeTest {
 `
 		testExpected = newNode()
 		testExpected.name = "a"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Incorrect names"
-		testXml = `< a     ><      /a >`
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, nil, true})
+		testXML = `< a     ><      /a >`
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, nil, true})
 
 		testName = "Comments"
-		testXml =
+		testXML =
 			`<!-- <abcdef/> -->
 <a> <!-- <!--12345-->
 </a>
 `
 		testExpected = newNode()
 		testExpected.name = "a"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Multiple roots"
-		testXml = `<a></a><b></b>`
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, nil, true})
+		testXML = `<a></a><b></b>`
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, nil, true})
 
 		testName = "Multiple roots + incorrect xml"
-		testXml = `<a></a><b>`
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, nil, true})
+		testXML = `<a></a><b>`
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, nil, true})
 
 		testName = "Some unicode and data"
-		testXml = `<俄语>данные</俄语>`
+		testXML = `<俄语>данные</俄语>`
 		testExpected = newNode()
 		testExpected.name = "俄语"
 		testExpected.value = "данные"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Values and children"
-		testXml = `<俄语>данные<and_a_child></and_a_child></俄语>`
+		testXML = `<俄语>данные<and_a_child></and_a_child></俄语>`
 		testExpected = newNode()
 		testExpected.name = "俄语"
 		testExpected.value = "данные"
 		child := newNode()
 		child.name = "and_a_child"
 		testExpected.children = append(testExpected.children, child)
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Just children"
-		testXml = `<俄语><and_a_child></and_a_child></俄语>`
+		testXML = `<俄语><and_a_child></and_a_child></俄语>`
 		testExpected = newNode()
 		testExpected.name = "俄语"
 		child = newNode()
 		child.name = "and_a_child"
 		testExpected.children = append(testExpected.children, child)
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 
 		testName = "Mixed test"
-		testXml = `<俄语 a="1" b="2.13" c="abc"><child abc="bca"/><child abc="def"></child></俄语>`
+		testXML = `<俄语 a="1" b="2.13" c="abc"><child abc="bca"/><child abc="def"></child></俄语>`
 		testExpected = newNode()
 		testExpected.name = "俄语"
 		testExpected.attributes["a"] = "1"
@@ -166,7 +166,7 @@ func getXmlTests() []xmlNodeTest {
 		child.name = "child"
 		child.attributes["abc"] = "def"
 		testExpected.children = append(testExpected.children, child)
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXml, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
 	}
 
 	return xmlNodeTests
@@ -174,23 +174,23 @@ func getXmlTests() []xmlNodeTest {
 
 func TestXmlNode(t *testing.T) {
 
-	for _, test := range getXmlTests() {
+	for _, test := range getXMLTests() {
 
-		reader := strings.NewReader(test.inputXml)
-		parsedXml, err := unmarshalConfig(reader)
+		reader := strings.NewReader(test.inputXML)
+		parsedXML, err := unmarshalConfig(reader)
 
 		if (err != nil) != test.errorExpected {
-			t.Errorf("\n%s:\nXml input: %s\nExpected error:%t. Got error: %t\n", test.testName,
-				test.inputXml, test.errorExpected, (err != nil))
+			t.Errorf("\n%s:\nXML input: %s\nExpected error:%t. Got error: %t\n", test.testName,
+				test.inputXML, test.errorExpected, (err != nil))
 			if err != nil {
 				t.Logf("%s\n", err.Error())
 			}
 			continue
 		}
 
-		if err == nil && !reflect.DeepEqual(parsedXml, test.expected) {
-			t.Errorf("\n%s:\nXml input: %s\nExpected: %s. \nGot: %s\n", test.testName,
-				test.inputXml, test.expected, parsedXml)
+		if err == nil && !reflect.DeepEqual(parsedXML, test.expected) {
+			t.Errorf("\n%s:\nXML input: %s\nExpected: %s. \nGot: %s\n", test.testName,
+				test.inputXML, test.expected, parsedXML)
 		}
 	}
 }

@@ -94,10 +94,10 @@ func newConfig(
 	logData interface{},
 	cfgParams *CfgParseParams) (*logConfig, error) {
 	if constraints == nil {
-		return nil, errors.New("Constraints can not be nil")
+		return nil, errors.New("constraints can not be nil")
 	}
 	if rootDispatcher == nil {
-		return nil, errors.New("RootDispatcher can not be nil")
+		return nil, errors.New("rootDispatcher can not be nil")
 	}
 
 	config := new(logConfig)

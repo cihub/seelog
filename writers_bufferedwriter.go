@@ -48,14 +48,14 @@ type bufferedWriter struct {
 func newBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.Duration) (*bufferedWriter, error) {
 
 	if innerWriter == nil {
-		return nil, errors.New("Argument is nil: innerWriter")
+		return nil, errors.New("argument is nil: innerWriter")
 	}
 	if flushPeriod < 0 {
-		return nil, errors.New(fmt.Sprintf("flushPeriod can not be less than 0. Got: %d", flushPeriod))
+		return nil, fmt.Errorf("flushPeriod can not be less than 0. Got: %d", flushPeriod)
 	}
 
 	if bufferSize <= 0 {
-		return nil, errors.New(fmt.Sprintf("bufferSize can not be less or equal to 0. Got: %d", bufferSize))
+		return nil, fmt.Errorf("bufferSize can not be less or equal to 0. Got: %d", bufferSize)
 	}
 
 	buffer := bufio.NewWriterSize(innerWriter, bufferSize)

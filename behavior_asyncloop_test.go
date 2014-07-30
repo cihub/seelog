@@ -75,7 +75,7 @@ func Test_Asyncloop(t *testing.T) {
 	}
 
 	if int64(count) != gotCount {
-		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
+		t.Errorf("wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
 		return
 	}
 
@@ -121,7 +121,7 @@ func Test_AsyncloopOff(t *testing.T) {
 		t.Error(err)
 	}
 	if ex {
-		t.Errorf("Logger at level OFF is not expected to create log file at all.")
+		t.Errorf("logger at level OFF is not expected to create log file at all.")
 		defer func() {
 			if e := tryRemoveFile(fileName); e != nil {
 				t.Error(e)

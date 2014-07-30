@@ -67,11 +67,11 @@ func RegisterReceiver(name string, receiver CustomReceiver) {
 func customReceiverByName(name string) (creceiver CustomReceiver, err error) {
 	rt, ok := registeredReceivers[name]
 	if !ok {
-		return nil, fmt.Errorf("Custom receiver name not registered: '%s'", name)
+		return nil, fmt.Errorf("custom receiver name not registered: '%s'", name)
 	}
 	v, ok := reflect.New(rt).Interface().(CustomReceiver)
 	if !ok {
-		return nil, fmt.Errorf("Cannot instantiate receiver with name='%s'", name)
+		return nil, fmt.Errorf("cannot instantiate receiver with name='%s'", name)
 	}
 	return v, nil
 }
@@ -197,7 +197,7 @@ func (disp *customReceiverDispatcher) Dispatch(
 
 	defer func() {
 		if err := recover(); err != nil {
-			errorFunc(fmt.Errorf("Panic in custom receiver '%s'.Dispatch: %s", reflect.TypeOf(disp.innerReceiver), err))
+			errorFunc(fmt.Errorf("panic in custom receiver '%s'.Dispatch: %s", reflect.TypeOf(disp.innerReceiver), err))
 		}
 	}()
 

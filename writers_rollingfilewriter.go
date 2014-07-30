@@ -503,7 +503,7 @@ func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
 	case rollingIntervalDaily:
 		return diff >= 24*time.Hour, nil
 	}
-	return false, fmt.Errorf("Unknown interval type: %d", rwt.interval)
+	return false, fmt.Errorf("unknown interval type: %d", rwt.interval)
 }
 
 func (rwt *rollingFileWriterTime) isFileTailValid(tail string) bool {

@@ -26,7 +26,6 @@ package seelog
 
 import (
 	"container/list"
-	"errors"
 	"fmt"
 	"sync"
 )
@@ -134,7 +133,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 		asnLogger.msgQueue.PushBack(queueItem)
 		asnLogger.queueHasElements.Broadcast()
 	} else {
-		err := errors.New(fmt.Sprintf("Queue closed! Cannot process element: %d %#v", level, message))
+		err := fmt.Errorf("queue closed! Cannot process element: %d %#v", level, message)
 		reportInternalError(err)
 	}
 }

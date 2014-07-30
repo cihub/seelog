@@ -75,7 +75,7 @@ func Test_Asynctimer(t *testing.T) {
 	}
 
 	if int64(count) != gotCount {
-		t.Errorf("Wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
+		t.Errorf("wrong count of log messages. Expected: %v, got: %v.", count, gotCount)
 		return
 	}
 
