@@ -29,7 +29,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -434,7 +433,7 @@ func createDateTimeFormatterFunc(dateTimeFormat string) FormatterFunc {
 		format = DateDefaultFormat
 	}
 	return func(message string, level LogLevel, context LogContextInterface) interface{} {
-		return time.Now().Format(format)
+		return context.CallTime().Format(format)
 	}
 }
 
@@ -444,7 +443,7 @@ func createUTCDateTimeFormatterFunc(dateTimeFormat string) FormatterFunc {
 		format = DateDefaultFormat
 	}
 	return func(message string, level LogLevel, context LogContextInterface) interface{} {
-		return time.Now().UTC().Format(format)
+		return context.CallTime().UTC().Format(format)
 	}
 }
 
