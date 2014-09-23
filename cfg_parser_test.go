@@ -174,6 +174,7 @@ func getParserTests() []parserTest {
 			"un",
 			"up",
 			[]string{"cacdp1", "cacdp2"},
+			DefaultSubjectPhrase,
 		)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSMTPWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString
