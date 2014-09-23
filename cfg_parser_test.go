@@ -189,10 +189,10 @@ func getParserTests() []parserTest {
 		<smtp senderaddress="sa" sendername="sn"  hostname="hn" hostport="123" username="un" password="up" subject="ohlala">
 			<recipient address="ra1"/>
 			<cacertdirpath path="cacdp1"/>
-            <header name="Priority" value="Urgent" />
-            <header name="Importance" value="high" />
-            <header name="Sensitivity" value="Company-Confidential" />
-            <header name="Auto-Submitted" value="auto-generated" />
+			<header name="Priority" value="Urgent" />
+			<header name="Importance" value="high" />
+			<header name="Sensitivity" value="Company-Confidential" />
+			<header name="Auto-Submitted" value="auto-generated" />
 		</smtp>
 	</outputs>
 </seelog>
