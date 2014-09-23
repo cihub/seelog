@@ -35,7 +35,9 @@ import (
 )
 
 const (
+	// Default subject phrase for sending emails.
 	DefaultSubjectPhrase = "Diagnostic message from server: "
+
 	// Message subject pattern composed according to RFC 5321.
 	rfc5321SubjectPattern = "From: %s <%s>\nSubject: %s\n"
 )

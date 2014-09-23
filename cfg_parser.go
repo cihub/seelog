@@ -810,6 +810,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	}
 
 	// subject is optionally set by configuration.
+	// default value is defined by DefaultSubjectPhrase constant in the writers_smtpwriter.go
 	var subjectPhrase = DefaultSubjectPhrase
 
 	subject, ok := node.attributes[subjectID]
