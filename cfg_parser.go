@@ -62,6 +62,7 @@ const (
 	userNameID                       = "username"
 	userPassID                       = "password"
 	cACertDirpathID                  = "cacertdirpath"
+	subjectID                        = "subject"
 	splitterDispatcherID             = "splitter"
 	consoleWriterID                  = "console"
 	customReceiverID                 = "custom"
@@ -740,7 +741,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 // Creates new SMTP writer if encountered in the config file.
 func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID)
+	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -808,6 +809,14 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		return nil, newMissingArgumentError(node.name, userPassID)
 	}
 
+	// subject is optionally set by configuration.
+	var subjectPhrase = DefaultSubjectPhrase
+
+	subject, ok := node.attributes[subjectID]
+	if ok {
+		subjectPhrase = subject
+	}
+
 	smtpWriter := newSMTPWriter(
 		senderAddress,
 		senderName,
@@ -817,6 +826,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		userName,
 		userPass,
 		caCertDirPaths,
+		subjectPhrase,
 	)
 
 	return newFormattedWriter(smtpWriter, currentFormat)

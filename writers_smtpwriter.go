@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	subjectPhrase = "Diagnostic message from server: "
+	DefaultSubjectPhrase = "Diagnostic message from server: "
 	// Message subject pattern composed according to RFC 5321.
 	rfc5321SubjectPattern = "From: %s <%s>\nSubject: %s\n"
 )
@@ -50,10 +50,11 @@ type smtpWriter struct {
 	senderName         string
 	recipientAddresses []string
 	caCertDirPaths     []string
+	subject            string
 }
 
 // newSMTPWriter returns a new SMTP-writer.
-func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string) *smtpWriter {
+func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
 		hostName:           hn,
@@ -63,6 +64,7 @@ func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps [
 		senderName:         sn,
 		recipientAddresses: ras,
 		caCertDirPaths:     cacdps,
+		subject:            subj,
 	}
 }
 
@@ -168,13 +170,14 @@ func sendMailWithTLSConfig(config *tls.Config, addr string, a smtp.Auth, from st
 // to a post server, which sends it to the recipients.
 func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 	var err error
+
 	if smtpw.caCertDirPaths == nil {
 		err = smtp.SendMail(
 			smtpw.hostNameWithPort,
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data),
+			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data),
 		)
 	} else {
 		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.hostName)
@@ -187,7 +190,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, subjectPhrase, data),
+			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data),
 		)
 	}
 	if err != nil {
