@@ -175,6 +175,42 @@ func getParserTests() []parserTest {
 			"up",
 			[]string{"cacdp1", "cacdp2"},
 			DefaultSubjectPhrase,
+			nil,
+		)
+		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSMTPWriter})
+		testExpected.LogType = asyncLooploggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
+
+		testName = "SMTP writer custom header and subject configuration"
+		testConfig = `
+<seelog>
+	<outputs>
+		<smtp senderaddress="sa" sendername="sn"  hostname="hn" hostport="123" username="un" password="up" subject="ohlala">
+			<recipient address="ra1"/>
+			<cacertdirpath path="cacdp1"/>
+            <header name="Priority" value="Urgent" />
+            <header name="Importance" value="high" />
+            <header name="Sensitivity" value="Company-Confidential" />
+            <header name="Auto-Submitted" value="auto-generated" />
+		</smtp>
+	</outputs>
+</seelog>
+		`
+		testExpected = new(logConfig)
+		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testSMTPWriter = newSMTPWriter(
+			"sa",
+			"sn",
+			[]string{"ra1"},
+			"hn",
+			"123",
+			"un",
+			"up",
+			[]string{"cacdp1"},
+			"ohlala",
+			[]string{"Priority: Urgent", "Importance: high", "Sensitivity: Company-Confidential", "Auto-Submitted: auto-generated"},
 		)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testSMTPWriter})
 		testExpected.LogType = asyncLooploggerTypeFromString

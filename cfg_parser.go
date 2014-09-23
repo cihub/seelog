@@ -56,6 +56,9 @@ const (
 	senderaddressID                  = "senderaddress"
 	senderNameID                     = "sendername"
 	recipientID                      = "recipient"
+	mailHeaderID                     = "header"
+	mailHeaderNameID                 = "name"
+	mailHeaderValueID                = "value"
 	addressID                        = "address"
 	hostNameID                       = "hostname"
 	hostPortID                       = "hostport"
@@ -764,6 +767,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	// Process child nodes scanning for recipient email addresses and/or CA certificate paths.
 	var recipientAddresses []string
 	var caCertDirPaths []string
+	var mailHeaders []string
 	for _, childNode := range node.children {
 		switch childNode.name {
 		// Extract recipient address from child nodes.
@@ -780,6 +784,21 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 				return nil, newMissingArgumentError(childNode.name, pathID)
 			}
 			caCertDirPaths = append(caCertDirPaths, path)
+
+		// Extract email headers from child nodes. 
+		case mailHeaderID:
+			headerName, ok := childNode.attributes[mailHeaderNameID]
+			if !ok {
+				return nil, newMissingArgumentError(childNode.name, mailHeaderNameID)
+			}
+
+			headerValue, ok := childNode.attributes[mailHeaderValueID]
+			if !ok {
+				return nil, newMissingArgumentError(childNode.name, mailHeaderValueID)
+			}
+
+			// Build header line
+			mailHeaders = append(mailHeaders, fmt.Sprintf("%s: %s", headerName, headerValue))
 		default:
 			return nil, newUnexpectedChildElementError(childNode.name)
 		}
@@ -828,6 +847,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		userPass,
 		caCertDirPaths,
 		subjectPhrase,
+		mailHeaders,
 	)
 
 	return newFormattedWriter(smtpWriter, currentFormat)
