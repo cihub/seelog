@@ -32,6 +32,7 @@ import (
 	"io/ioutil"
 	"net/smtp"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -52,11 +53,12 @@ type smtpWriter struct {
 	senderName         string
 	recipientAddresses []string
 	caCertDirPaths     []string
+	mailHeaders        []string
 	subject            string
 }
 
 // newSMTPWriter returns a new SMTP-writer.
-func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string) *smtpWriter {
+func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
 		hostName:           hn,
@@ -67,12 +69,20 @@ func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps [
 		recipientAddresses: ras,
 		caCertDirPaths:     cacdps,
 		subject:            subj,
+		mailHeaders:        headers,
 	}
 }
 
-func prepareMessage(senderAddr, senderName, subject string, body []byte) []byte {
-	h := []byte(fmt.Sprintf(rfc5321SubjectPattern, senderName, senderAddr, subject))
-	return append(h, body...)
+func prepareMessage(senderAddr, senderName, subject string, body []byte, headers []string) []byte {
+	headerLines := fmt.Sprintf(rfc5321SubjectPattern, senderName, senderAddr, subject);
+
+	// Build header lines if configured.
+	if headers != nil && len(headers) > 0 {
+		headerLines += strings.Join(headers, "\n")
+		headerLines += "\n"
+	}
+
+	return append([]byte(headerLines), body...)
 }
 
 // getTLSConfig gets paths of PEM files with certificates,
@@ -179,7 +189,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data),
+			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
 		)
 	} else {
 		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.hostName)
@@ -192,7 +202,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 			smtpw.auth,
 			smtpw.senderAddress,
 			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data),
+			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
 		)
 	}
 	if err != nil {
