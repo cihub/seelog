@@ -241,7 +241,22 @@ func configFromReaderWithConfig(reader io.Reader, cfg *CfgParseParams) (*logConf
 }
 
 func configFromXMLNodeWithConfig(config *xmlNode, cfg *CfgParseParams) (*logConfig, error) {
-	err := checkExpectedElements(config, optionalElement(outputsID), optionalElement(formatsID), optionalElement(exceptionsID))
+	err := checkUnexpectedAttribute(
+		config,
+		minLevelID,
+		maxLevelID,
+		levelsID,
+		loggerTypeFromStringAttr,
+		asyncLoggerIntervalAttr,
+		adaptLoggerMinIntervalAttr,
+		adaptLoggerMaxIntervalAttr,
+		adaptLoggerCriticalMsgCountAttr,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkExpectedElements(config, optionalElement(outputsID), optionalElement(formatsID), optionalElement(exceptionsID))
 	if err != nil {
 		return nil, err
 	}
