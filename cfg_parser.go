@@ -26,6 +26,7 @@ package seelog
 
 import (
 	"crypto/tls"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -189,6 +190,33 @@ func fillPredefinedFormats() error {
 	return nil
 }
 
+// configFromXMLDecoder parses data from a given XML decoder.
+// Returns parsed config which can be used to create logger in case no errors occured.
+// Returns error if format is incorrect or anything happened.
+func configFromXMLDecoder(xmlParser *xml.Decoder, rootNode xml.Token) (*logConfig, error) {
+	return configFromXMLDecoderWithConfig(xmlParser, rootNode, nil)
+}
+
+// configFromXMLDecoderWithConfig parses data from a given XML decoder.
+// Returns parsed config which can be used to create logger in case no errors occured.
+// Returns error if format is incorrect or anything happened.
+func configFromXMLDecoderWithConfig(xmlParser *xml.Decoder, rootNode xml.Token, cfg *CfgParseParams) (*logConfig, error) {
+	_, ok := rootNode.(xml.StartElement)
+	if !ok {
+		return nil, errors.New("rootNode must be XML startElement")
+	}
+
+	config, err := unmarshalNode(xmlParser, rootNode)
+	if err != nil {
+		return nil, err
+	}
+	if config == nil {
+		return nil, errors.New("xml has no content")
+	}
+
+	return configFromXMLNodeWithConfig(config, cfg)
+}
+
 // configFromReader parses data from a given reader.
 // Returns parsed config which can be used to create logger in case no errors occured.
 // Returns error if format is incorrect or anything happened.
@@ -196,7 +224,7 @@ func configFromReader(reader io.Reader) (*logConfig, error) {
 	return configFromReaderWithConfig(reader, nil)
 }
 
-// configFromReader parses data from a given reader.
+// configFromReaderWithConfig parses data from a given reader.
 // Returns parsed config which can be used to create logger in case no errors occured.
 // Returns error if format is incorrect or anything happened.
 func configFromReaderWithConfig(reader io.Reader, cfg *CfgParseParams) (*logConfig, error) {
@@ -209,7 +237,11 @@ func configFromReaderWithConfig(reader io.Reader, cfg *CfgParseParams) (*logConf
 		return nil, errors.New("root xml tag must be '" + seelogConfigID + "'")
 	}
 
-	err = checkUnexpectedAttribute(
+	return configFromXMLNodeWithConfig(config, cfg)
+}
+
+func configFromXMLNodeWithConfig(config *xmlNode, cfg *CfgParseParams) (*logConfig, error) {
+	err := checkUnexpectedAttribute(
 		config,
 		minLevelID,
 		maxLevelID,
@@ -785,7 +817,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 			}
 			caCertDirPaths = append(caCertDirPaths, path)
 
-		// Extract email headers from child nodes. 
+		// Extract email headers from child nodes.
 		case mailHeaderID:
 			headerName, ok := childNode.attributes[mailHeaderNameID]
 			if !ok {

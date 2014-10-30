@@ -26,6 +26,7 @@ package seelog
 
 import (
 	"bytes"
+	"encoding/xml"
 	"io"
 	"os"
 )
@@ -122,6 +123,17 @@ func LoggerFromWriterWithMinLevelAndFormat(output io.Writer, minLevel LogLevel, 
 	}
 
 	conf, err := newConfig(constraints, make([]*logLevelException, 0), dispatcher, syncloggerTypeFromString, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return createLoggerFromConfig(conf)
+}
+
+// LoggerFromXMLDecoder creates logger with config from a XML decoder starting from a specific node.
+// It should contain valid seelog xml, except for root node name.
+func LoggerFromXMLDecoder(xmlParser *xml.Decoder, rootNode xml.Token) (LoggerInterface, error) {
+	conf, err := configFromXMLDecoder(xmlParser, rootNode)
 	if err != nil {
 		return nil, err
 	}
