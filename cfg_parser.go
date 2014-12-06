@@ -79,6 +79,7 @@ const (
 	rollingFilePathAttr              = "filename"
 	rollingFileMaxSizeAttr           = "maxsize"
 	rollingFileMaxRollsAttr          = "maxrolls"
+	rollingFileNameModeAttr          = "namemode"
 	rollingFileDataPatternAttr       = "datepattern"
 	rollingFileArchiveAttr           = "archivetype"
 	rollingFileArchivePathAttr       = "archivepath"
@@ -1030,16 +1031,27 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		}
 	}
 
+	nameMode := rollingNameMode(rollingNameModePostfix)
+	nameModeStr, ok := node.attributes[rollingFileNameModeAttr]
+	if ok {
+		mode, found := rollingNameModeFromString(nameModeStr)
+		if !found {
+			return nil, errors.New("unknown rolling filename mode: " + nameModeStr)
+		} else {
+			nameMode = mode
+		}
+	}
+
 	if rollingType == rollingTypeSize {
 		err := checkUnexpectedAttribute(node, outputFormatID, rollingFileTypeAttr, rollingFilePathAttr,
 			rollingFileMaxSizeAttr, rollingFileMaxRollsAttr, rollingFileArchiveAttr,
-			rollingFileArchivePathAttr)
+			rollingFileArchivePathAttr, rollingFileNameModeAttr)
 		if err != nil {
 			return nil, err
 		}
 
-		maxSizeStr, isMaxSize := node.attributes[rollingFileMaxSizeAttr]
-		if !isMaxSize {
+		maxSizeStr, ok := node.attributes[rollingFileMaxSizeAttr]
+		if !ok {
 			return nil, newMissingArgumentError(node.name, rollingFileMaxSizeAttr)
 		}
 
@@ -1049,15 +1061,15 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		}
 
 		maxRolls := 0
-		maxRollsStr, isMaxRolls := node.attributes[rollingFileMaxRollsAttr]
-		if isMaxRolls {
+		maxRollsStr, ok := node.attributes[rollingFileMaxRollsAttr]
+		if ok {
 			maxRolls, err = strconv.Atoi(maxRollsStr)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		rollingWriter, err := newRollingFileWriterSize(path, rArchiveType, rArchivePath, maxSize, maxRolls)
+		rollingWriter, err := newRollingFileWriterSize(path, rArchiveType, rArchivePath, maxSize, maxRolls, nameMode)
 		if err != nil {
 			return nil, err
 		}
@@ -1067,26 +1079,26 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	} else if rollingType == rollingTypeTime {
 		err := checkUnexpectedAttribute(node, outputFormatID, rollingFileTypeAttr, rollingFilePathAttr,
 			rollingFileDataPatternAttr, rollingFileArchiveAttr, rollingFileMaxRollsAttr,
-			rollingFileArchivePathAttr)
+			rollingFileArchivePathAttr, rollingFileNameModeAttr)
 		if err != nil {
 			return nil, err
 		}
 
 		maxRolls := 0
-		maxRollsStr, isMaxRolls := node.attributes[rollingFileMaxRollsAttr]
-		if isMaxRolls {
+		maxRollsStr, ok := node.attributes[rollingFileMaxRollsAttr]
+		if ok {
 			maxRolls, err = strconv.Atoi(maxRollsStr)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		dataPattern, isDataPattern := node.attributes[rollingFileDataPatternAttr]
-		if !isDataPattern {
+		dataPattern, ok := node.attributes[rollingFileDataPatternAttr]
+		if !ok {
 			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
-		rollingWriter, err := newRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny)
+		rollingWriter, err := newRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny, nameMode)
 		if err != nil {
 			return nil, err
 		}

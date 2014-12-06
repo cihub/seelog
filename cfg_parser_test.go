@@ -269,7 +269,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ := newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5)
+		testrollingFileWriter, _ := newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -286,7 +286,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "log.zip", 100, 5)
+		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "log.zip", 100, 5, rollingNameModePostfix)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -297,13 +297,13 @@ func getParserTests() []parserTest {
 		testConfig = `
 		<seelog type="sync">
 			<outputs>
-				<rollingfile type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="zip" archivepath="test.zip"/>
+				<rollingfile namemode="prefix" type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="zip" archivepath="test.zip"/>
 			</outputs>
 		</seelog>`
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test.zip", 100, 5)
+		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test.zip", 100, 5, rollingNameModePrefix)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -314,13 +314,13 @@ func getParserTests() []parserTest {
 		testConfig = `
 		<seelog type="sync">
 			<outputs>
-				<rollingfile type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="none"/>
+				<rollingfile namemode="postfix" type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="none"/>
 			</outputs>
 		</seelog>`
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5)
+		testrollingFileWriter, _ = newRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -337,7 +337,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ := newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny)
+		testrollingFileWriterTime, _ := newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny, rollingNameModePostfix)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testrollingFileWriterTime})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -356,7 +356,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily)
+		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePostfix)
 		testbufferedWriter, _ := newBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testHeadSplitter, _ = newSplitDispatcher(defaultformatter, []interface{}{testbufferedWriter})
 		testExpected.LogType = syncloggerTypeFromString
@@ -993,7 +993,7 @@ func getParserTests() []parserTest {
 		<seelog type="sync">
 			<outputs>
 				<buffered size="100500" flushperiod="100" formatid="testFormat">
-					<rollingfile type="date" filename="` + testLogFileName + `" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
+					<rollingfile namemode="prefix" type="date" filename="` + testLogFileName + `" datepattern="2006-01-02T15:04:05Z07:00" formatid="testFormat"/>
 				</buffered>
 			</outputs>
 			<formats>
@@ -1003,7 +1003,7 @@ func getParserTests() []parserTest {
 		testExpected = new(logConfig)
 		testExpected.Constraints, _ = newMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily)
+		testrollingFileWriterTime, _ = newRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePrefix)
 		testbufferedWriter, _ = newBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testFormat, _ = newFormatter("%Level %Msg %File 123")
 		formattedWriter, _ = newFormattedWriter(testbufferedWriter, testFormat)

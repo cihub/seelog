@@ -60,10 +60,11 @@ type fileWriterTestCase struct {
 	datePattern string
 	writeCount  int
 	resFiles    []string
+	nameMode    rollingNameMode
 }
 
 func createSimplefileWriterTestCase(fileName string, writeCount int) *fileWriterTestCase {
-	return &fileWriterTestCase{[]string{}, fileName, rollingTypeSize, 0, 0, "", writeCount, []string{fileName}}
+	return &fileWriterTestCase{[]string{}, fileName, rollingTypeSize, 0, 0, "", writeCount, []string{fileName}, 0}
 }
 
 var simplefileWriterTests = []*fileWriterTestCase{
