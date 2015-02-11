@@ -27,11 +27,12 @@ package seelog
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 )
 
 func reportInternalError(err error) {
-	fmt.Println("Seelog error: " + err.Error())
+	fmt.Fprintln(os.Stderr, "Seelog error: "+err.Error())
 }
 
 // LoggerInterface represents structs capable of logging Seelog messages
