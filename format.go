@@ -206,7 +206,10 @@ func (formatter *formatter) extractFormatterFunc(index int) (FormatterFunc, int,
 		return function, index + formatterLength - 1, nil
 	}
 
-	function, formatterLength, ok = formatter.findFormatterFuncParametrized(letterSequence, index)
+	function, formatterLength, ok, err := formatter.findFormatterFuncParametrized(letterSequence, index)
+	if err != nil {
+		return nil, 0, err
+	}
 	if ok {
 		return function, index + formatterLength - 1, nil
 	}
@@ -245,44 +248,49 @@ func (formatter *formatter) findFormatterFunc(letters string) (FormatterFunc, in
 	return nil, 0, false
 }
 
-func (formatter *formatter) findFormatterFuncParametrized(letters string, lettersStartIndex int) (FormatterFunc, int, bool) {
+func (formatter *formatter) findFormatterFuncParametrized(letters string, lettersStartIndex int) (FormatterFunc, int, bool, error) {
 	currentVerb := letters
 	for i := 0; i < len(letters); i++ {
 		functionCreator, ok := formatterFuncsParameterized[currentVerb]
 		if ok {
-			paramter := ""
+			parameter := ""
 			parameterLen := 0
 			isVerbEqualsLetters := i == 0 // if not, then letter goes after formatter, and formatter is parameterless
 			if isVerbEqualsLetters {
-				userParamter := ""
-				userParamter, parameterLen, ok = formatter.findparameter(lettersStartIndex + len(currentVerb))
+				userParameter := ""
+				var err error
+				userParameter, parameterLen, ok, err = formatter.findparameter(lettersStartIndex + len(currentVerb))
 				if ok {
-					paramter = userParamter
+					parameter = userParameter
+				} else if err != nil {
+					return nil, 0, false, err
 				}
 			}
 
-			return functionCreator(paramter), len(currentVerb) + parameterLen, true
+			return functionCreator(parameter), len(currentVerb) + parameterLen, true, nil
 		}
 
 		currentVerb = currentVerb[:len(currentVerb)-1]
 	}
 
-	return nil, 0, false
+	return nil, 0, false, nil
 }
 
-func (formatter *formatter) findparameter(startIndex int) (string, int, bool) {
+func (formatter *formatter) findparameter(startIndex int) (string, int, bool, error) {
 	if len(formatter.fmtStringOriginal) == startIndex || formatter.fmtStringOriginal[startIndex] != formatterParameterStart {
-		return "", 0, false
+		return "", 0, false, nil
 	}
 
-	endIndex := strings.Index(formatter.fmtStringOriginal[startIndex:], string(formatterParameterEnd)) + startIndex
+	endIndex := strings.Index(formatter.fmtStringOriginal[startIndex:], string(formatterParameterEnd))
 	if endIndex == -1 {
-		return "", 0, false
+		return "", 0, false, fmt.Errorf("Unmatched parenthesis or invalid parameter at %d: %s",
+			startIndex, formatter.fmtStringOriginal[startIndex:])
 	}
+	endIndex += startIndex
 
 	length := endIndex - startIndex + 1
 
-	return formatter.fmtStringOriginal[startIndex+1 : endIndex], length, true
+	return formatter.fmtStringOriginal[startIndex+1 : endIndex], length, true, nil
 }
 
 // Format processes a message with special formatters, log level, and context. Returns formatted string

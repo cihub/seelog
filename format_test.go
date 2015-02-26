@@ -186,6 +186,11 @@ func TestDateParameterizedFormat(t *testing.T) {
 	if !strings.HasPrefix(msg, dateBefore) && !strings.HasPrefix(msg, dateAfter) {
 		t.Errorf("incorrect message: %v. Expected %v or %v", msg, dateBefore, dateAfter)
 	}
+
+	_, err = newFormatter("%Date(" + preciseForamt)
+	if err == nil {
+		t.Error("Expected error for invalid format")
+	}
 }
 
 func createTestFormatter(format string) FormatterFunc {
