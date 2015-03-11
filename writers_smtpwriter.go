@@ -40,7 +40,7 @@ const (
 	DefaultSubjectPhrase = "Diagnostic message from server: "
 
 	// Message subject pattern composed according to RFC 5321.
-	rfc5321SubjectPattern = "From: %s <%s>\nSubject: %s\n"
+	rfc5321SubjectPattern = "From: %s <%s>\nSubject: %s\n\n"
 )
 
 // smtpWriter is used to send emails via given SMTP-server.
