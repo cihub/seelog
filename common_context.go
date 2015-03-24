@@ -26,6 +26,8 @@ package seelog
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -75,6 +77,12 @@ func currentContext() (LogContextInterface, error) {
 }
 
 func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName string, lineNumber int, err error) {
+	f, err := os.OpenFile("c:\\var\\log\\seelog.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err == nil {
+		defer f.Close()
+		log.SetOutput(f)
+	}
+
 	pc, fullPath, line, ok := runtime.Caller(skip)
 
 	if !ok {
@@ -88,9 +96,16 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	fullPath = strings.Replace(fullPath, "/", string(os.PathSeparator), -1)
 
 	// fix: weird path:  \\psf\gopath\src\github.com\cihub\seelog/\\psf\gopath\src\github.com\cihub\seelog\format_test.go
-	if strings.HasPrefix(fullPath, workingDir) && strings.Count(fullPath, workingDir) == 2 {
-		fullPath = fullPath[len(workingDir):]
+	sep := fmt.Sprintf("%c%c%c", os.PathSeparator, os.PathSeparator, os.PathSeparator)
+	wid := strings.Index(fullPath, sep)
+	if wid > 0 {
+		prefix := fullPath[:wid]
+		if strings.Count(fullPath, prefix) == 2 {
+			fullPath = fullPath[len(prefix)+1:]
+		}
 	}
+
+	log.Printf("wid: %d, sep: %s, fullPath: %s, workingDir: %s", wid, sep, fullPath, workingDir)
 
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
@@ -116,6 +131,13 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 // occurs, the returned context is an error context, which contains no paths
 // or names, but states that they can't be extracted.
 func specificContext(skip int) (LogContextInterface, error) {
+	f, err := os.OpenFile("c:\\var\\log\\seelog.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err == nil {
+		defer f.Close()
+		log.SetOutput(f)
+	}
+	// log.Println("specificContext")
+
 	callTime := time.Now()
 
 	if skip < 0 {
@@ -124,6 +146,7 @@ func specificContext(skip int) (LogContextInterface, error) {
 	}
 
 	fullPath, shortPath, function, line, err := extractCallerInfo(skip + 2)
+	log.Printf("specificContext: fullpath: %s, shortPath: %s, func: %s", fullPath, shortPath, function)
 	if err != nil {
 		return &errorContext{callTime, err}, err
 	}
