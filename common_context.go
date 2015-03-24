@@ -87,6 +87,11 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 	fullPath = strings.Replace(fullPath, "\\", string(os.PathSeparator), -1)
 	fullPath = strings.Replace(fullPath, "/", string(os.PathSeparator), -1)
 
+	// fix: weird path:  \\psf\gopath\src\github.com\cihub\seelog/\\psf\gopath\src\github.com\cihub\seelog\format_test.go
+	if strings.HasPrefix(fullPath, workingDir) && strings.Count(fullPath, workingDir) == 2 {
+		fullPath = fullPath[len(workingDir):]
+	}
+
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
 	} else {
@@ -95,6 +100,7 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 
 	funName := runtime.FuncForPC(pc).Name()
 	var functionName string
+
 	if strings.HasPrefix(funName, workingDir) {
 		functionName = funName[len(workingDir):]
 	} else {

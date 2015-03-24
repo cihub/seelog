@@ -26,6 +26,7 @@ package seelog
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -358,7 +359,6 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		if err != nil {
 			return 0, err
 		}
-
 		// Current history of all previous log files.
 		// For file roller it may be like this:
 		//     * ...
@@ -402,9 +402,55 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		}
 
 		if newHistoryName != rw.fileName {
-			err = os.Rename(filepath.Join(rw.currentDirPath, rw.fileName), filepath.Join(rw.currentDirPath, newHistoryName))
+
+			curFilePath := filepath.Join(rw.currentDirPath, rw.fileName)
+			newHistPath := filepath.Join(rw.currentDirPath, newHistoryName)
+			err = os.Rename(curFilePath, newHistPath)
 			if err != nil {
-				return 0, err
+				if strings.Contains(err.Error(), "used by another process") {
+					// on windows service. (tracked with systeminternal suite.) only our service (single process),
+					// SYSTEM and explorer.exe are using the log file. but still, an error will be raised while
+					// renaming it:
+					//
+					//     The process cannot access the file because it is being used by another process.
+					//
+					// I consulted with some one who implemented windows service with python also encountered the
+					// some issue. then find out their solution seems pretty stable, although it's not the
+					// ideal way to fix the issue.
+
+					// reopen the closed log file for writing!
+					rw.currentFile, err = os.OpenFile(curFilePath, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
+					if err != nil {
+						return 0, err
+					}
+
+					// copy it, then truncate it
+					r, err := os.OpenFile(curFilePath, os.O_RDWR|os.O_APPEND, defaultFilePermissions)
+					if err != nil {
+						return 0, err
+					}
+					defer r.Close()
+
+					w, err := os.Create(newHistPath)
+					if err != nil {
+						return 0, err
+					}
+					defer w.Close()
+
+					_, err = io.Copy(w, r)
+					if err != nil {
+						return 0, err
+					}
+
+					// clean contents
+					err = ioutil.WriteFile(curFilePath, []byte(``), defaultFilePermissions)
+					if err != nil {
+						return 0, err
+					}
+					rw.currentFileSize = 0
+				} else {
+					return 0, err
+				}
 			}
 		}
 
