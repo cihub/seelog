@@ -320,10 +320,13 @@ func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 	// In all cases (archive files or not) the files should be deleted.
 	for i := 0; i < rollsToDelete; i++ {
 		rollPath := filepath.Join(rw.currentDirPath, history[i])
-		err := tryRemoveFile(rollPath)
-		if err != nil {
-			return err
-		}
+		// it's better to try best to delete files rather than break the whole loop.
+		tryRemoveFile(rollPath)
+
+		// err := tryRemoveFile(rollPath)
+		// if err != nil {
+		// 	return err
+		// }
 	}
 
 	return nil
