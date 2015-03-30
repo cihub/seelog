@@ -268,24 +268,18 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 
 // stackCallDepth is used to indicate the call depth of 'log' func.
 // This depth level is used in the runtime.Caller(...) call. See
-// common_context.go -> specificContext, extractCallerInfo for details.
-func (cLogger *commonLogger) log(
-	level LogLevel,
-	message fmt.Stringer,
-	stackCallDepth int) {
+// common_context.go -> specifyContext, extractCallerInfo for details.
+func (cLogger *commonLogger) log(level LogLevel, message fmt.Stringer, stackCallDepth int) {
 	cLogger.m.Lock()
 	defer cLogger.m.Unlock()
 
 	if cLogger.Closed() {
 		return
 	}
-
 	if cLogger.unusedLevels[level] {
 		return
 	}
-
-	context, _ := specificContext(stackCallDepth + cLogger.addStackDepth)
-
+	context, _ := specifyContext(stackCallDepth + cLogger.addStackDepth)
 	// Context errors are not reported because there are situations
 	// in which context errors are normal Seelog usage cases. For
 	// example in executables with stripped symbols.
@@ -294,21 +288,15 @@ func (cLogger *commonLogger) log(
 		reportInternalError(err)
 		return
 	}*/
-
 	cLogger.innerLogger.innerLog(level, context, message)
 }
 
-func (cLogger *commonLogger) processLogMsg(
-	level LogLevel,
-	message fmt.Stringer,
-	context LogContextInterface) {
-
+func (cLogger *commonLogger) processLogMsg(level LogLevel, message fmt.Stringer, context LogContextInterface) {
 	defer func() {
 		if err := recover(); err != nil {
 			reportInternalError(fmt.Errorf("recovered from panic during message processing: %s", err))
 		}
 	}()
-
 	if cLogger.config.IsAllowed(level, context) {
 		cLogger.config.RootDispatcher.Dispatch(message.String(), level, context, reportInternalError)
 	}
