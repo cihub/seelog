@@ -92,25 +92,18 @@ func extractCallerInfo(skip int) (fullPath string, shortPath string, funcName st
 // Context is returned in any situation, even if error occurs. But, if an error
 // occurs, the returned context is an error context, which contains no paths
 // or names, but states that they can't be extracted.
-func specifyContext(skip int) (ctx LogContextInterface, err error) {
+func specifyContext(skip int) (LogContextInterface, error) {
 	callTime := time.Now()
 	if skip < 0 {
-		err = fmt.Errorf("can not skip negative stack frames")
-		ctx = &errorContext{callTime, err}
-		return
+		err := fmt.Errorf("can not skip negative stack frames")
+		return &errorContext{callTime, err}, err
 	}
-	var (
-		fullPath, shortPath, funcName string
-		line                          int
-	)
-	fullPath, shortPath, funcName, line, err = extractCallerInfo(skip + 2)
+	fullPath, shortPath, funcName, line, err := extractCallerInfo(skip + 2)
 	if err != nil {
-		ctx = &errorContext{callTime, err}
-		return
+		return &errorContext{callTime, err}, err
 	}
 	_, fileName := filepath.Split(fullPath)
-	ctx = &logContext{funcName, line, shortPath, fullPath, fileName, callTime}
-	return
+	return &logContext{funcName, line, shortPath, fullPath, fileName, callTime}, nil
 }
 
 // Represents a normal runtime caller context.
