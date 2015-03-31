@@ -150,7 +150,7 @@ type errorContext struct {
 	err       error
 }
 
-func (errContext *errorContext) getErrorText(prefix) string {
+func (errContext *errorContext) getErrorText(prefix string) string {
 	return fmt.Sprintf("%s() error: %s", prefix, errContext.err)
 }
 
