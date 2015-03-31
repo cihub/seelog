@@ -144,17 +144,14 @@ func (context *logContext) CallTime() time.Time {
 	return context.callTime
 }
 
-const (
-	errorContextFunc      = "Func() error: "
-	errorContextShortPath = "ShortPath() error: "
-	errorContextFullPath  = "FullPath() error: "
-	errorContextFileName  = "FileName() error: "
-)
-
 // Represents an error context
 type errorContext struct {
 	errorTime time.Time
 	err       error
+}
+
+func (errContext *errorContext) getErrorText(prefix) string {
+	return fmt.Sprintf("%s() error: %s", prefix, errContext.err)
 }
 
 func (errContext *errorContext) IsValid() bool {
@@ -166,19 +163,19 @@ func (errContext *errorContext) Line() int {
 }
 
 func (errContext *errorContext) Func() string {
-	return errorContextFunc + errContext.err.Error()
+	return errContext.getErrorText("Func")
 }
 
 func (errContext *errorContext) ShortPath() string {
-	return errorContextShortPath + errContext.err.Error()
+	return errContext.getErrorText("ShortPath")
 }
 
 func (errContext *errorContext) FullPath() string {
-	return errorContextFullPath + errContext.err.Error()
+	return errContext.getErrorText("FullPath")
 }
 
 func (errContext *errorContext) FileName() string {
-	return errorContextFileName + errContext.err.Error()
+	return errContext.getErrorText("FileName")
 }
 
 func (errContext *errorContext) CallTime() time.Time {
