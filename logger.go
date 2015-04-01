@@ -270,13 +270,13 @@ func (cLogger *commonLogger) fillUnusedLevelsByContraint(constraint logLevelCons
 // This depth level is used in the runtime.Caller(...) call. See
 // common_context.go -> specifyContext, extractCallerInfo for details.
 func (cLogger *commonLogger) log(level LogLevel, message fmt.Stringer, stackCallDepth int) {
+	if cLogger.unusedLevels[level] {
+		return
+	}
 	cLogger.m.Lock()
 	defer cLogger.m.Unlock()
 
 	if cLogger.Closed() {
-		return
-	}
-	if cLogger.unusedLevels[level] {
 		return
 	}
 	context, _ := specifyContext(stackCallDepth + cLogger.addStackDepth)
