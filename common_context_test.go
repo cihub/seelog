@@ -56,25 +56,25 @@ func init() {
 func TestContext(t *testing.T) {
 	context, err := currentContext()
 	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
+		t.Fatalf("unexpected error: %s", err)
 	}
 	if context == nil {
-		t.Fatalf("Unexpected error: context is nil")
+		t.Fatalf("unexpected error: context is nil")
 	}
 	if fn, funcName := context.Func(), commonPrefix+"TestContext"; fn != funcName {
 		// Account for a case when the func full path is longer than commonPrefix but includes it.
 		if !strings.HasSuffix(fn, funcName) {
-			t.Errorf("Expected context.Func == %s ; got %s", funcName, context.Func())
+			t.Errorf("expected context.Func == %s ; got %s", funcName, context.Func())
 		}
 	}
 	if context.ShortPath() != testShortPath {
-		t.Errorf("Expected context.ShortPath == %s ; got %s", testShortPath, context.ShortPath())
+		t.Errorf("expected context.ShortPath == %s ; got %s", testShortPath, context.ShortPath())
 	}
 	if len(testFullPath) == 0 {
-		t.Fatal("Working directory seems invalid")
+		t.Fatal("working directory seems invalid")
 	}
 	if context.FullPath() != testFullPath {
-		t.Errorf("Expected context.FullPath == %s ; got %s", testFullPath, context.FullPath())
+		t.Errorf("expected context.FullPath == %s ; got %s", testFullPath, context.FullPath())
 	}
 }
 
@@ -85,24 +85,24 @@ func innerContext() (context LogContextInterface, err error) {
 func TestInnerContext(t *testing.T) {
 	context, err := innerContext()
 	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
+		t.Fatalf("unexpected error: %s", err)
 	}
 	if context == nil {
-		t.Fatalf("Unexpected error: context is nil")
+		t.Fatalf("unexpected error: context is nil")
 	}
 	if fn, funcName := context.Func(), commonPrefix+"innerContext"; fn != funcName {
 		// Account for a case when the func full path is longer than commonPrefix but includes it.
 		if !strings.HasSuffix(fn, funcName) {
-			t.Errorf("Expected context.Func == %s ; got %s", funcName, context.Func())
+			t.Errorf("expected context.Func == %s ; got %s", funcName, context.Func())
 		}
 	}
 	if context.ShortPath() != testShortPath {
-		t.Errorf("Expected context.ShortPath == %s ; got %s", testShortPath, context.ShortPath())
+		t.Errorf("expected context.ShortPath == %s ; got %s", testShortPath, context.ShortPath())
 	}
 	if len(testFullPath) == 0 {
-		t.Fatal("Working directory seems invalid")
+		t.Fatal("working directory seems invalid")
 	}
 	if context.FullPath() != testFullPath {
-		t.Errorf("Expected context.FullPath == %s ; got %s", testFullPath, context.FullPath())
+		t.Errorf("expected context.FullPath == %s ; got %s", testFullPath, context.FullPath())
 	}
 }
