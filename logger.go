@@ -32,6 +32,7 @@ import (
 )
 
 func reportInternalError(err error) {
+	fmt.Fprintf(os.Stderr, "seelog internal error: %s\n", err)
 }
 
 // LoggerInterface represents structs capable of logging Seelog messages
