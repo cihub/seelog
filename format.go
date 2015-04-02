@@ -40,7 +40,6 @@ const (
 )
 
 const (
-	formatterSymbolString   = "%"
 	formatterParameterStart = '('
 	formatterParameterEnd   = ')'
 )
