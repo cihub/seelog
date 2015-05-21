@@ -80,6 +80,7 @@ func (asnLogger *asyncLogger) Close() {
 			reportInternalError(err)
 		}
 
+		asnLogger.closed = true
 		asnLogger.queueHasElements.Broadcast()
 	}
 }

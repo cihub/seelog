@@ -59,6 +59,7 @@ func (syncLogger *syncLogger) Close() {
 		if err := syncLogger.config.RootDispatcher.Close(); err != nil {
 			reportInternalError(err)
 		}
+		syncLogger.closed = true
 	}
 }
 
