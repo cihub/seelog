@@ -128,8 +128,9 @@ type allowedContextCache map[string]map[string]map[LogLevel]bool
 type commonLogger struct {
 	config        *logConfig          // Config used for logging
 	contextCache  allowedContextCache // Caches whether log is enabled for specific "full path-func name-level" sets
-	closed        bool                // 'true' when all writers are closed, all data is flushed, logger is unusable.
-	m             sync.Mutex          // Mutex for main operations
+	closed        bool                // 'true' when all writers are closed, all data is flushed, logger is unusable. Must be accessed while holding closedM
+	closedM       sync.RWMutex
+	m             sync.Mutex // Mutex for main operations
 	unusedLevels  []bool
 	innerLogger   innerLoggerInterface
 	addStackDepth int // Additional stack depth needed for correct seelog caller context detection
@@ -243,6 +244,8 @@ func (cLogger *commonLogger) criticalWithCallDepth(callDepth int, message fmt.St
 }
 
 func (cLogger *commonLogger) Closed() bool {
+	cLogger.closedM.RLock()
+	defer cLogger.closedM.RUnlock()
 	return cLogger.closed
 }
 
