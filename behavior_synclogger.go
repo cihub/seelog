@@ -34,8 +34,8 @@ type syncLogger struct {
 	commonLogger
 }
 
-// newSyncLogger creates a new synchronous logger
-func newSyncLogger(config *logConfig) *syncLogger {
+// NewSyncLogger creates a new synchronous logger
+func NewSyncLogger(config *logConfig) *syncLogger {
 	syncLogger := new(syncLogger)
 
 	syncLogger.commonLogger = *newCommonLogger(config, syncLogger)

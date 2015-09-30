@@ -57,8 +57,8 @@ type smtpWriter struct {
 	subject            string
 }
 
-// newSMTPWriter returns a new SMTP-writer.
-func newSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
+// NewSMTPWriter returns a new SMTP-writer.
+func NewSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
 		hostName:           hn,

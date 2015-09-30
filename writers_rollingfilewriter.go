@@ -447,7 +447,7 @@ type rollingFileWriterSize struct {
 	maxFileSize int64
 }
 
-func newRollingFileWriterSize(fpath string, atype rollingArchiveType, apath string, maxSize int64, maxRolls int, namemode rollingNameMode) (*rollingFileWriterSize, error) {
+func NewRollingFileWriterSize(fpath string, atype rollingArchiveType, apath string, maxSize int64, maxRolls int, namemode rollingNameMode) (*rollingFileWriterSize, error) {
 	rw, err := newRollingFileWriter(fpath, rollingTypeSize, atype, apath, maxRolls, namemode)
 	if err != nil {
 		return nil, err
@@ -518,7 +518,7 @@ type rollingFileWriterTime struct {
 	currentTimeFileName string
 }
 
-func newRollingFileWriterTime(fpath string, atype rollingArchiveType, apath string, maxr int,
+func NewRollingFileWriterTime(fpath string, atype rollingArchiveType, apath string, maxr int,
 	timePattern string, interval rollingIntervalType, namemode rollingNameMode) (*rollingFileWriterTime, error) {
 
 	rw, err := newRollingFileWriter(fpath, rollingTypeTime, atype, apath, maxr, namemode)

@@ -30,8 +30,8 @@ type asyncLoopLogger struct {
 	asyncLogger
 }
 
-// newAsyncLoopLogger creates a new asynchronous loop logger
-func newAsyncLoopLogger(config *logConfig) *asyncLoopLogger {
+// NewAsyncLoopLogger creates a new asynchronous loop logger
+func NewAsyncLoopLogger(config *logConfig) *asyncLoopLogger {
 
 	asnLoopLogger := new(asyncLoopLogger)
 
