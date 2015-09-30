@@ -51,7 +51,7 @@ func TestformattedWriter(t *testing.T) {
 		return
 	}
 
-	context, err := currentContext()
+	context, err := currentContext(nil)
 	if err != nil {
 		t.Error(err)
 		return

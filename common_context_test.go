@@ -44,7 +44,11 @@ func init() {
 	// Here we remove the hardcoding of the package name which
 	// may break forks and some CI environments such as jenkins.
 	_, _, funcName, _, _ := extractCallerInfo(1)
-	commonPrefix = funcName[:strings.Index(funcName, "init·")]
+	preIndex := strings.Index(funcName, "init·")
+	if preIndex == -1 {
+		preIndex = strings.Index(funcName, "init")
+	}
+	commonPrefix = funcName[:preIndex]
 	wd, err := os.Getwd()
 	if err == nil {
 		// Transform the file path into a slashed form:
@@ -54,7 +58,7 @@ func init() {
 }
 
 func TestContext(t *testing.T) {
-	context, err := currentContext()
+	context, err := currentContext(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
@@ -79,7 +83,7 @@ func TestContext(t *testing.T) {
 }
 
 func innerContext() (context LogContextInterface, err error) {
-	return currentContext()
+	return currentContext(nil)
 }
 
 func TestInnerContext(t *testing.T) {
@@ -104,5 +108,20 @@ func TestInnerContext(t *testing.T) {
 	}
 	if context.FullPath() != testFullPath {
 		t.Errorf("expected context.FullPath == %s ; got %s", testFullPath, context.FullPath())
+	}
+}
+
+type testContext struct {
+	field string
+}
+
+func TestCustomContext(t *testing.T) {
+	expected := "testStr"
+	context, err := currentContext(&testContext{expected})
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	if st, _ := context.CustomContext().(*testContext); st.field != expected {
+		t.Errorf("expected context.CustomContext == %s ; got %s", expected, st.field)
 	}
 }

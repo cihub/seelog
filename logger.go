@@ -113,6 +113,9 @@ type LoggerInterface interface {
 	// function/file names in log files. Do not use it if you are not going to wrap seelog funcs.
 	// You may reset the value to default using a SetAdditionalStackDepth(0) call.
 	SetAdditionalStackDepth(depth int) error
+
+	// Sets logger context that can be used in formatter funcs and custom receivers
+	SetContext(context interface{})
 }
 
 // innerLoggerInterface is an internal logging interface
@@ -134,6 +137,7 @@ type commonLogger struct {
 	unusedLevels  []bool
 	innerLogger   innerLoggerInterface
 	addStackDepth int // Additional stack depth needed for correct seelog caller context detection
+	customContext interface{}
 }
 
 func newCommonLogger(config *logConfig, internalLogger innerLoggerInterface) *commonLogger {
@@ -218,6 +222,10 @@ func (cLogger *commonLogger) Critical(v ...interface{}) error {
 	return errors.New(message.String())
 }
 
+func (cLogger *commonLogger) SetContext(c interface{}) {
+	cLogger.customContext = c
+}
+
 func (cLogger *commonLogger) traceWithCallDepth(callDepth int, message fmt.Stringer) {
 	cLogger.log(TraceLvl, message, callDepth)
 }
@@ -282,7 +290,7 @@ func (cLogger *commonLogger) log(level LogLevel, message fmt.Stringer, stackCall
 	if cLogger.Closed() {
 		return
 	}
-	context, _ := specifyContext(stackCallDepth + cLogger.addStackDepth)
+	context, _ := specifyContext(stackCallDepth+cLogger.addStackDepth, cLogger.customContext)
 	// Context errors are not reported because there are situations
 	// in which context errors are normal Seelog usage cases. For
 	// example in executables with stripped symbols.

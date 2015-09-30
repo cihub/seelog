@@ -127,7 +127,7 @@ var formatTests = []formatTest{
 
 func TestFormats(t *testing.T) {
 
-	context, conErr := currentContext()
+	context, conErr := currentContext(nil)
 	if conErr != nil {
 		t.Fatal("Cannot get current context:" + conErr.Error())
 		return
@@ -168,7 +168,7 @@ func TestDateParameterizedFormat(t *testing.T) {
 	testFormat := "Mon Jan 02 2006 15:04:05"
 	preciseForamt := "Mon Jan 02 2006 15:04:05.000"
 
-	context, conErr := currentContext()
+	context, conErr := currentContext(nil)
 	if conErr != nil {
 		t.Fatal("Cannot get current context:" + conErr.Error())
 		return
@@ -217,7 +217,7 @@ func TestCustomFormatterRegistration(t *testing.T) {
 		t.Errorf("expected an error when trying to register a custom formatter with duplicate name")
 	}
 
-	context, conErr := currentContext()
+	context, conErr := currentContext(nil)
 	if conErr != nil {
 		t.Fatal("Cannot get current context:" + conErr.Error())
 		return
