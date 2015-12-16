@@ -94,7 +94,7 @@ type configForParsing struct {
 	logConfig
 	LogType    loggerTypeFromString
 	LoggerData interface{}
-	Params     *cfgParseParams // Check cfg_parser: cfgParseParams
+	Params     *CfgParseParams // Check cfg_parser: CfgParseParams
 }
 
 func newFullLoggerConfig(
@@ -103,7 +103,7 @@ func newFullLoggerConfig(
 	rootDispatcher dispatcherInterface,
 	logType loggerTypeFromString,
 	logData interface{},
-	cfgParams *cfgParseParams) (*configForParsing, error) {
+	cfgParams *CfgParseParams) (*configForParsing, error) {
 	if constraints == nil {
 		return nil, errors.New("constraints can not be nil")
 	}

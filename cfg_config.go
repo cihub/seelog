@@ -63,8 +63,8 @@ func LoggerFromConfigAsString(data string) (LoggerInterface, error) {
 }
 
 // LoggerFromParamConfigAsFile does the same as LoggerFromConfigAsFile, but includes special parser options.
-// See 'cfgParseParams' comments.
-func LoggerFromParamConfigAsFile(fileName string, parserParams *cfgParseParams) (LoggerInterface, error) {
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsFile(fileName string, parserParams *CfgParseParams) (LoggerInterface, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -80,8 +80,8 @@ func LoggerFromParamConfigAsFile(fileName string, parserParams *cfgParseParams) 
 }
 
 // LoggerFromParamConfigAsBytes does the same as LoggerFromConfigAsBytes, but includes special parser options.
-// See 'cfgParseParams' comments.
-func LoggerFromParamConfigAsBytes(data []byte, parserParams *cfgParseParams) (LoggerInterface, error) {
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsBytes(data []byte, parserParams *CfgParseParams) (LoggerInterface, error) {
 	conf, err := configFromReaderWithConfig(bytes.NewBuffer(data), parserParams)
 	if err != nil {
 		return nil, err
@@ -91,8 +91,8 @@ func LoggerFromParamConfigAsBytes(data []byte, parserParams *cfgParseParams) (Lo
 }
 
 // LoggerFromParamConfigAsString does the same as LoggerFromConfigAsString, but includes special parser options.
-// See 'cfgParseParams' comments.
-func LoggerFromParamConfigAsString(data string, parserParams *cfgParseParams) (LoggerInterface, error) {
+// See 'CfgParseParams' comments.
+func LoggerFromParamConfigAsString(data string, parserParams *CfgParseParams) (LoggerInterface, error) {
 	return LoggerFromParamConfigAsBytes([]byte(data), parserParams)
 }
 

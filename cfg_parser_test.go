@@ -84,7 +84,7 @@ type parserTest struct {
 	config        string
 	expected      *configForParsing //interface{}
 	errorExpected bool
-	parserConfig  *cfgParseParams
+	parserConfig  *CfgParseParams
 }
 
 func getParserTests() []parserTest {
@@ -438,7 +438,7 @@ func getParserTests() []parserTest {
 		fnc := func(initArgs CustomReceiverInitArgs) (CustomReceiver, error) {
 			return &customTestReceiver{}, nil
 		}
-		cfg := cfgParseParams{
+		cfg := CfgParseParams{
 			CustomReceiverProducers: map[string]CustomReceiverProducer{
 				"custom-name-2": CustomReceiverProducer(fnc),
 			},

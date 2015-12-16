@@ -100,13 +100,13 @@ const (
 	connWriterInsecureSkipVerifyAttr = "insecureskipverify"
 )
 
-// CustomReceiverProducer is the signature of the function cfgParseParams needs to create
+// CustomReceiverProducer is the signature of the function CfgParseParams needs to create
 // custom receivers.
 type CustomReceiverProducer func(CustomReceiverInitArgs) (CustomReceiver, error)
 
-// cfgParseParams represent specific parse options or flags used by parser. It is used if seelog parser needs
+// CfgParseParams represent specific parse options or flags used by parser. It is used if seelog parser needs
 // some special directives or additional info to correctly parse a config.
-type cfgParseParams struct {
+type CfgParseParams struct {
 	// CustomReceiverProducers expose the same functionality as RegisterReceiver func
 	// but only in the scope (context) of the config parse func instead of a global package scope.
 	//
@@ -116,7 +116,7 @@ type cfgParseParams struct {
 	//
 	// A producer func is called when config parser processes a '<custom>' element. It takes the 'name' attribute
 	// of the element and tries to find a match in two places:
-	// 1) cfgParseParams.CustomReceiverProducers map
+	// 1) CfgParseParams.CustomReceiverProducers map
 	// 2) Global type map, filled by RegisterReceiver
 	//
 	// If a match is found in the CustomReceiverProducers map, parser calls the corresponding producer func
@@ -130,12 +130,12 @@ type cfgParseParams struct {
 	CustomReceiverProducers map[string]CustomReceiverProducer
 }
 
-func (cfg *cfgParseParams) String() string {
+func (cfg *CfgParseParams) String() string {
 	return fmt.Sprintf("CfgParams: {custom_recs=%d}", len(cfg.CustomReceiverProducers))
 }
 
 type elementMapEntry struct {
-	constructor func(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error)
+	constructor func(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error)
 }
 
 var elementMap map[string]elementMapEntry
@@ -201,7 +201,7 @@ func configFromXMLDecoder(xmlParser *xml.Decoder, rootNode xml.Token) (*configFo
 // configFromXMLDecoderWithConfig parses data from a given XML decoder.
 // Returns parsed config which can be used to create logger in case no errors occured.
 // Returns error if format is incorrect or anything happened.
-func configFromXMLDecoderWithConfig(xmlParser *xml.Decoder, rootNode xml.Token, cfg *cfgParseParams) (*configForParsing, error) {
+func configFromXMLDecoderWithConfig(xmlParser *xml.Decoder, rootNode xml.Token, cfg *CfgParseParams) (*configForParsing, error) {
 	_, ok := rootNode.(xml.StartElement)
 	if !ok {
 		return nil, errors.New("rootNode must be XML startElement")
@@ -228,7 +228,7 @@ func configFromReader(reader io.Reader) (*configForParsing, error) {
 // configFromReaderWithConfig parses data from a given reader.
 // Returns parsed config which can be used to create logger in case no errors occured.
 // Returns error if format is incorrect or anything happened.
-func configFromReaderWithConfig(reader io.Reader, cfg *cfgParseParams) (*configForParsing, error) {
+func configFromReaderWithConfig(reader io.Reader, cfg *CfgParseParams) (*configForParsing, error) {
 	config, err := unmarshalConfig(reader)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,7 @@ func configFromReaderWithConfig(reader io.Reader, cfg *cfgParseParams) (*configF
 	return configFromXMLNodeWithConfig(config, cfg)
 }
 
-func configFromXMLNodeWithConfig(config *xmlNode, cfg *cfgParseParams) (*configForParsing, error) {
+func configFromXMLNodeWithConfig(config *xmlNode, cfg *CfgParseParams) (*configForParsing, error) {
 	err := checkUnexpectedAttribute(
 		config,
 		minLevelID,
@@ -559,7 +559,7 @@ func getloggerTypeFromStringData(config *xmlNode) (logType loggerTypeFromString,
 	return logType, logData, nil
 }
 
-func getOutputsTree(config *xmlNode, formats map[string]*formatter, cfg *cfgParseParams) (dispatcherInterface, error) {
+func getOutputsTree(config *xmlNode, formats map[string]*formatter, cfg *CfgParseParams) (dispatcherInterface, error) {
 	var outputsNode *xmlNode
 	for _, child := range config.children {
 		if child.name == outputsID {
@@ -618,7 +618,7 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[st
 	return pdFormat, nil
 }
 
-func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*formatter, cfg *cfgParseParams) ([]interface{}, error) {
+func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*formatter, cfg *CfgParseParams) ([]interface{}, error) {
 	var outputs []interface{}
 	for _, childNode := range node.children {
 		entry, ok := elementMap[childNode.name]
@@ -637,7 +637,7 @@ func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*
 	return outputs, nil
 }
 
-func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID)
 	if err != nil {
 		return nil, err
@@ -660,7 +660,7 @@ func createSplitter(node *xmlNode, formatFromParent *formatter, formats map[stri
 	return NewSplitDispatcher(currentFormat, receivers)
 }
 
-func createCustomReceiver(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createCustomReceiver(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	dataCustomPrefixes := make(map[string]string)
 	// Expecting only 'formatid', 'name' and 'data-' attrs
 	for attr, attrval := range node.attributes {
@@ -714,7 +714,7 @@ func createCustomReceiver(node *xmlNode, formatFromParent *formatter, formats ma
 	return NewCustomReceiverDispatcher(currentFormat, customName, args)
 }
 
-func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID, filterLevelsAttrID)
 	if err != nil {
 		return nil, err
@@ -747,7 +747,7 @@ func createFilter(node *xmlNode, formatFromParent *formatter, formats map[string
 	return NewFilterDispatcher(currentFormat, receivers, levels...)
 }
 
-func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID, pathID)
 	if err != nil {
 		return nil, err
@@ -776,7 +776,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 }
 
 // Creates new SMTP writer if encountered in the config file.
-func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID)
 	if err != nil {
 		return nil, err
@@ -886,7 +886,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	return NewFormattedWriter(smtpWriter, currentFormat)
 }
 
-func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID)
 	if err != nil {
 		return nil, err
@@ -909,7 +909,7 @@ func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map
 	return NewFormattedWriter(consoleWriter, currentFormat)
 }
 
-func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	if node.hasChildren() {
 		return nil, errNodeCannotHaveChildren
 	}
@@ -979,7 +979,7 @@ func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	return NewFormattedWriter(connWriter, currentFormat)
 }
 
-func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	if node.hasChildren() {
 		return nil, errNodeCannotHaveChildren
 	}
@@ -1109,7 +1109,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	return nil, errors.New("incorrect rolling writer type " + rollingTypeStr)
 }
 
-func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *cfgParseParams) (interface{}, error) {
+func createbufferedWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
 	err := checkUnexpectedAttribute(node, outputFormatID, bufferedSizeAttr, bufferedFlushPeriodAttr)
 	if err != nil {
 		return nil, err
