@@ -115,7 +115,7 @@ func getXMLTests() []xmlNodeTest {
 `
 		testExpected = newNode()
 		testExpected.name = "a"
-		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, false})
+		xmlNodeTests = append(xmlNodeTests, xmlNodeTest{testName, testXML, testExpected, true})
 
 		testName = "Multiple roots"
 		testXML = `<a></a><b></b>`
