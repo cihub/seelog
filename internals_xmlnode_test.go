@@ -110,7 +110,7 @@ func getXMLTests() []xmlNodeTest {
 		testName = "Comments"
 		testXML =
 			`<!-- <abcdef/> -->
-<a> <!-- <!--12345-->
+<a> <!-- 12345-->
 </a>
 `
 		testExpected = newNode()

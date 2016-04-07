@@ -269,7 +269,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ := NewRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix)
+		testrollingFileWriter, _ := NewRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix, false)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -286,7 +286,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "log.zip", 100, 5, rollingNameModePostfix)
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "log.zip", 100, 5, rollingNameModePostfix, false)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -303,7 +303,41 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test.zip", 100, 5, rollingNameModePrefix)
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test.zip", 100, 5, rollingNameModePrefix, false)
+		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
+
+		testName = "Rolling file writer archive zip exploded"
+		testLogFileName = getTestFileName(testName, "")
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<rollingfile type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="zip" archiveexploded="true"/>
+			</outputs>
+		</seelog>`
+		testExpected = new(configForParsing)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "old", 100, 5, rollingNameModePostfix , true)
+		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
+
+		testName = "Rolling file writer archive zip exploded with specified path"
+		testLogFileName = getTestFileName(testName, "")
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<rollingfile namemode="prefix" type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="zip" archiveexploded="true" archivepath="test_old_logs"/>
+			</outputs>
+		</seelog>`
+		testExpected = new(configForParsing)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "test_old_logs", 100, 5, rollingNameModePrefix, true)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -320,7 +354,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix)
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveNone, "", 100, 5, rollingNameModePostfix, false)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -337,7 +371,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ := NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny, rollingNameModePostfix)
+		testrollingFileWriterTime, _ := NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny, rollingNameModePostfix, false)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriterTime})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -356,7 +390,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePostfix)
+		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePostfix, false)
 		testbufferedWriter, _ := NewBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testbufferedWriter})
 		testExpected.LogType = syncloggerTypeFromString
@@ -987,6 +1021,16 @@ func getParserTests() []parserTest {
 		</seelog>`
 		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true, nil})
 
+		testName = "Errors #27"
+		testLogFileName = getTestFileName(testName, "")
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<rollingfile type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="zip" archivepath="" />
+			</outputs>
+		</seelog>`
+		parserTests = append(parserTests, parserTest{testName, testConfig, nil, true, nil})
+
 		testName = "Buffered writer same formatid override"
 		testLogFileName = getTestFileName(testName, "")
 		testConfig = `
@@ -1003,7 +1047,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePrefix)
+		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePrefix, false)
 		testbufferedWriter, _ = NewBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testFormat, _ = NewFormatter("%Level %Msg %File 123")
 		formattedWriter, _ = NewFormattedWriter(testbufferedWriter, testFormat)

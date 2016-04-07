@@ -83,6 +83,7 @@ const (
 	rollingFileDataPatternAttr       = "datepattern"
 	rollingFileArchiveAttr           = "archivetype"
 	rollingFileArchivePathAttr       = "archivepath"
+	rollingFileArchiveExplodedAttr   = "archiveexploded"
 	bufferedWriterID                 = "buffered"
 	bufferedSizeAttr                 = "size"
 	bufferedFlushPeriodAttr          = "flushperiod"
@@ -1008,6 +1009,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 
 	var rArchiveType rollingArchiveType
 	var rArchivePath string
+	var rArchiveExploded bool = false
 	if !archiveAttrExists {
 		rArchiveType = rollingArchiveNone
 		rArchivePath = ""
@@ -1020,12 +1022,28 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 		if rArchiveType == rollingArchiveNone {
 			rArchivePath = ""
 		} else {
+			if rArchiveExplodedAttr, ok := node.attributes[rollingFileArchiveExplodedAttr]; ok {
+				if rArchiveExploded, err = strconv.ParseBool(rArchiveExplodedAttr); err != nil {
+					return nil, fmt.Errorf("archive exploded should be true or false, but was %v",
+						rArchiveExploded)
+				}
+			}
+
 			rArchivePath, ok = node.attributes[rollingFileArchivePathAttr]
-			if !ok {
-				rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
-				if !ok {
-					return nil, fmt.Errorf("cannot get default filename for archive type = %v",
-						rArchiveType)
+			if ok {
+				if rArchivePath == "" {
+					return nil, fmt.Errorf("empty archive path is not supported")
+				}
+			} else {
+				if rArchiveExploded {
+					rArchivePath = rollingArchiveDefaultExplodedName
+
+				} else {
+					rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
+					if !ok {
+						return nil, fmt.Errorf("cannot get default filename for archive type = %v",
+							rArchiveType)
+					}
 				}
 			}
 		}
@@ -1045,7 +1063,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	if rollingType == rollingTypeSize {
 		err := checkUnexpectedAttribute(node, outputFormatID, rollingFileTypeAttr, rollingFilePathAttr,
 			rollingFileMaxSizeAttr, rollingFileMaxRollsAttr, rollingFileArchiveAttr,
-			rollingFileArchivePathAttr, rollingFileNameModeAttr)
+			rollingFileArchivePathAttr, rollingFileArchiveExplodedAttr, rollingFileNameModeAttr)
 		if err != nil {
 			return nil, err
 		}
@@ -1069,7 +1087,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			}
 		}
 
-		rollingWriter, err := NewRollingFileWriterSize(path, rArchiveType, rArchivePath, maxSize, maxRolls, nameMode)
+		rollingWriter, err := NewRollingFileWriterSize(path, rArchiveType, rArchivePath, maxSize, maxRolls, nameMode, rArchiveExploded)
 		if err != nil {
 			return nil, err
 		}
@@ -1079,7 +1097,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	} else if rollingType == rollingTypeTime {
 		err := checkUnexpectedAttribute(node, outputFormatID, rollingFileTypeAttr, rollingFilePathAttr,
 			rollingFileDataPatternAttr, rollingFileArchiveAttr, rollingFileMaxRollsAttr,
-			rollingFileArchivePathAttr, rollingFileNameModeAttr)
+			rollingFileArchivePathAttr, rollingFileArchiveExplodedAttr, rollingFileNameModeAttr)
 		if err != nil {
 			return nil, err
 		}
@@ -1098,7 +1116,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
-		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny, nameMode)
+		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny, nameMode, rArchiveExploded)
 		if err != nil {
 			return nil, err
 		}
