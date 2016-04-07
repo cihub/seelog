@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 // File and directory permitions.
@@ -378,7 +379,13 @@ func createZip(archiveName string, files map[string][]byte) error {
 
 	// Write files
 	for fpath, fcont := range files {
-		f, err := w.Create(fpath)
+		header := &zip.FileHeader{
+			Name:   fpath,
+			Method: zip.Deflate,
+		}
+		header.SetModTime(time.Now())
+
+		f, err := w.CreateHeader(header)
 		if err != nil {
 			return err
 		}
