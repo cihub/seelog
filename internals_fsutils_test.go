@@ -18,13 +18,13 @@ func TestGzip(t *testing.T) {
 		t.Fail()
 	}
 
-	decompressedFiles, err := unGzip("./gzip.gz")
+	decompressedFile, err := unGzip("./gzip.gz")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
 
-	equal := reflect.DeepEqual(files["file1"], decompressedFiles)
+	equal := reflect.DeepEqual(files["file1"], decompressedFile)
 	if !equal {
 		t.Fail()
 	}
