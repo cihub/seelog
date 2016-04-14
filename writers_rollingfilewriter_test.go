@@ -61,6 +61,16 @@ func createRollingDatefileWriterTestCase(
 	return &fileWriterTestCase{files, fileName, rollingTypeTime, 0, 0, datePattern, writeCount, resFiles, nameMode, archiveType, archiveExploded, archivePath}
 }
 
+func TestShouldArchiveWithTar(t*testing.T) {
+	compressionType := compressionTypes[rollingArchiveGzip]
+
+	archiveName := compressionType.rollingArchiveTypeName("log", false)
+
+	if archiveName != "log.tar.gz" {
+		t.Fatalf("archive name should be log.tar.gz but got %v", archiveName)
+	}
+}
+
 func TestRollingFileWriter(t *testing.T) {
 	t.Logf("Starting rolling file writer tests")
 	NewFileWriterTester(rollingfileWriterTests, rollingFileWriterGetter, t).test()

@@ -337,7 +337,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "old", 100, 5, rollingNameModePostfix , true)
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "old", 100, 5, rollingNameModePostfix, true)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter

@@ -1,8 +1,10 @@
 package seelog
 
 import (
+	"archive/tar"
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,8 +12,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-	"compress/gzip"
-	"archive/tar"
 )
 
 // File and directory permitions.
@@ -420,9 +420,9 @@ func createTar(files map[string][]byte) ([]byte, error) {
 	for fpath, fcont := range files {
 
 		header := &tar.Header{
-			Name:   fpath,
-			Size: int64(len(fcont)),
-			Mode: defaultFilePermissions,
+			Name:    fpath,
+			Size:    int64(len(fcont)),
+			Mode:    defaultFilePermissions,
 			ModTime: time.Now(),
 		}
 
@@ -459,7 +459,7 @@ func unTar(data []byte) (map[string][]byte, error) {
 			continue
 		}
 		buffer := new(bytes.Buffer)
-		_, err =io.Copy(buffer, tarReader)
+		_, err = io.Copy(buffer, tarReader)
 		files[header.Name] = buffer.Bytes()
 		if err != nil {
 			return nil, err
@@ -509,7 +509,7 @@ func unGzip(filename string) ([]byte, error) {
 	for {
 		byteRead, err = reader.Read(byteBuffer)
 		if err == io.EOF {
-			break;
+			break
 		}
 		content.Write(byteBuffer[0:byteRead])
 
@@ -517,4 +517,9 @@ func unGzip(filename string) ([]byte, error) {
 	reader.Close()
 	return content.Bytes(), nil
 
+}
+
+func isTar(data []byte) bool {
+	tarMagicNumbers := []byte{'\x75', '\x73', '\x74', '\x61', '\x72'}
+	return bytes.Equal(data[257:262], tarMagicNumbers)
 }
