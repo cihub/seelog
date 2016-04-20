@@ -1039,10 +1039,9 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 					rArchivePath = rollingArchiveDefaultExplodedName
 
 				} else {
-					rArchivePath, ok = rollingArchiveTypesDefaultNames[rArchiveType]
-					if !ok {
-						return nil, fmt.Errorf("cannot get default filename for archive type = %v",
-							rArchiveType)
+					rArchivePath, err = rollingArchiveTypeDefaultName(rArchiveType, false)
+					if err != nil {
+						return nil, err
 					}
 				}
 			}

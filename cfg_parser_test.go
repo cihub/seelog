@@ -275,6 +275,23 @@ func getParserTests() []parserTest {
 		testExpected.RootDispatcher = testHeadSplitter
 		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
 
+		testName = "Rolling file writer archive gzip"
+		testLogFileName = getTestFileName(testName, "")
+		testConfig = `
+		<seelog type="sync">
+			<outputs>
+				<rollingfile type="size" filename="` + testLogFileName + `" maxsize="100" maxrolls="5" archivetype="gzip"/>
+			</outputs>
+		</seelog>`
+		testExpected = new(configForParsing)
+		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
+		testExpected.Exceptions = nil
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveGzip, "log.tar.gz", 100, 5, rollingNameModePostfix, false)
+		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
+		testExpected.LogType = syncloggerTypeFromString
+		testExpected.RootDispatcher = testHeadSplitter
+		parserTests = append(parserTests, parserTest{testName, testConfig, testExpected, false, nil})
+
 		testName = "Rolling file writer archive zip"
 		testLogFileName = getTestFileName(testName, "")
 		testConfig = `
@@ -320,7 +337,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "old", 100, 5, rollingNameModePostfix , true)
+		testrollingFileWriter, _ = NewRollingFileWriterSize(testLogFileName, rollingArchiveZip, "old", 100, 5, rollingNameModePostfix, true)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriter})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter

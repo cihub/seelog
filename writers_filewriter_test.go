@@ -93,7 +93,7 @@ func NewFileWriterTester(
 }
 
 func isWriterTestFile(fn string) bool {
-	return strings.Contains(fn, ".testlog") || strings.Contains(fn, ".zip")
+	return strings.Contains(fn, ".testlog") || strings.Contains(fn, ".zip") || strings.Contains(fn, ".gz")
 }
 
 func cleanupWriterTest(t *testing.T) {

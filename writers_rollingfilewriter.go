@@ -114,15 +114,75 @@ type rollingArchiveType uint8
 const (
 	rollingArchiveNone = iota
 	rollingArchiveZip
+	rollingArchiveGzip
 )
 
 var rollingArchiveTypesStringRepresentation = map[rollingArchiveType]string{
 	rollingArchiveNone: "none",
 	rollingArchiveZip:  "zip",
+	rollingArchiveGzip: "gzip",
 }
 
-var rollingArchiveTypesExtension = map[rollingArchiveType]string {
-	rollingArchiveZip:  ".zip",
+type archive func(archiveName string, files map[string][]byte, exploded bool) error
+
+type unarchive func(archiveName string) (map[string][]byte, error)
+
+type compressionType struct {
+	extension             string
+	handleMultipleEntries bool
+	archive               archive
+	unarchive             unarchive
+}
+
+var compressionTypes = map[rollingArchiveType]compressionType{
+	rollingArchiveZip: {
+		extension:             ".zip",
+		handleMultipleEntries: true,
+		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
+			return createZip(archiveName, files)
+		},
+		unarchive: unzip,
+	},
+	rollingArchiveGzip: {
+		extension:             ".gz",
+		handleMultipleEntries: false,
+		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
+			if exploded {
+				if len(files) != 1 {
+					return fmt.Errorf("Expected only 1 file but got %v file(s)", len(files))
+				}
+				for _, data := range files {
+					return createGzip(archiveName, data)
+				}
+			}
+			tar, err := createTar(files)
+			if err != nil {
+				return err
+			}
+			return createGzip(archiveName, tar)
+		},
+		unarchive: func(archiveName string) (map[string][]byte, error) {
+			content, err := unGzip(archiveName)
+			if err != nil {
+				return nil, err
+			}
+			if isTar(content) {
+				return unTar(content)
+			}
+			file := make(map[string][]byte)
+			file[archiveName] = content
+			return file, nil
+		},
+	},
+}
+
+func (compressionType *compressionType) rollingArchiveTypeName(name string, exploded bool) string {
+	if !compressionType.handleMultipleEntries && !exploded {
+		return name + ".tar" + compressionType.extension
+	} else {
+		return name + compressionType.extension
+	}
+
 }
 
 func rollingArchiveTypeFromString(rollingArchiveTypeStr string) (rollingArchiveType, bool) {
@@ -135,11 +195,15 @@ func rollingArchiveTypeFromString(rollingArchiveTypeStr string) (rollingArchiveT
 	return 0, false
 }
 
-// Default names for different archivation types
+// Default names for different archive types
 var rollingArchiveDefaultExplodedName = "old"
 
-var rollingArchiveTypesDefaultNames = map[rollingArchiveType]string{
-	rollingArchiveZip: "log.zip",
+func rollingArchiveTypeDefaultName(archiveType rollingArchiveType, exploded bool) (string, error) {
+	compressionType, ok := compressionTypes[archiveType]
+	if !ok {
+		return "", fmt.Errorf("cannot get default filename for archive type = %v", archiveType)
+	}
+	return compressionType.rollingArchiveTypeName("log", exploded), nil
 }
 
 // rollerVirtual is an interface that represents all virtual funcs that are
@@ -278,6 +342,56 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 	return nil
 }
 
+func (rw *rollingFileWriter) archiveExplodedLogs(logFilename string, compressionType compressionType) error {
+	rollPath := filepath.Join(rw.currentDirPath, logFilename)
+	bts, err := ioutil.ReadFile(rollPath)
+	if err != nil {
+		return err
+	}
+
+	entry := make(map[string][]byte)
+	entry[logFilename] = bts
+	archiveFile := path.Clean(rw.archivePath + "/" + compressionType.rollingArchiveTypeName(logFilename, true))
+
+	// archive entry
+	return compressionType.archive(archiveFile, entry, true)
+}
+
+func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionType, rollsToDelete int, history []string) error {
+	var files map[string][]byte
+	// If archive exists
+	_, err := os.Lstat(rw.archivePath)
+	if nil == err {
+		// Extract files and content from it
+		files, err = compressionType.unarchive(rw.archivePath)
+		if err != nil {
+			return err
+		}
+
+		// Remove the original file
+		err = tryRemoveFile(rw.archivePath)
+		if err != nil {
+			return err
+		}
+	} else {
+		files = make(map[string][]byte)
+	}
+
+	// Add files to the existing files map, filled above
+	for i := 0; i < rollsToDelete; i++ {
+		rollPath := filepath.Join(rw.currentDirPath, history[i])
+		bts, err := ioutil.ReadFile(rollPath)
+		if err != nil {
+			return err
+		}
+
+		files[rollPath] = bts
+	}
+
+	// Put the final file set to archive file.
+	return compressionType.archive(rw.archivePath, files, false)
+}
+
 func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 	if rw.maxRolls <= 0 {
 		return nil
@@ -288,69 +402,21 @@ func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 		return nil
 	}
 
-	switch rw.archiveType {
-	case rollingArchiveZip:
+	if rw.archiveType != rollingArchiveNone {
 		if rw.archiveExploded {
 			os.MkdirAll(rw.archivePath, defaultDirectoryPermissions)
 
 			// Archive logs
 			for i := 0; i < rollsToDelete; i++ {
-				rollPath := filepath.Join(rw.currentDirPath, history[i])
-				bts, err := ioutil.ReadFile(rollPath)
-				if err != nil {
-					return err
-				}
-
-				entry := make(map[string][]byte)
-				entry[history[i]] = bts
-				archiveFile := path.Clean(rw.archivePath + "/" + history[i] + rollingArchiveTypesExtension[rollingArchiveZip])
-
-				// zip entry
-				if err = createZip(archiveFile, entry); err != nil {
-					return err
-				}
-
+				rw.archiveExplodedLogs(history[i], compressionTypes[rw.archiveType])
 			}
-
 		} else {
-			var files map[string][]byte
 			os.MkdirAll(path.Dir(rw.archivePath), defaultDirectoryPermissions)
 
-			// If archive exists
-			_, err := os.Lstat(rw.archivePath)
-			if nil == err {
-				// Extract files and content from it
-				files, err = unzip(rw.archivePath)
-				if err != nil {
-					return err
-				}
-
-				// Remove the original file
-				err = tryRemoveFile(rw.archivePath)
-				if err != nil {
-					return err
-				}
-			} else {
-				files = make(map[string][]byte)
-			}
-
-			// Add files to the existing files map, filled above
-			for i := 0; i < rollsToDelete; i++ {
-				rollPath := filepath.Join(rw.currentDirPath, history[i])
-				bts, err := ioutil.ReadFile(rollPath)
-				if err != nil {
-					return err
-				}
-
-				files[rollPath] = bts
-			}
-
-			// Put the final file set to zip file.
-			if err = createZip(rw.archivePath, files); err != nil {
-				return err
-			}
+			rw.archiveUnexplodedLogs(compressionTypes[rw.archiveType], rollsToDelete, history)
 		}
 	}
+
 	var err error
 	// In all cases (archive files or not) the files should be deleted.
 	for i := 0; i < rollsToDelete; i++ {
@@ -508,13 +574,17 @@ func (rws *rollingFileWriterSize) isFileRollNameValid(rname string) bool {
 
 type rollSizeFileTailsSlice []string
 
-func (p rollSizeFileTailsSlice) Len() int { return len(p) }
+func (p rollSizeFileTailsSlice) Len() int {
+	return len(p)
+}
 func (p rollSizeFileTailsSlice) Less(i, j int) bool {
 	v1, _ := strconv.Atoi(p[i])
 	v2, _ := strconv.Atoi(p[j])
 	return v1 < v2
 }
-func (p rollSizeFileTailsSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p rollSizeFileTailsSlice) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
 
 func (rws *rollingFileWriterSize) sortFileRollNamesAsc(fs []string) ([]string, error) {
 	ss := rollSizeFileTailsSlice(fs)
@@ -608,7 +678,9 @@ type rollTimeFileTailsSlice struct {
 	pattern string
 }
 
-func (p rollTimeFileTailsSlice) Len() int { return len(p.data) }
+func (p rollTimeFileTailsSlice) Len() int {
+	return len(p.data)
+}
 
 func (p rollTimeFileTailsSlice) Less(i, j int) bool {
 	t1, _ := time.ParseInLocation(p.pattern, p.data[i], time.Local)
@@ -616,7 +688,9 @@ func (p rollTimeFileTailsSlice) Less(i, j int) bool {
 	return t1.Before(t2)
 }
 
-func (p rollTimeFileTailsSlice) Swap(i, j int) { p.data[i], p.data[j] = p.data[j], p.data[i] }
+func (p rollTimeFileTailsSlice) Swap(i, j int) {
+	p.data[i], p.data[j] = p.data[j], p.data[i]
+}
 
 func (rwt *rollingFileWriterTime) sortFileRollNamesAsc(fs []string) ([]string, error) {
 	ss := rollTimeFileTailsSlice{data: fs, pattern: rwt.timePattern}
