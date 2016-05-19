@@ -185,17 +185,21 @@ func rollingArchiveTypeDefaultName(archiveType rollingArchiveType, exploded bool
 	return compressionType.rollingArchiveTypeName("log", exploded), nil
 }
 
+type rollInfo struct {
+	Name string
+	Time time.Time
+}
+
 // rollerVirtual is an interface that represents all virtual funcs that are
 // called in different rolling writer subtypes.
 type rollerVirtual interface {
-	needsToRoll() (bool, error)                         // Returns true if needs to switch to another file.
+	needsToRoll(lastRollTime time.Time) (bool, error)   // Returns true if needs to switch to another file.
 	isFileRollNameValid(rname string) bool              // Returns true if logger roll file name (postfix/prefix/etc.) is ok.
 	sortFileRollNamesAsc(fs []string) ([]string, error) // Sorts logger roll file names in ascending order of their creation by logger.
 
 	// Creates a new froll history file using the contents of current file and special filename of the latest roll (prefix/ postfix).
 	// If lastRollName is empty (""), then it means that there is no latest roll (current is the first one)
-	getNewHistoryRollFileName(lastRollName string) string
-	getCurrentModifiedFileName(originalFileName string, first bool) (string, error) // Returns filename modified according to specific logger rules
+	getNewHistoryRollFileName(lastRoll rollInfo) string
 }
 
 // rollingFileWriter writes received messages to a file, until time interval passes
@@ -204,18 +208,17 @@ type rollerVirtual interface {
 // files count, if you want, and then the rolling writer would delete older ones when
 // the files count exceed the specified limit.
 type rollingFileWriter struct {
-	fileName         string // current file name. May differ from original in date rolling loggers
-	originalFileName string // original one
-	currentDirPath   string
-	currentFile      *os.File
-	currentFileSize  int64
-	rollingType      rollingType // Rolling mode (Files roll by size/date/...)
-	archiveType      rollingArchiveType
-	archivePath      string
-	archiveExploded  bool
-	maxRolls         int
-	nameMode         rollingNameMode
-	self             rollerVirtual // Used for virtual calls
+	fileName        string // log file name
+	currentDirPath  string
+	currentFile     *os.File
+	currentFileSize int64
+	rollingType     rollingType // Rolling mode (Files roll by size/date/...)
+	archiveType     rollingArchiveType
+	archivePath     string
+	archiveExploded bool
+	maxRolls        int
+	nameMode        rollingNameMode
+	self            rollerVirtual // Used for virtual calls
 }
 
 func newRollingFileWriter(fpath string, rtype rollingType, atype rollingArchiveType, apath string, maxr int, namemode rollingNameMode, archiveExploded bool) (*rollingFileWriter, error) {
@@ -224,7 +227,6 @@ func newRollingFileWriter(fpath string, rtype rollingType, atype rollingArchiveT
 	if len(rw.currentDirPath) == 0 {
 		rw.currentDirPath = "."
 	}
-	rw.originalFileName = rw.fileName
 
 	rw.rollingType = rtype
 	rw.archiveType = atype
@@ -238,10 +240,10 @@ func newRollingFileWriter(fpath string, rtype rollingType, atype rollingArchiveT
 func (rw *rollingFileWriter) hasRollName(file string) bool {
 	switch rw.nameMode {
 	case rollingNameModePostfix:
-		rname := rw.originalFileName + rollingLogHistoryDelimiter
+		rname := rw.fileName + rollingLogHistoryDelimiter
 		return strings.HasPrefix(file, rname)
 	case rollingNameModePrefix:
-		rname := rollingLogHistoryDelimiter + rw.originalFileName
+		rname := rollingLogHistoryDelimiter + rw.fileName
 		return strings.HasSuffix(file, rname)
 	}
 	return false
@@ -264,7 +266,7 @@ func (rw *rollingFileWriter) getSortedLogHistory() ([]string, error) {
 	}
 	var validRollNames []string
 	for _, file := range files {
-		if file != rw.fileName && rw.hasRollName(file) {
+		if rw.hasRollName(file) {
 			rname := rw.getFileRollName(file)
 			if rw.self.isFileRollNameValid(rname) {
 				validRollNames = append(validRollNames, rname)
@@ -277,7 +279,7 @@ func (rw *rollingFileWriter) getSortedLogHistory() ([]string, error) {
 	}
 	validSortedFiles := make([]string, len(sortedTails))
 	for i, v := range sortedTails {
-		validSortedFiles[i] = rw.createFullFileName(rw.originalFileName, v)
+		validSortedFiles[i] = rw.createFullFileName(rw.fileName, v)
 	}
 	return validSortedFiles, nil
 }
@@ -291,11 +293,6 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	rw.fileName, err = rw.self.getCurrentModifiedFileName(rw.originalFileName, first)
-	if err != nil {
-		return err
 	}
 	filePath := filepath.Join(rw.currentDirPath, rw.fileName)
 
@@ -411,9 +408,9 @@ func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 func (rw *rollingFileWriter) getFileRollName(fileName string) string {
 	switch rw.nameMode {
 	case rollingNameModePostfix:
-		return fileName[len(rw.originalFileName+rollingLogHistoryDelimiter):]
+		return fileName[len(rw.fileName+rollingLogHistoryDelimiter):]
 	case rollingNameModePrefix:
-		return fileName[:len(fileName)-len(rw.originalFileName+rollingLogHistoryDelimiter)]
+		return fileName[:len(fileName)-len(rw.fileName+rollingLogHistoryDelimiter)]
 	}
 	return ""
 }
@@ -428,7 +425,12 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 	// needs to roll if:
 	//   * file roller max file size exceeded OR
 	//   * time roller interval passed
-	nr, err := rw.self.needsToRoll()
+	fi, err := os.Stat(filepath.Join(rw.currentDirPath, rw.fileName))
+	if err != nil {
+		return 0, err
+	}
+	lastRollTime := fi.ModTime()
+	nr, err := rw.self.needsToRoll(lastRollTime)
 	if err != nil {
 		return 0, err
 	}
@@ -464,14 +466,17 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 		//     n file.log.7  <---- RENAMED (from file.log)
 		// Time rollers that doesn't modify file names (e.g. 'date' roller) skip this logic.
 		var newHistoryName string
-		var newRollMarkerName string
+		lastRoll := rollInfo{
+			Time: lastRollTime,
+		}
 		if len(history) > 0 {
 			// Create new rname name using last history file name
-			newRollMarkerName = rw.self.getNewHistoryRollFileName(rw.getFileRollName(history[len(history)-1]))
+			lastRoll.Name = rw.getFileRollName(history[len(history)-1])
 		} else {
 			// Create first rname name
-			newRollMarkerName = rw.self.getNewHistoryRollFileName("")
+			lastRoll.Name = ""
 		}
+		newRollMarkerName := rw.self.getNewHistoryRollFileName(lastRoll)
 		if len(newRollMarkerName) != 0 {
 			newHistoryName = rw.createFullFileName(rw.fileName, newRollMarkerName)
 		} else {
@@ -539,7 +544,7 @@ func NewRollingFileWriterSize(fpath string, atype rollingArchiveType, apath stri
 	return rws, nil
 }
 
-func (rws *rollingFileWriterSize) needsToRoll() (bool, error) {
+func (rws *rollingFileWriterSize) needsToRoll(lastRollTime time.Time) (bool, error) {
 	return rws.currentFileSize >= rws.maxFileSize, nil
 }
 
@@ -571,16 +576,12 @@ func (rws *rollingFileWriterSize) sortFileRollNamesAsc(fs []string) ([]string, e
 	return ss, nil
 }
 
-func (rws *rollingFileWriterSize) getNewHistoryRollFileName(lastRollName string) string {
+func (rws *rollingFileWriterSize) getNewHistoryRollFileName(lastRoll rollInfo) string {
 	v := 0
-	if len(lastRollName) != 0 {
-		v, _ = strconv.Atoi(lastRollName)
+	if len(lastRoll.Name) != 0 {
+		v, _ = strconv.Atoi(lastRoll.Name)
 	}
 	return fmt.Sprintf("%d", v+1)
-}
-
-func (rws *rollingFileWriterSize) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
-	return originalFileName, nil
 }
 
 func (rws *rollingFileWriterSize) String() string {
@@ -615,16 +616,9 @@ func NewRollingFileWriterTime(fpath string, atype rollingArchiveType, apath stri
 	return rws, nil
 }
 
-func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
-	switch rwt.nameMode {
-	case rollingNameModePostfix:
-		if rwt.originalFileName+rollingLogHistoryDelimiter+time.Now().Format(rwt.timePattern) == rwt.fileName {
-			return false, nil
-		}
-	case rollingNameModePrefix:
-		if time.Now().Format(rwt.timePattern)+rollingLogHistoryDelimiter+rwt.originalFileName == rwt.fileName {
-			return false, nil
-		}
+func (rwt *rollingFileWriterTime) needsToRoll(lastRollTime time.Time) (bool, error) {
+	if time.Now().Format(rwt.timePattern) == lastRollTime.Format(rwt.timePattern) {
+		return false, nil
 	}
 	return true, nil
 }
@@ -662,28 +656,8 @@ func (rwt *rollingFileWriterTime) sortFileRollNamesAsc(fs []string) ([]string, e
 	return ss.data, nil
 }
 
-func (rwt *rollingFileWriterTime) getNewHistoryRollFileName(lastRollName string) string {
-	return ""
-}
-
-func (rwt *rollingFileWriterTime) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
-	if first {
-		history, err := rwt.getSortedLogHistory()
-		if err != nil {
-			return "", err
-		}
-		if len(history) > 0 {
-			return history[len(history)-1], nil
-		}
-	}
-
-	switch rwt.nameMode {
-	case rollingNameModePostfix:
-		return originalFileName + rollingLogHistoryDelimiter + time.Now().Format(rwt.timePattern), nil
-	case rollingNameModePrefix:
-		return time.Now().Format(rwt.timePattern) + rollingLogHistoryDelimiter + originalFileName, nil
-	}
-	return "", fmt.Errorf("Unknown rolling writer mode. Either postfix or prefix must be used")
+func (rwt *rollingFileWriterTime) getNewHistoryRollFileName(lastRoll rollInfo) string {
+	return lastRoll.Time.Format(rwt.timePattern)
 }
 
 func (rwt *rollingFileWriterTime) String() string {
