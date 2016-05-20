@@ -388,7 +388,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ := NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalAny, rollingNameModePostfix, false)
+		testrollingFileWriterTime, _ := NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingNameModePostfix, false)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testrollingFileWriterTime})
 		testExpected.LogType = syncloggerTypeFromString
 		testExpected.RootDispatcher = testHeadSplitter
@@ -407,7 +407,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePostfix, false)
+		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingNameModePostfix, false)
 		testbufferedWriter, _ := NewBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testHeadSplitter, _ = NewSplitDispatcher(DefaultFormatter, []interface{}{testbufferedWriter})
 		testExpected.LogType = syncloggerTypeFromString
@@ -1064,7 +1064,7 @@ func getParserTests() []parserTest {
 		testExpected = new(configForParsing)
 		testExpected.Constraints, _ = NewMinMaxConstraints(TraceLvl, CriticalLvl)
 		testExpected.Exceptions = nil
-		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingIntervalDaily, rollingNameModePrefix, false)
+		testrollingFileWriterTime, _ = NewRollingFileWriterTime(testLogFileName, rollingArchiveNone, "", 0, "2006-01-02T15:04:05Z07:00", rollingNameModePrefix, false)
 		testbufferedWriter, _ = NewBufferedWriter(testrollingFileWriterTime, 100500, 100)
 		testFormat, _ = NewFormatter("%Level %Msg %File 123")
 		formattedWriter, _ = NewFormattedWriter(testbufferedWriter, testFormat)

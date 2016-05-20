@@ -1115,7 +1115,7 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
-		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, rollingIntervalAny, nameMode, rArchiveExploded)
+		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, nameMode, rArchiveExploded)
 		if err != nil {
 			return nil, err
 		}

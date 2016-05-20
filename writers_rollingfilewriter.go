@@ -72,27 +72,6 @@ func rollingNameModeFromString(rollingNameStr string) (rollingNameMode, bool) {
 	return 0, false
 }
 
-type rollingIntervalType uint8
-
-const (
-	rollingIntervalAny = iota
-	rollingIntervalDaily
-)
-
-var rollingInvervalTypesStringRepresentation = map[rollingIntervalType]string{
-	rollingIntervalDaily: "daily",
-}
-
-func rollingIntervalTypeFromString(rollingTypeStr string) (rollingIntervalType, bool) {
-	for tp, tpStr := range rollingInvervalTypesStringRepresentation {
-		if tpStr == rollingTypeStr {
-			return tp, true
-		}
-	}
-
-	return 0, false
-}
-
 var rollingTypesStringRepresentation = map[rollingType]string{
 	rollingTypeSize: "size",
 	rollingTypeTime: "date",
@@ -621,18 +600,17 @@ func (rws *rollingFileWriterSize) String() string {
 type rollingFileWriterTime struct {
 	*rollingFileWriter
 	timePattern         string
-	interval            rollingIntervalType
 	currentTimeFileName string
 }
 
 func NewRollingFileWriterTime(fpath string, atype rollingArchiveType, apath string, maxr int,
-	timePattern string, interval rollingIntervalType, namemode rollingNameMode, archiveExploded bool) (*rollingFileWriterTime, error) {
+	timePattern string, namemode rollingNameMode, archiveExploded bool) (*rollingFileWriterTime, error) {
 
 	rw, err := newRollingFileWriter(fpath, rollingTypeTime, atype, apath, maxr, namemode, archiveExploded)
 	if err != nil {
 		return nil, err
 	}
-	rws := &rollingFileWriterTime{rw, timePattern, interval, ""}
+	rws := &rollingFileWriterTime{rw, timePattern, ""}
 	rws.self = rws
 	return rws, nil
 }
@@ -648,21 +626,7 @@ func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
 			return false, nil
 		}
 	}
-	if rwt.interval == rollingIntervalAny {
-		return true, nil
-	}
-
-	tprev, err := time.ParseInLocation(rwt.timePattern, rwt.getFileRollName(rwt.fileName), time.Local)
-	if err != nil {
-		return false, err
-	}
-
-	diff := time.Now().Sub(tprev)
-	switch rwt.interval {
-	case rollingIntervalDaily:
-		return diff >= 24*time.Hour, nil
-	}
-	return false, fmt.Errorf("unknown interval type: %d", rwt.interval)
+	return true, nil
 }
 
 func (rwt *rollingFileWriterTime) isFileRollNameValid(rname string) bool {
@@ -723,11 +687,10 @@ func (rwt *rollingFileWriterTime) getCurrentModifiedFileName(originalFileName st
 }
 
 func (rwt *rollingFileWriterTime) String() string {
-	return fmt.Sprintf("Rolling file writer (By TIME): filename: %s, archive: %s, archivefile: %s, maxInterval: %v, pattern: %s, maxRolls: %v",
+	return fmt.Sprintf("Rolling file writer (By TIME): filename: %s, archive: %s, archivefile: %s, pattern: %s, maxRolls: %v",
 		rwt.fileName,
 		rollingArchiveTypesStringRepresentation[rwt.archiveType],
 		rwt.archivePath,
-		rwt.interval,
 		rwt.timePattern,
 		rwt.maxRolls)
 }
