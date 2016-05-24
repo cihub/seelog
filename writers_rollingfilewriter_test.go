@@ -61,7 +61,7 @@ func createRollingDatefileWriterTestCase(
 	return &fileWriterTestCase{files, fileName, rollingTypeTime, 0, 0, datePattern, writeCount, resFiles, nameMode, archiveType, archiveExploded, archivePath}
 }
 
-func TestShouldArchiveWithTar(t*testing.T) {
+func TestShouldArchiveWithTar(t *testing.T) {
 	compressionType := compressionTypes[rollingArchiveGzip]
 
 	archiveName := compressionType.rollingArchiveTypeName("log", false)
