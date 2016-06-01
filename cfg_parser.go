@@ -84,6 +84,7 @@ const (
 	rollingFileArchiveAttr           = "archivetype"
 	rollingFileArchivePathAttr       = "archivepath"
 	rollingFileArchiveExplodedAttr   = "archiveexploded"
+	rollingFileFullNameAttr          = "fullname"
 	bufferedWriterID                 = "buffered"
 	bufferedSizeAttr                 = "size"
 	bufferedFlushPeriodAttr          = "flushperiod"
@@ -1096,7 +1097,8 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 	} else if rollingType == rollingTypeTime {
 		err := checkUnexpectedAttribute(node, outputFormatID, rollingFileTypeAttr, rollingFilePathAttr,
 			rollingFileDataPatternAttr, rollingFileArchiveAttr, rollingFileMaxRollsAttr,
-			rollingFileArchivePathAttr, rollingFileArchiveExplodedAttr, rollingFileNameModeAttr)
+			rollingFileArchivePathAttr, rollingFileArchiveExplodedAttr, rollingFileNameModeAttr,
+			rollingFileFullNameAttr)
 		if err != nil {
 			return nil, err
 		}
@@ -1110,12 +1112,24 @@ func createRollingFileWriter(node *xmlNode, formatFromParent *formatter, formats
 			}
 		}
 
+		fullName := false
+		fn, ok := node.attributes[rollingFileFullNameAttr]
+		if ok {
+			if fn == "true" {
+				fullName = true
+			} else if fn == "false" {
+				fullName = false
+			} else {
+				return nil, errors.New("node '" + node.name + "' has incorrect '" + rollingFileFullNameAttr + "' attribute value")
+			}
+		}
+
 		dataPattern, ok := node.attributes[rollingFileDataPatternAttr]
 		if !ok {
 			return nil, newMissingArgumentError(node.name, rollingFileDataPatternAttr)
 		}
 
-		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, nameMode, rArchiveExploded)
+		rollingWriter, err := NewRollingFileWriterTime(path, rArchiveType, rArchivePath, maxRolls, dataPattern, nameMode, rArchiveExploded, fullName)
 		if err != nil {
 			return nil, err
 		}
