@@ -82,7 +82,7 @@ func rollingFileWriterGetter(testCase *fileWriterTestCase) (io.WriteCloser, erro
 	if testCase.rollingType == rollingTypeSize {
 		return NewRollingFileWriterSize(testCase.fileName, testCase.archiveType, testCase.archivePath, testCase.fileSize, testCase.maxRolls, testCase.nameMode, testCase.archiveExploded)
 	} else if testCase.rollingType == rollingTypeTime {
-		return NewRollingFileWriterTime(testCase.fileName, testCase.archiveType, testCase.archivePath, -1, testCase.datePattern, testCase.nameMode, testCase.archiveExploded)
+		return NewRollingFileWriterTime(testCase.fileName, testCase.archiveType, testCase.archivePath, -1, testCase.datePattern, testCase.nameMode, testCase.archiveExploded, false)
 	}
 
 	return nil, fmt.Errorf("incorrect rollingType")
