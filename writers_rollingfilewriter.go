@@ -307,6 +307,9 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 	stat, err := os.Lstat(filePath)
 	if err == nil {
 		rw.currentFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
+		if err != nil {
+			return err
+		}
 
 		stat, err = os.Lstat(filePath)
 		if err != nil {
