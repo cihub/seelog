@@ -278,15 +278,6 @@ func getOpenFilesByDirectoryAsync(
 	return nil
 }
 
-func copyFile(sf *os.File, dst string) (int64, error) {
-	df, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer df.Close()
-	return io.Copy(df, sf)
-}
-
 // fileExists return flag whether a given file exists
 // and operation error if an unclassified failure occurs.
 func fileExists(path string) (bool, error) {
@@ -502,21 +493,9 @@ func unGzip(filename string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer reader.Close()
 
-	content := new(bytes.Buffer)
-	byteBuffer := make([]byte, 1000)
-	byteRead := 0
-	for {
-		byteRead, err = reader.Read(byteBuffer)
-		if err == io.EOF {
-			break
-		}
-		content.Write(byteBuffer[0:byteRead])
-
-	}
-	reader.Close()
-	return content.Bytes(), nil
-
+	return ioutil.ReadAll(reader)
 }
 
 func isTar(data []byte) bool {
