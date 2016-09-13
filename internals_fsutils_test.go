@@ -1,6 +1,8 @@
 package seelog
 
 import (
+	"bytes"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -10,7 +12,13 @@ func TestGzip(t *testing.T) {
 
 	files := make(map[string][]byte)
 	files["file1"] = []byte("I am a log")
-	err := createGzip("./gzip.gz", files["file1"])
+
+	readers := make(map[string]io.Reader)
+	for fname, fcont := range files {
+		readers[fname] = bytes.NewReader(fcont)
+	}
+
+	err := createGzip("./gzip.gz", readers["file1"])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +39,13 @@ func TestTar(t *testing.T) {
 	files := make(map[string][]byte)
 	files["file1"] = []byte("I am a log")
 	files["file2"] = []byte("I am another log")
-	tar, err := createTar(files)
+
+	readers := make(map[string]io.Reader)
+	for fname, fcont := range files {
+		readers[fname] = bytes.NewReader(fcont)
+	}
+
+	tar, err := createTar(readers)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +65,13 @@ func TestIsTar(t *testing.T) {
 	files := make(map[string][]byte)
 	files["file1"] = []byte("I am a log")
 	files["file2"] = []byte("I am another log")
-	tar, _ := createTar(files)
+
+	readers := make(map[string]io.Reader)
+	for fname, fcont := range files {
+		readers[fname] = bytes.NewReader(fcont)
+	}
+
+	tar, _ := createTar(readers)
 
 	if !isTar(tar) {
 		t.Fatal("tar(files) should be recognized as a tar file")
