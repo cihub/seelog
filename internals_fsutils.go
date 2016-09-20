@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// File and directory permitions.
+// File and directory permissions.
 const (
 	defaultFilePermissions      = 0666
 	defaultDirectoryPermissions = 0767
@@ -45,7 +45,7 @@ func newNotDirectoryError(dname string) *notDirectoryError {
 // Must return 'false' to set aside the given file.
 type fileFilter func(os.FileInfo, *os.File) bool
 
-// filePathFilter is a filtering creteria function for file path.
+// filePathFilter is a filtering criteria function for file path.
 // Must return 'false' to set aside the given file.
 type filePathFilter func(filePath string) bool
 
