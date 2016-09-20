@@ -332,14 +332,14 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 
 func (rw *rollingFileWriter) archiveExplodedLogs(logFilename string, compressionType compressionType) error {
 	rollPath := filepath.Join(rw.currentDirPath, logFilename)
-	rawFile, err := os.Open(rollPath)
+	rollFile, err := os.Open(rollPath)
 	if err != nil {
 		return err
 	}
-	defer rawFile.Close()
+	defer rollFile.Close()
 
 	entry := make(map[string]io.Reader)
-	entry[logFilename] = rawFile
+	entry[logFilename] = rollFile
 	archiveName := path.Clean(rw.archivePath + "/" + compressionType.rollingArchiveTypeName(logFilename, true))
 
 	// archive entry
@@ -377,13 +377,13 @@ func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionTy
 		files[rollPath] = bts
 	}
 
-	readers := make(map[string]io.Reader)
+	freaders := make(map[string]io.Reader)
 	for fname, fcont := range files {
-		readers[fname] = bytes.NewReader(fcont)
+		freaders[fname] = bytes.NewReader(fcont)
 	}
 
 	// Put the final file set to archive file.
-	return compressionType.archive(rw.archivePath, readers, false)
+	return compressionType.archive(rw.archivePath, freaders, false)
 }
 
 func (rw *rollingFileWriter) deleteOldRolls(history []string) error {

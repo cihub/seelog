@@ -13,12 +13,12 @@ func TestGzip(t *testing.T) {
 	files := make(map[string][]byte)
 	files["file1"] = []byte("I am a log")
 
-	readers := make(map[string]io.Reader)
+	freaders := make(map[string]io.Reader)
 	for fname, fcont := range files {
-		readers[fname] = bytes.NewReader(fcont)
+		freaders[fname] = bytes.NewReader(fcont)
 	}
 
-	err := createGzip("./gzip.gz", readers["file1"])
+	err := createGzip("./gzip.gz", freaders["file1"])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,12 +40,12 @@ func TestTar(t *testing.T) {
 	files["file1"] = []byte("I am a log")
 	files["file2"] = []byte("I am another log")
 
-	readers := make(map[string]io.Reader)
+	freaders := make(map[string]io.Reader)
 	for fname, fcont := range files {
-		readers[fname] = bytes.NewReader(fcont)
+		freaders[fname] = bytes.NewReader(fcont)
 	}
 
-	tar, err := createTar(readers)
+	tar, err := createTar(freaders)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,12 +66,15 @@ func TestIsTar(t *testing.T) {
 	files["file1"] = []byte("I am a log")
 	files["file2"] = []byte("I am another log")
 
-	readers := make(map[string]io.Reader)
+	freaders := make(map[string]io.Reader)
 	for fname, fcont := range files {
-		readers[fname] = bytes.NewReader(fcont)
+		freaders[fname] = bytes.NewReader(fcont)
 	}
 
-	tar, _ := createTar(readers)
+	tar, err := createTar(freaders)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if !isTar(tar) {
 		t.Fatal("tar(files) should be recognized as a tar file")

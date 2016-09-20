@@ -375,7 +375,7 @@ func createZip(archiveName string, files map[string]io.Reader) error {
 	w := zip.NewWriter(archiveFile)
 
 	// Write files
-	for fpath, fcont := range files {
+	for fpath, freader := range files {
 		header := &zip.FileHeader{
 			Name:   fpath,
 			Method: zip.Deflate,
@@ -386,8 +386,7 @@ func createZip(archiveName string, files map[string]io.Reader) error {
 		if err != nil {
 			return err
 		}
-		_, err = io.Copy(f, fcont)
-		if err != nil {
+		if _, err := io.Copy(f, freader); err != nil {
 			return err
 		}
 	}
@@ -417,18 +416,15 @@ func createTar(files map[string]io.Reader) ([]byte, error) {
 			ModTime: time.Now(),
 		}
 
-		err = tarWriter.WriteHeader(header)
-		if err != nil {
+		if err := tarWriter.WriteHeader(header); err != nil {
 			return nil, err
 		}
 
-		_, err = tarWriter.Write(fcontents)
-		if err != nil {
+		if _, err := tarWriter.Write(fcontents); err != nil {
 			return nil, err
 		}
 	}
-	err := tarWriter.Close()
-	if err != nil {
+	if err := tarWriter.Close(); err != nil {
 		return nil, err
 	}
 
