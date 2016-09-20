@@ -25,7 +25,9 @@
 package seelog
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -102,7 +104,7 @@ var rollingArchiveTypesStringRepresentation = map[rollingArchiveType]string{
 	rollingArchiveGzip: "gzip",
 }
 
-type archive func(archiveName string, files map[string][]byte, exploded bool) error
+type archive func(archiveName string, files map[string]io.Reader, exploded bool) error
 
 type unarchive func(archiveName string) (map[string][]byte, error)
 
@@ -117,7 +119,7 @@ var compressionTypes = map[rollingArchiveType]compressionType{
 	rollingArchiveZip: {
 		extension:             ".zip",
 		handleMultipleEntries: true,
-		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
+		archive: func(archiveName string, files map[string]io.Reader, exploded bool) error {
 			return createZip(archiveName, files)
 		},
 		unarchive: unzip,
@@ -125,7 +127,7 @@ var compressionTypes = map[rollingArchiveType]compressionType{
 	rollingArchiveGzip: {
 		extension:             ".gz",
 		handleMultipleEntries: false,
-		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
+		archive: func(archiveName string, files map[string]io.Reader, exploded bool) error {
 			if exploded {
 				if len(files) != 1 {
 					return fmt.Errorf("Expected only 1 file but got %v file(s)", len(files))
@@ -138,7 +140,7 @@ var compressionTypes = map[rollingArchiveType]compressionType{
 			if err != nil {
 				return err
 			}
-			return createGzip(archiveName, tar)
+			return createGzip(archiveName, bytes.NewReader(tar))
 		},
 		unarchive: func(archiveName string) (map[string][]byte, error) {
 			content, err := unGzip(archiveName)
@@ -330,17 +332,18 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 
 func (rw *rollingFileWriter) archiveExplodedLogs(logFilename string, compressionType compressionType) error {
 	rollPath := filepath.Join(rw.currentDirPath, logFilename)
-	bts, err := ioutil.ReadFile(rollPath)
+	rollFile, err := os.Open(rollPath)
 	if err != nil {
 		return err
 	}
+	defer rollFile.Close()
 
-	entry := make(map[string][]byte)
-	entry[logFilename] = bts
-	archiveFile := path.Clean(rw.archivePath + "/" + compressionType.rollingArchiveTypeName(logFilename, true))
+	entry := make(map[string]io.Reader)
+	entry[logFilename] = rollFile
+	archiveName := path.Clean(rw.archivePath + "/" + compressionType.rollingArchiveTypeName(logFilename, true))
 
 	// archive entry
-	return compressionType.archive(archiveFile, entry, true)
+	return compressionType.archive(archiveName, entry, true)
 }
 
 func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionType, rollsToDelete int, history []string) error {
@@ -374,8 +377,13 @@ func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionTy
 		files[rollPath] = bts
 	}
 
+	freaders := make(map[string]io.Reader)
+	for fname, fcont := range files {
+		freaders[fname] = bytes.NewReader(fcont)
+	}
+
 	// Put the final file set to archive file.
-	return compressionType.archive(rw.archivePath, files, false)
+	return compressionType.archive(rw.archivePath, freaders, false)
 }
 
 func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
