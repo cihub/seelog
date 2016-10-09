@@ -26,14 +26,19 @@ package seelog
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cihub/seelog/archive"
+	"github.com/cihub/seelog/archive/gzip"
+	"github.com/cihub/seelog/archive/tar"
+	"github.com/cihub/seelog/archive/zip"
 )
 
 // Common constants
@@ -102,55 +107,67 @@ var rollingArchiveTypesStringRepresentation = map[rollingArchiveType]string{
 	rollingArchiveGzip: "gzip",
 }
 
-type archive func(archiveName string, files map[string][]byte, exploded bool) error
+type archiver func(f *os.File, exploded bool) archive.WriteCloser
 
-type unarchive func(archiveName string) (map[string][]byte, error)
+type unarchiver func(f *os.File) (archive.ReadCloser, error)
 
 type compressionType struct {
 	extension             string
 	handleMultipleEntries bool
-	archive               archive
-	unarchive             unarchive
+	archiver              archiver
+	unarchiver            unarchiver
 }
 
 var compressionTypes = map[rollingArchiveType]compressionType{
 	rollingArchiveZip: {
 		extension:             ".zip",
 		handleMultipleEntries: true,
-		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
-			return createZip(archiveName, files)
+		archiver: func(f *os.File, _ bool) archive.WriteCloser {
+			return zip.NewWriter(f)
 		},
-		unarchive: unzip,
+		unarchiver: func(f *os.File) (archive.ReadCloser, error) {
+			fi, err := f.Stat()
+			if err != nil {
+				return nil, err
+			}
+			r, err := zip.NewReader(f, fi.Size())
+			if err != nil {
+				return nil, err
+			}
+			return archive.NopCloser(r), nil
+		},
 	},
 	rollingArchiveGzip: {
 		extension:             ".gz",
 		handleMultipleEntries: false,
-		archive: func(archiveName string, files map[string][]byte, exploded bool) error {
+		archiver: func(f *os.File, exploded bool) archive.WriteCloser {
+			gw := gzip.NewWriter(f)
 			if exploded {
-				if len(files) != 1 {
-					return fmt.Errorf("Expected only 1 file but got %v file(s)", len(files))
-				}
-				for _, data := range files {
-					return createGzip(archiveName, data)
-				}
+				return gw
 			}
-			tar, err := createTar(files)
-			if err != nil {
-				return err
-			}
-			return createGzip(archiveName, tar)
+			return tar.NewWriteMultiCloser(gw, gw)
 		},
-		unarchive: func(archiveName string) (map[string][]byte, error) {
-			content, err := unGzip(archiveName)
+		unarchiver: func(f *os.File) (archive.ReadCloser, error) {
+			gr, err := gzip.NewReader(f, f.Name())
 			if err != nil {
 				return nil, err
 			}
-			if isTar(content) {
-				return unTar(content)
+
+			// Determine if the gzip is a tar
+			tr := tar.NewReader(gr)
+			_, err = tr.Next()
+			isTar := err == nil
+
+			// Reset to beginning of file
+			if _, err := f.Seek(0, os.SEEK_SET); err != nil {
+				return nil, err
 			}
-			file := make(map[string][]byte)
-			file[archiveName] = content
-			return file, nil
+			gr.Reset(f)
+
+			if isTar {
+				return archive.NopCloser(tar.NewReader(gr)), nil
+			}
+			return gr, nil
 		},
 	},
 }
@@ -328,54 +345,120 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 	return nil
 }
 
-func (rw *rollingFileWriter) archiveExplodedLogs(logFilename string, compressionType compressionType) error {
+func (rw *rollingFileWriter) archiveExplodedLogs(logFilename string, compressionType compressionType) (err error) {
+	closeWithError := func(c io.Closer) {
+		if cerr := c.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}
+
 	rollPath := filepath.Join(rw.currentDirPath, logFilename)
-	bts, err := ioutil.ReadFile(rollPath)
+	src, err := os.Open(rollPath)
 	if err != nil {
 		return err
 	}
+	defer src.Close() // Read-only
 
-	entry := make(map[string][]byte)
-	entry[logFilename] = bts
-	archiveFile := path.Clean(rw.archivePath + "/" + compressionType.rollingArchiveTypeName(logFilename, true))
+	// Buffer to a temporary file on the same partition
+	// Note: archivePath is a path to a directory when handling exploded logs
+	dst, err := rw.tempArchiveFile(rw.archivePath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		closeWithError(dst)
+		if err != nil {
+			os.Remove(dst.Name()) // Can't do anything when we fail to remove temp file
+			return
+		}
+
+		// Finalize archive by swapping the buffered archive into place
+		err = os.Rename(dst.Name(), filepath.Join(rw.archivePath,
+			compressionType.rollingArchiveTypeName(logFilename, true)))
+	}()
 
 	// archive entry
-	return compressionType.archive(archiveFile, entry, true)
+	w := compressionType.archiver(dst, true)
+	defer closeWithError(w)
+	fi, err := src.Stat()
+	if err != nil {
+		return err
+	}
+	if err := w.NextFile(logFilename, fi); err != nil {
+		return err
+	}
+	_, err = io.Copy(w, src)
+	return err
 }
 
-func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionType, rollsToDelete int, history []string) error {
-	var files map[string][]byte
-	// If archive exists
-	_, err := os.Lstat(rw.archivePath)
-	if nil == err {
-		// Extract files and content from it
-		files, err = compressionType.unarchive(rw.archivePath)
-		if err != nil {
-			return err
+func (rw *rollingFileWriter) archiveUnexplodedLogs(compressionType compressionType, rollsToDelete int, history []string) (err error) {
+	closeWithError := func(c io.Closer) {
+		if cerr := c.Close(); cerr != nil && err == nil {
+			err = cerr
 		}
-
-		// Remove the original file
-		err = tryRemoveFile(rw.archivePath)
-		if err != nil {
-			return err
-		}
-	} else {
-		files = make(map[string][]byte)
 	}
 
-	// Add files to the existing files map, filled above
+	// Buffer to a temporary file on the same partition
+	// Note: archivePath is a path to a file when handling unexploded logs
+	dst, err := rw.tempArchiveFile(filepath.Dir(rw.archivePath))
+	if err != nil {
+		return err
+	}
+	defer func() {
+		closeWithError(dst)
+		if err != nil {
+			os.Remove(dst.Name()) // Can't do anything when we fail to remove temp file
+			return
+		}
+
+		// Finalize archive by moving the buffered archive into place
+		err = os.Rename(dst.Name(), rw.archivePath)
+	}()
+
+	w := compressionType.archiver(dst, false)
+	defer closeWithError(w)
+
+	src, err := os.Open(rw.archivePath)
+	switch {
+	// Archive exists
+	case err == nil:
+		defer src.Close() // Read-only
+
+		r, err := compressionType.unarchiver(src)
+		if err != nil {
+			return err
+		}
+		defer r.Close() // Read-only
+
+		if err := archive.Copy(w, r); err != nil {
+			return err
+		}
+
+	// Failed to stat
+	case !os.IsNotExist(err):
+		return err
+	}
+
+	// Add new files to the archive
 	for i := 0; i < rollsToDelete; i++ {
 		rollPath := filepath.Join(rw.currentDirPath, history[i])
-		bts, err := ioutil.ReadFile(rollPath)
+		src, err := os.Open(rollPath)
 		if err != nil {
 			return err
 		}
-
-		files[rollPath] = bts
+		defer src.Close() // Read-only
+		fi, err := src.Stat()
+		if err != nil {
+			return err
+		}
+		if err := w.NextFile(src.Name(), fi); err != nil {
+			return err
+		}
+		if _, err := io.Copy(w, src); err != nil {
+			return err
+		}
 	}
-
-	// Put the final file set to archive file.
-	return compressionType.archive(rw.archivePath, files, false)
+	return nil
 }
 
 func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
@@ -397,7 +480,7 @@ func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 				rw.archiveExplodedLogs(history[i], compressionTypes[rw.archiveType])
 			}
 		} else {
-			os.MkdirAll(path.Dir(rw.archivePath), defaultDirectoryPermissions)
+			os.MkdirAll(filepath.Dir(rw.archivePath), defaultDirectoryPermissions)
 
 			rw.archiveUnexplodedLogs(compressionTypes[rw.archiveType], rollsToDelete, history)
 		}
@@ -528,6 +611,14 @@ func (rw *rollingFileWriter) Close() error {
 		rw.currentFile = nil
 	}
 	return nil
+}
+
+func (rw *rollingFileWriter) tempArchiveFile(archiveDir string) (*os.File, error) {
+	tmp := filepath.Join(archiveDir, ".seelog_tmp")
+	if err := os.MkdirAll(tmp, defaultDirectoryPermissions); err != nil {
+		return nil, err
+	}
+	return ioutil.TempFile(tmp, "archived_logs")
 }
 
 // =============================================================================================

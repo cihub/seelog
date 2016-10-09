@@ -1,17 +1,11 @@
 package seelog
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"bytes"
-	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 )
 
 // File and directory permitions.
@@ -278,15 +272,6 @@ func getOpenFilesByDirectoryAsync(
 	return nil
 }
 
-func copyFile(sf *os.File, dst string) (int64, error) {
-	df, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer df.Close()
-	return io.Copy(df, sf)
-}
-
 // fileExists return flag whether a given file exists
 // and operation error if an unclassified failure occurs.
 func fileExists(path string) (bool, error) {
@@ -332,194 +317,4 @@ func tryRemoveFile(filePath string) (err error) {
 		return
 	}
 	return
-}
-
-// Unzips a specified zip file. Returns filename->filebytes map.
-func unzip(archiveName string) (map[string][]byte, error) {
-	// Open a zip archive for reading.
-	r, err := zip.OpenReader(archiveName)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	// Files to be added to archive
-	// map file name to contents
-	files := make(map[string][]byte)
-
-	// Iterate through the files in the archive,
-	// printing some of their contents.
-	for _, f := range r.File {
-		rc, err := f.Open()
-		if err != nil {
-			return nil, err
-		}
-
-		bts, err := ioutil.ReadAll(rc)
-		rcErr := rc.Close()
-
-		if err != nil {
-			return nil, err
-		}
-		if rcErr != nil {
-			return nil, rcErr
-		}
-
-		files[f.Name] = bts
-	}
-
-	return files, nil
-}
-
-// Creates a zip file with the specified file names and byte contents.
-func createZip(archiveName string, files map[string][]byte) error {
-	// Create a buffer to write our archive to.
-	buf := new(bytes.Buffer)
-
-	// Create a new zip archive.
-	w := zip.NewWriter(buf)
-
-	// Write files
-	for fpath, fcont := range files {
-		header := &zip.FileHeader{
-			Name:   fpath,
-			Method: zip.Deflate,
-		}
-		header.SetModTime(time.Now())
-
-		f, err := w.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-		_, err = f.Write([]byte(fcont))
-		if err != nil {
-			return err
-		}
-	}
-
-	// Make sure to check the error on Close.
-	err := w.Close()
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(archiveName, buf.Bytes(), defaultFilePermissions)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createTar(files map[string][]byte) ([]byte, error) {
-
-	// Create a buffer to write our archive to.
-	tarBuffer := new(bytes.Buffer)
-	tarWriter := tar.NewWriter(tarBuffer)
-
-	for fpath, fcont := range files {
-
-		header := &tar.Header{
-			Name:    fpath,
-			Size:    int64(len(fcont)),
-			Mode:    defaultFilePermissions,
-			ModTime: time.Now(),
-		}
-
-		err := tarWriter.WriteHeader(header)
-
-		if err != nil {
-			return nil, err
-		}
-
-		_, err = tarWriter.Write(fcont)
-		if err != nil {
-			return nil, err
-		}
-	}
-	tarWriter.Close()
-
-	return tarBuffer.Bytes(), nil
-}
-
-func unTar(data []byte) (map[string][]byte, error) {
-	tarReader := tar.NewReader(bytes.NewReader(data))
-	files := make(map[string][]byte)
-
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return nil, err
-		}
-
-		info := header.FileInfo()
-		if info.IsDir() {
-			continue
-		}
-		buffer := new(bytes.Buffer)
-		_, err = io.Copy(buffer, tarReader)
-		files[header.Name] = buffer.Bytes()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return files, nil
-
-}
-
-func createGzip(archiveName string, content []byte) error {
-
-	// Create a buffer to write our archive to.
-	// Make sure to check the error on Close.
-	gzipBuffer := new(bytes.Buffer)
-	gzipWriter := gzip.NewWriter(gzipBuffer)
-
-	_, err := gzipWriter.Write(content)
-	if err != nil {
-		return err
-	}
-	err = gzipWriter.Close()
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(archiveName, gzipBuffer.Bytes(), defaultFilePermissions)
-
-}
-
-func unGzip(filename string) ([]byte, error) {
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	reader, err := gzip.NewReader(file)
-	if err != nil {
-		return nil, err
-	}
-
-	content := new(bytes.Buffer)
-	byteBuffer := make([]byte, 1000)
-	byteRead := 0
-	for {
-		byteRead, err = reader.Read(byteBuffer)
-		if err == io.EOF {
-			break
-		}
-		content.Write(byteBuffer[0:byteRead])
-
-	}
-	reader.Close()
-	return content.Bytes(), nil
-
-}
-
-func isTar(data []byte) bool {
-	tarMagicNumbers := []byte{'\x75', '\x73', '\x74', '\x61', '\x72'}
-	return bytes.Equal(data[257:262], tarMagicNumbers)
 }
