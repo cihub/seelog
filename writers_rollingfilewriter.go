@@ -239,6 +239,7 @@ type rollingFileWriter struct {
 	fullName        bool
 	maxRolls        int
 	nameMode        rollingNameMode
+	lastRollTime    time.Time
 	self            rollerVirtual // Used for virtual calls
 }
 
@@ -334,9 +335,11 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 		}
 
 		rw.currentFileSize = stat.Size()
+		rw.lastRollTime = stat.ModTime()
 	} else {
 		rw.currentFile, err = os.Create(filePath)
 		rw.currentFileSize = 0
+		rw.lastRollTime = time.Now()
 	}
 	if err != nil {
 		return err
@@ -518,11 +521,7 @@ func (rw *rollingFileWriter) Write(bytes []byte) (n int, err error) {
 	// needs to roll if:
 	//   * file roller max file size exceeded OR
 	//   * time roller interval passed
-	fi, err := rw.currentFile.Stat()
-	if err != nil {
-		return 0, err
-	}
-	lastRollTime := fi.ModTime()
+	lastRollTime := rw.lastRollTime
 	nr, err := rw.self.needsToRoll(lastRollTime)
 	if err != nil {
 		return 0, err
