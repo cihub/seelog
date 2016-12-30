@@ -43,7 +43,8 @@ var (
 func init() {
 	// Here we remove the hardcoding of the package name which
 	// may break forks and some CI environments such as jenkins.
-	_, _, funcName, _, _ := extractCallerInfo(1)
+	ctx, _ := extractCallerInfo(1)
+	funcName := ctx.funcName
 	preIndex := strings.Index(funcName, "init·")
 	if preIndex == -1 {
 		preIndex = strings.Index(funcName, "init")
