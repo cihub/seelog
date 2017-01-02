@@ -29,6 +29,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"unicode"
@@ -57,7 +58,7 @@ var (
 	DefaultFormatter *formatter
 	msgonlyformatter *formatter
 
-	formattedHostname, formattedPID string
+	formattedHostname, formattedPID, formattedAppName string
 )
 
 func init() {
@@ -72,6 +73,7 @@ func init() {
 		reportInternalError(fmt.Errorf("error querying os.Hostname: %s", err))
 	}
 	formattedPID = fmt.Sprintf("%d", os.Getpid())
+	formattedAppName = filepath.Base(os.Args[0])
 }
 
 // FormatterFunc represents one formatter object that starts with '%' sign in the 'format' attribute
@@ -108,6 +110,7 @@ var formatterFuncs = map[string]FormatterFunc{
 	"UTCNs":     formatterUTCNs,
 	"Hostname":  formatterHostname,
 	"PID":       formatterPID,
+	"AppName":   formatterAppName,
 	"r":         formatterr,
 	"n":         formattern,
 	"t":         formattert,
@@ -438,6 +441,10 @@ func formatterHostname(message string, level LogLevel, context LogContextInterfa
 
 func formatterPID(message string, level LogLevel, context LogContextInterface) interface{} {
 	return formattedPID
+}
+
+func formatterAppName(message string, level LogLevel, context LogContextInterface) interface{} {
+	return formattedAppName
 }
 
 func formatterr(message string, level LogLevel, context LogContextInterface) interface{} {
