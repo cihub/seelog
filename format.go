@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -55,6 +56,8 @@ var DefaultMsgFormat = "%Ns [%Level] %Msg%n"
 var (
 	DefaultFormatter *formatter
 	msgonlyformatter *formatter
+
+	formattedHostname, formattedPID string
 )
 
 func init() {
@@ -65,6 +68,10 @@ func init() {
 	if msgonlyformatter, err = NewFormatter("%Msg"); err != nil {
 		reportInternalError(fmt.Errorf("error during creating msgonlyformatter: %s", err))
 	}
+	if formattedHostname, err = os.Hostname(); err != nil {
+		reportInternalError(fmt.Errorf("error querying os.Hostname: %s", err))
+	}
+	formattedPID = fmt.Sprintf("%d", os.Getpid())
 }
 
 // FormatterFunc represents one formatter object that starts with '%' sign in the 'format' attribute
@@ -99,6 +106,8 @@ var formatterFuncs = map[string]FormatterFunc{
 	"UTCTime":   formatterUTCTime,
 	"Ns":        formatterNs,
 	"UTCNs":     formatterUTCNs,
+	"Hostname":  formatterHostname,
+	"PID":       formatterPID,
 	"r":         formatterr,
 	"n":         formattern,
 	"t":         formattert,
@@ -421,6 +430,14 @@ func formatterNs(message string, level LogLevel, context LogContextInterface) in
 
 func formatterUTCNs(message string, level LogLevel, context LogContextInterface) interface{} {
 	return context.CallTime().UTC().UnixNano()
+}
+
+func formatterHostname(message string, level LogLevel, context LogContextInterface) interface{} {
+	return formattedHostname
+}
+
+func formatterPID(message string, level LogLevel, context LogContextInterface) interface{} {
+	return formattedPID
 }
 
 func formatterr(message string, level LogLevel, context LogContextInterface) interface{} {
