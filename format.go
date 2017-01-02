@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log/syslog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -50,6 +51,10 @@ const (
 const (
 	DateDefaultFormat = "2006-01-02"
 	TimeFormat        = "15:04:05"
+
+	// syslogPriorityDefault contains default settings for the
+	// SyslogPriority formatter.
+	syslogPriorityDefault = "daemon,debug,debug,info,warning,err,crit"
 )
 
 var DefaultMsgFormat = "%Ns [%Level] %Msg%n"
@@ -117,9 +122,10 @@ var formatterFuncs = map[string]FormatterFunc{
 }
 
 var formatterFuncsParameterized = map[string]FormatterFuncCreator{
-	"Date":    createDateTimeFormatterFunc,
-	"UTCDate": createUTCDateTimeFormatterFunc,
-	"EscM":    createANSIEscapeFunc,
+	"Date":           createDateTimeFormatterFunc,
+	"UTCDate":        createUTCDateTimeFormatterFunc,
+	"EscM":           createANSIEscapeFunc,
+	"SyslogPriority": createSyslogPriorityFormatterFunc,
 }
 
 func errorAliasReserved(name string) error {
@@ -487,4 +493,77 @@ func createANSIEscapeFunc(escapeCodeString string) FormatterFunc {
 
 		return fmt.Sprintf("%c[%sm", 0x1B, escapeCodeString)
 	}
+}
+
+func createSyslogPriorityFormatterFunc(priFmt string) FormatterFunc {
+	if len(priFmt) == 0 {
+		priFmt = syslogPriorityDefault
+	}
+	pf := strings.Split(strings.ToLower(priFmt), ",")
+	f, err := createSyslogPriorityFormatterFuncAux(pf)
+	if err != nil {
+		errMsg := err.Error()
+		return func(message string, level LogLevel, context LogContextInterface) interface{} {
+			return errMsg
+		}
+	}
+	return f
+}
+
+var syslogFacilities = map[string]syslog.Priority{
+	"kern":     syslog.LOG_KERN,
+	"user":     syslog.LOG_USER,
+	"mail":     syslog.LOG_MAIL,
+	"daemon":   syslog.LOG_DAEMON,
+	"auth":     syslog.LOG_AUTH,
+	"syslog":   syslog.LOG_SYSLOG,
+	"lpr":      syslog.LOG_LPR,
+	"news":     syslog.LOG_NEWS,
+	"uucp":     syslog.LOG_UUCP,
+	"cron":     syslog.LOG_CRON,
+	"authpriv": syslog.LOG_AUTHPRIV,
+	"ftp":      syslog.LOG_FTP,
+	"local0":   syslog.LOG_LOCAL0,
+	"local1":   syslog.LOG_LOCAL1,
+	"local2":   syslog.LOG_LOCAL2,
+	"local3":   syslog.LOG_LOCAL3,
+	"local4":   syslog.LOG_LOCAL4,
+	"local5":   syslog.LOG_LOCAL5,
+	"local6":   syslog.LOG_LOCAL6,
+	"local7":   syslog.LOG_LOCAL7,
+}
+
+var syslogLevels = map[string]syslog.Priority{
+	"debug":     syslog.LOG_DEBUG,
+	"info":      syslog.LOG_INFO,
+	"notice":    syslog.LOG_NOTICE,
+	"warn":      syslog.LOG_WARNING,
+	"warning":   syslog.LOG_WARNING,
+	"err":       syslog.LOG_ERR,
+	"error":     syslog.LOG_ERR,
+	"crit":      syslog.LOG_CRIT,
+	"critical":  syslog.LOG_CRIT,
+	"alert":     syslog.LOG_ALERT,
+	"emerg":     syslog.LOG_EMERG,
+	"emergency": syslog.LOG_EMERG,
+}
+
+func createSyslogPriorityFormatterFuncAux(pf []string) (FormatterFunc, error) {
+	if len(pf) != 7 {
+		return nil, errors.New("WRONG_SYSLOG_PRIORITY")
+	}
+	facility, ok := syslogFacilities[pf[0]]
+	if !ok {
+		return nil, errors.New("WRONG_SYSLOG_FACILITY")
+	}
+	var levelMap [6]syslog.Priority
+	for i := range levelMap {
+		levelMap[i], ok = syslogLevels[pf[i+1]]
+		if !ok {
+			return nil, errors.New("WRONG_SYSLOG_LEVEL")
+		}
+	}
+	return func(message string, level LogLevel, context LogContextInterface) interface{} {
+		return fmt.Sprintf("<%d>", facility|levelMap[level])
+	}, nil
 }
