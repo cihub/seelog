@@ -69,6 +69,7 @@ const (
 	subjectID                        = "subject"
 	splitterDispatcherID             = "splitter"
 	consoleWriterID                  = "console"
+	syslogWriterID                   = "syslog"
 	customReceiverID                 = "custom"
 	customNameAttrID                 = "name"
 	customNameDataAttrPrefix         = "data-"
@@ -150,6 +151,7 @@ func init() {
 		customReceiverID:     {createCustomReceiver},
 		filterDispatcherID:   {createFilter},
 		consoleWriterID:      {createConsoleWriter},
+		syslogWriterID:       {createSyslogWriter},
 		rollingfileWriterID:  {createRollingFileWriter},
 		bufferedWriterID:     {createbufferedWriter},
 		smtpWriterID:         {createSMTPWriter},
@@ -913,6 +915,24 @@ func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map
 	}
 
 	return NewFormattedWriter(consoleWriter, currentFormat)
+}
+
+func createSyslogWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
+	if node.hasChildren() {
+		return nil, errNodeCannotHaveChildren
+	}
+
+	err := checkUnexpectedAttribute(node, outputFormatID)
+	if err != nil {
+		return nil, err
+	}
+
+	currentFormat, err := getCurrentFormat(node, predefinedFormats["std:syslog-bsd-local"], formats)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewFormattedWriter(NewSyslogWriter(), currentFormat)
 }
 
 func createconnWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
