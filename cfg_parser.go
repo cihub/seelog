@@ -177,6 +177,10 @@ func fillPredefinedFormats() error {
 		"debug":       `[%LEVEL] %RelFile:%Func.%Line %Date %Time %Msg%n`,
 		"debug-short": `[%LEVEL] %Date %Time %Msg%n`,
 		"fast":        `%Ns %l %Msg%n`,
+
+		"syslog-bsd-local": `%SyslogPriority%Date(Jan _2 15:04:05) %AppName[%PID]: %Msg%n`,
+		"syslog-bsd":       `%SyslogPriority%Date(Jan _2 15:04:05) %Hostname %AppName[%PID]: %Msg%n`,
+		"syslog-rfc5424":   `%SyslogPriority()1%UTCDate(2006-01-25T15:04:05.000000000Z07:00) %Hostname %AppName %PID - - %Msg%n`,
 	}
 
 	predefinedFormats = make(map[string]*formatter)
