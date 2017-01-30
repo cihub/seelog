@@ -102,6 +102,7 @@ var formatterFuncs = map[string]FormatterFunc{
 	"r":         formatterr,
 	"n":         formattern,
 	"t":         formattert,
+	"GoID":      formatterGoID,
 }
 
 var formatterFuncsParameterized = map[string]FormatterFuncCreator{
@@ -433,6 +434,10 @@ func formattern(message string, level LogLevel, context LogContextInterface) int
 
 func formattert(message string, level LogLevel, context LogContextInterface) interface{} {
 	return "\t"
+}
+
+func formatterGoID(message string, level LogLevel, context LogContextInterface) interface{} {
+	return goID()
 }
 
 func createDateTimeFormatterFunc(dateTimeFormat string) FormatterFunc {
