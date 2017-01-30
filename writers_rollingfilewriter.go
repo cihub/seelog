@@ -318,28 +318,21 @@ func (rw *rollingFileWriter) createFileAndFolderIfNeeded(first bool) error {
 	rw.currentName = rw.self.getCurrentFileName()
 	filePath := filepath.Join(rw.currentDirPath, rw.currentName)
 
-	// If exists
-	stat, err := os.Lstat(filePath)
-	if err == nil {
-		rw.currentFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, defaultFilePermissions)
-		if err != nil {
-			return err
-		}
-
-		stat, err = os.Lstat(filePath)
-		if err != nil {
-			return err
-		}
-
-		rw.currentFileSize = stat.Size()
-	} else {
-		rw.currentFile, err = os.Create(filePath)
-		rw.currentFileSize = 0
-	}
+	// This will either open the existing file (without truncating it) or
+	// create if necessary. Append mode avoids any race conditions.
+	rw.currentFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, defaultFilePermissions)
 	if err != nil {
 		return err
 	}
 
+	stat, err := rw.currentFile.Stat()
+	if err != nil {
+		rw.currentFile.Close()
+		rw.currentFile = nil
+		return err
+	}
+
+	rw.currentFileSize = stat.Size()
 	return nil
 }
 
