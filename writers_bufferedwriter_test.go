@@ -43,22 +43,6 @@ func TestChunkWriteOnFilling(t *testing.T) {
 	bufferedWriter.Write(bytes)
 }
 
-func TestFlushByTimePeriod(t *testing.T) {
-	writer, _ := newBytesVerifier(t)
-	bufferedWriter, err := NewBufferedWriter(writer, 1024, 10)
-
-	if err != nil {
-		t.Fatalf("Unexpected buffered writer creation error: %s", err.Error())
-	}
-
-	bytes := []byte("Hello")
-
-	for i := 0; i < 2; i++ {
-		writer.ExpectBytes(bytes)
-		bufferedWriter.Write(bytes)
-	}
-}
-
 func TestBigMessageMustPassMemoryBuffer(t *testing.T) {
 	writer, _ := newBytesVerifier(t)
 	bufferedWriter, err := NewBufferedWriter(writer, 1024, 0)
