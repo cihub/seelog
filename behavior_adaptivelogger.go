@@ -127,3 +127,7 @@ func (asnAdaptiveLogger *asyncAdaptiveLogger) processQueue() {
 		<-time.After(interval)
 	}
 }
+
+func (asnAdaptiveLogger *asyncAdaptiveLogger) getCommonLogger() commonLogger {
+	return asnAdaptiveLogger.commonLogger
+}

@@ -305,3 +305,35 @@ func Flush() {
 	defer pkgOperationsMutex.Unlock()
 	Current.Flush()
 }
+
+// Set/Update constraints
+func SetConstraints(constrains logLevelConstraints) logLevelConstraints {
+	commonLogger := Current.getCommonLogger()
+
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+
+	last := commonLogger.config.Constraints
+
+	commonLogger.config.Constraints = constrains
+	commonLogger.unusedLevels = make([]bool, Off)
+	commonLogger.fillUnusedLevels()
+
+	return last
+}
+
+// Set/Update Exceptions
+func SetExceptions(logLevelExceptions []*LogLevelException) []*LogLevelException {
+	commonLogger := Current.getCommonLogger()
+
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+
+	last := commonLogger.config.Exceptions
+
+	commonLogger.config.Exceptions = logLevelExceptions
+	commonLogger.unusedLevels = make([]bool, Off)
+	commonLogger.fillUnusedLevels()
+
+	return last
+}
