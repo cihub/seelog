@@ -218,6 +218,13 @@ func Infof(format string, params ...interface{}) {
 	Current.infoWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
 }
 
+// Printf formats message according to format specifier and writes to default logger with log level = Info
+func Printf(format string, params ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.infoWithCallDepth(staticFuncCallDepth, newLogFormattedMessage(format, params))
+}
+
 // Warnf formats message according to format specifier and writes to default logger with log level = Warn
 func Warnf(format string, params ...interface{}) error {
 	pkgOperationsMutex.Lock()
@@ -261,6 +268,13 @@ func Debug(v ...interface{}) {
 
 // Info formats message using the default formats for its operands and writes to default logger with log level = Info
 func Info(v ...interface{}) {
+	pkgOperationsMutex.Lock()
+	defer pkgOperationsMutex.Unlock()
+	Current.infoWithCallDepth(staticFuncCallDepth, newLogMessage(v))
+}
+
+// Println formats message using the default formats for its operands and writes to default logger with log level = Info
+func Println(v ...interface{}) {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
 	Current.infoWithCallDepth(staticFuncCallDepth, newLogMessage(v))
