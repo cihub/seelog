@@ -63,6 +63,11 @@ func (fw *fileWriter) Write(bytes []byte) (n int, err error) {
 			return 0, err
 		}
 	}
+	if _, err := os.Stat(fw.fileName); err != nil {
+		if err := fw.createFile(); err != nil {
+			return 0, err
+		}
+	}
 	return fw.innerWriter.Write(bytes)
 }
 
