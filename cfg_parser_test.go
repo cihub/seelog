@@ -170,6 +170,7 @@ func getParserTests() []parserTest {
 			"sn",
 			[]string{"ra1", "ra2", "ra3"},
 			"hn",
+			"hn",
 			"123",
 			"un",
 			"up",
@@ -186,7 +187,7 @@ func getParserTests() []parserTest {
 		testConfig = `
 <seelog>
 	<outputs>
-		<smtp senderaddress="sa" sendername="sn"  hostname="hn" hostport="123" username="un" password="up" subject="ohlala">
+		<smtp senderaddress="sa" sendername="sn" servername="svn" hostname="hn" hostport="123" username="un" password="up" subject="ohlala">
 			<recipient address="ra1"/>
 			<cacertdirpath path="cacdp1"/>
 			<header name="Priority" value="Urgent" />
@@ -204,6 +205,7 @@ func getParserTests() []parserTest {
 			"sa",
 			"sn",
 			[]string{"ra1"},
+			"svn",
 			"hn",
 			"123",
 			"un",

@@ -46,6 +46,7 @@ const (
 // smtpWriter is used to send emails via given SMTP-server.
 type smtpWriter struct {
 	auth               smtp.Auth
+	serverName         string
 	hostName           string
 	hostPort           string
 	hostNameWithPort   string
@@ -58,9 +59,10 @@ type smtpWriter struct {
 }
 
 // NewSMTPWriter returns a new SMTP-writer.
-func NewSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
+func NewSMTPWriter(sa, sn string, ras []string, svn, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
+		serverName:         svn,
 		hostName:           hn,
 		hostPort:           hp,
 		hostNameWithPort:   fmt.Sprintf("%s:%s", hn, hp),
@@ -188,7 +190,7 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
 		)
 	} else {
-		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.hostName)
+		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.serverName)
 		if e != nil {
 			return 0, e
 		}

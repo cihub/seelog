@@ -61,6 +61,7 @@ const (
 	mailHeaderNameID                 = "name"
 	mailHeaderValueID                = "value"
 	addressID                        = "address"
+	serverNameID                     = "servername"
 	hostNameID                       = "hostname"
 	hostPortID                       = "hostport"
 	userNameID                       = "username"
@@ -779,7 +780,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 // Creates new SMTP writer if encountered in the config file.
 func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID)
+	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, serverNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -838,9 +839,16 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 			return nil, newUnexpectedChildElementError(childNode.name)
 		}
 	}
+
 	hostName, ok := node.attributes[hostNameID]
 	if !ok {
 		return nil, newMissingArgumentError(node.name, hostNameID)
+	}
+
+	serverName := hostName
+	name, ok := node.attributes[serverNameID]
+	if ok {
+		serverName = name
 	}
 
 	hostPort, ok := node.attributes[hostPortID]
@@ -876,6 +884,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		senderAddress,
 		senderName,
 		recipientAddresses,
+		serverName,
 		hostName,
 		hostPort,
 		userName,
