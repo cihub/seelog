@@ -73,3 +73,7 @@ func (syncLogger *syncLogger) Flush() {
 		syncLogger.config.RootDispatcher.Flush()
 	}
 }
+
+func (syncLogger *syncLogger) getCommonLogger() commonLogger {
+	return syncLogger.commonLogger
+}

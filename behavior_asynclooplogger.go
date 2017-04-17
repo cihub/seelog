@@ -67,3 +67,7 @@ func (asnLoopLogger *asyncLoopLogger) processQueue() {
 		}
 	}
 }
+
+func (asnLoopLogger *asyncLoopLogger) getCommonLogger() commonLogger {
+	return asnLoopLogger.commonLogger
+}

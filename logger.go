@@ -116,6 +116,9 @@ type LoggerInterface interface {
 
 	// Sets logger context that can be used in formatter funcs and custom receivers
 	SetContext(context interface{})
+
+	// get common logger
+	getCommonLogger() commonLogger
 }
 
 // innerLoggerInterface is an internal logging interface

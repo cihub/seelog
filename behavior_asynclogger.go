@@ -140,3 +140,7 @@ func (asnLogger *asyncLogger) addMsgToQueue(
 		reportInternalError(err)
 	}
 }
+
+func (asnLogger *asyncLogger) getCommonLogger() commonLogger {
+	return asnLogger.commonLogger
+}

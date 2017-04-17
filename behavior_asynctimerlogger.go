@@ -80,3 +80,7 @@ func (asnTimerLogger *asyncTimerLogger) processQueue() {
 		<-time.After(asnTimerLogger.interval)
 	}
 }
+
+func (asnTimerLogger *asyncTimerLogger) getCommonLogger() commonLogger {
+	return asnTimerLogger.commonLogger
+}
