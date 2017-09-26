@@ -33,6 +33,7 @@ import (
 	"net/smtp"
 	"path/filepath"
 	"strings"
+	"net"
 )
 
 const (
@@ -55,10 +56,11 @@ type smtpWriter struct {
 	caCertDirPaths     []string
 	mailHeaders        []string
 	subject            string
+	sslEnabled		   bool
 }
 
 // NewSMTPWriter returns a new SMTP-writer.
-func NewSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string) *smtpWriter {
+func NewSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps []string, subj string, headers []string, ssl bool) *smtpWriter {
 	return &smtpWriter{
 		auth:               smtp.PlainAuth("", un, pwd, hn),
 		hostName:           hn,
@@ -70,6 +72,7 @@ func NewSMTPWriter(sa, sn string, ras []string, hn, hp, un, pwd string, cacdps [
 		caCertDirPaths:     cacdps,
 		subject:            subj,
 		mailHeaders:        headers,
+		sslEnabled:			ssl,
 	}
 }
 
@@ -81,6 +84,17 @@ func prepareMessage(senderAddr, senderName, subject string, body []byte, headers
 		headerLines += "\n"
 	}
 	return append([]byte(headerLines), body...)
+}
+
+// getSimpleTLSConfig sets InsecureSkipVerify as true if no CA is given and ssl is necessary.
+// tls accepts any certificate presented by the server and any host name in that certificate
+func getSimpleTLSConfig(hostName string) (config *tls.Config) {
+	config = &tls.Config {
+		InsecureSkipVerify: true,
+		ServerName: hostName,
+	}
+
+	return
 }
 
 // getTLSConfig gets paths of PEM files with certificates,
@@ -131,9 +145,26 @@ func getTLSConfig(pemFileDirPaths []string, hostName string) (config *tls.Config
 // switches to TLS if possible, authenticates with mechanism a if possible,
 // and then sends an email from address from, to addresses to, with message msg.
 func sendMailWithTLSConfig(config *tls.Config, addr string, a smtp.Auth, from string, to []string, msg []byte) error {
-	c, err := smtp.Dial(addr)
-	if err != nil {
-		return err
+	var c *smtp.Client
+	var err error
+
+	if config.InsecureSkipVerify {
+		conn, err := tls.Dial("tcp", addr, config)
+		if err != nil {
+			return err
+		}
+
+		host, _, _ := net.SplitHostPort(addr)
+
+		c, err = smtp.NewClient(conn, host)
+		if err != nil {
+			return err
+		}
+	} else {
+		c, err = smtp.Dial(addr)
+		if err != nil {
+			return err
+		}
 	}
 	// Check if the server supports STARTTLS extension.
 	if ok, _ := c.Extension("STARTTLS"); ok {
@@ -180,13 +211,25 @@ func (smtpw *smtpWriter) Write(data []byte) (int, error) {
 	var err error
 
 	if smtpw.caCertDirPaths == nil {
-		err = smtp.SendMail(
-			smtpw.hostNameWithPort,
-			smtpw.auth,
-			smtpw.senderAddress,
-			smtpw.recipientAddresses,
-			prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
-		)
+		if smtpw.sslEnabled {
+			config := getSimpleTLSConfig(smtpw.hostName)
+			err = sendMailWithTLSConfig(
+				config,
+				smtpw.hostNameWithPort,
+				smtpw.auth,
+				smtpw.senderAddress,
+				smtpw.recipientAddresses,
+				prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
+			)
+		} else {
+			err = smtp.SendMail(
+				smtpw.hostNameWithPort,
+				smtpw.auth,
+				smtpw.senderAddress,
+				smtpw.recipientAddresses,
+				prepareMessage(smtpw.senderAddress, smtpw.senderName, smtpw.subject, data, smtpw.mailHeaders),
+			)
+		}
 	} else {
 		config, e := getTLSConfig(smtpw.caCertDirPaths, smtpw.hostName)
 		if e != nil {
