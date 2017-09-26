@@ -67,6 +67,7 @@ const (
 	userPassID                       = "password"
 	cACertDirpathID                  = "cacertdirpath"
 	subjectID                        = "subject"
+	sslEnabledId					 = "ssl"
 	splitterDispatcherID             = "splitter"
 	consoleWriterID                  = "console"
 	customReceiverID                 = "custom"
@@ -779,7 +780,7 @@ func createfileWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 // Creates new SMTP writer if encountered in the config file.
 func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID)
+	err := checkUnexpectedAttribute(node, outputFormatID, senderaddressID, senderNameID, hostNameID, hostPortID, userNameID, userPassID, subjectID, sslEnabledId)
 	if err != nil {
 		return nil, err
 	}
@@ -872,6 +873,19 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		subjectPhrase = subject
 	}
 
+	// sslEnabled is optionally set by configuration.
+	// considering the situation of sending email via ssl connection without a CA file.
+	// default is false
+	var sslEnabled = false
+
+	sslEnabledStr, ok := node.attributes[sslEnabledId]
+	if ok {
+		sslEnabled, err = strconv.ParseBool(sslEnabledStr)
+		if err != nil {
+			return nil, errors.New("only true/false can be set in ssl field")
+		}
+	}
+
 	smtpWriter := NewSMTPWriter(
 		senderAddress,
 		senderName,
@@ -883,6 +897,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 		caCertDirPaths,
 		subjectPhrase,
 		mailHeaders,
+		sslEnabled,
 	)
 
 	return NewFormattedWriter(smtpWriter, currentFormat)
