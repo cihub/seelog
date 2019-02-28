@@ -47,7 +47,7 @@ const (
 // Time and date formats used for %Date and %Time aliases.
 const (
 	DateDefaultFormat = "2006-01-02"
-	TimeFormat        = "15:04:05"
+	TimeFormat        = "15:04:05.000"
 )
 
 var DefaultMsgFormat = "%Ns [%Level] %Msg%n"

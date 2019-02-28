@@ -98,7 +98,7 @@ func extractCallerInfo(skip int) (*logContext, error) {
 	}
 
 	var shortPath string
-	fullPath, line := funcInfo.FileLine(pc)
+	fullPath, line := funcInfo.FileLine(pc - 1)
 	if strings.HasPrefix(fullPath, workingDir) {
 		shortPath = fullPath[len(workingDir):]
 	} else {

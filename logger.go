@@ -336,35 +336,17 @@ func (cLogger *commonLogger) isAllowed(level LogLevel, context LogContextInterfa
 }
 
 type logMessage struct {
-	params []interface{}
-}
-
-type logFormattedMessage struct {
-	format string
-	params []interface{}
+	str string
 }
 
 func newLogMessage(params []interface{}) fmt.Stringer {
-	message := new(logMessage)
-
-	message.params = params
-
-	return message
+	return &logMessage{ fmt.Sprint(params...) }
 }
 
-func newLogFormattedMessage(format string, params []interface{}) *logFormattedMessage {
-	message := new(logFormattedMessage)
-
-	message.params = params
-	message.format = format
-
-	return message
+func newLogFormattedMessage(format string, params []interface{}) fmt.Stringer {
+	return &logMessage{ fmt.Sprintf(format, params...) }
 }
 
 func (message *logMessage) String() string {
-	return fmt.Sprint(message.params...)
-}
-
-func (message *logFormattedMessage) String() string {
-	return fmt.Sprintf(message.format, message.params...)
+	return message.str
 }

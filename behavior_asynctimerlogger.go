@@ -55,17 +55,28 @@ func NewAsyncTimerLogger(config *logConfig, interval time.Duration) (*asyncTimer
 
 func (asnTimerLogger *asyncTimerLogger) processItem() (closed bool) {
 	asnTimerLogger.queueHasElements.L.Lock()
-	defer asnTimerLogger.queueHasElements.L.Unlock()
 
 	for asnTimerLogger.msgQueue.Len() == 0 && !asnTimerLogger.Closed() {
 		asnTimerLogger.queueHasElements.Wait()
+	}
+
+	element := asnTimerLogger.msgQueue.Front()
+
+	if element != nil {
+		asnTimerLogger.msgQueue.Remove(element)
+	}
+
+	asnTimerLogger.queueHasElements.L.Unlock()
+
+	if element != nil {
+		msg, _ := element.Value.(msgQueueItem)
+		asnTimerLogger.processLogMsg(msg.level, msg.message, msg.context)
 	}
 
 	if asnTimerLogger.Closed() {
 		return true
 	}
 
-	asnTimerLogger.processQueueElement()
 	return false
 }
 
