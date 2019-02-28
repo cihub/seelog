@@ -44,17 +44,28 @@ func NewAsyncLoopLogger(config *logConfig) *asyncLoopLogger {
 
 func (asnLoopLogger *asyncLoopLogger) processItem() (closed bool) {
 	asnLoopLogger.queueHasElements.L.Lock()
-	defer asnLoopLogger.queueHasElements.L.Unlock()
 
 	for asnLoopLogger.msgQueue.Len() == 0 && !asnLoopLogger.Closed() {
 		asnLoopLogger.queueHasElements.Wait()
+	}
+
+	element := asnLoopLogger.msgQueue.Front()
+
+	if element != nil {
+		asnLoopLogger.msgQueue.Remove(element)
+	}
+
+	asnLoopLogger.queueHasElements.L.Unlock()
+
+	if element != nil {
+		msg, _ := element.Value.(msgQueueItem)
+		asnLoopLogger.processLogMsg(msg.level, msg.message, msg.context)
 	}
 
 	if asnLoopLogger.Closed() {
 		return true
 	}
 
-	asnLoopLogger.processQueueElement()
 	return false
 }
 
