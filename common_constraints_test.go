@@ -60,7 +60,7 @@ func TestInvalidLogLevels(t *testing.T) {
 	}
 }
 
-func TestlistConstraintsWithDuplicates(t *testing.T) {
+func TestListConstraintsWithDuplicates(t *testing.T) {
 	duplicateList := []LogLevel{TraceLvl, DebugLvl, InfoLvl,
 		WarnLvl, ErrorLvl, CriticalLvl, CriticalLvl, CriticalLvl}
 
@@ -85,7 +85,7 @@ func TestlistConstraintsWithDuplicates(t *testing.T) {
 	}
 }
 
-func TestlistConstraintsWithOffInList(t *testing.T) {
+func TestListConstraintsWithOffInList(t *testing.T) {
 	offList := []LogLevel{TraceLvl, DebugLvl, Off}
 
 	listConstr, errList := NewListConstraints(offList)

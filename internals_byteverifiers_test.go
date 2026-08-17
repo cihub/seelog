@@ -97,7 +97,7 @@ func (verifier *bytesVerifier) MustNotExpect() {
 			errorText += ". text = " + string(verifier.expectedBytes)
 		}
 
-		verifier.testEnv.Errorf(errorText)
+		verifier.testEnv.Error(errorText)
 	}
 }
 
