@@ -48,17 +48,17 @@ func TestConfig(t *testing.T) {
 
 	context, err := currentContext(nil)
 	if err != nil {
-		t.Errorf("cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context: %s", err)
 		return
 	}
 	firstContext, err := getFirstContext()
 	if err != nil {
-		t.Errorf("cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context: %s", err)
 		return
 	}
 	secondContext, err := getSecondContext()
 	if err != nil {
-		t.Errorf("cannot get current context:" + err.Error())
+		t.Errorf("cannot get current context: %s", err)
 		return
 	}
 

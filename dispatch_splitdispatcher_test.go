@@ -39,7 +39,7 @@ func init() {
 	}
 }
 
-func TestsplitDispatcher(t *testing.T) {
+func TestSplitDispatcher(t *testing.T) {
 	writer1, _ := newBytesVerifier(t)
 	writer2, _ := newBytesVerifier(t)
 	spliter, err := NewSplitDispatcher(onlyMessageFormatForTest, []interface{}{writer1, writer2})

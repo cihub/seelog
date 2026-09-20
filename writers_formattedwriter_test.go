@@ -28,7 +28,7 @@ import (
 	"testing"
 )
 
-func TestformattedWriter(t *testing.T) {
+func TestFormattedWriter(t *testing.T) {
 	formatStr := "%Level %LEVEL %Msg"
 	message := "message"
 	var logLevel = LogLevel(TraceLvl)
